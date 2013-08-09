@@ -1,0 +1,8 @@
+{
+    "require": {
+        "symfony/console": "2.3.*"
+    },
+    "autoload": {
+        "psr-0": {"Joomlatools\\": "src/"}
+    }
+}
