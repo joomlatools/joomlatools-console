@@ -1,2 +1,2 @@
-joomla-console
-==============
+Joomla Command Line Tools
+=========================
