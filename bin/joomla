@@ -9,4 +9,8 @@ $application = new Application('Joomla console tools', '1.0');
 
 $application->add(new Joomlatools\Console\Command\Symlink());
 
+$application->add(new Joomlatools\Console\Command\SiteCreate());
+$application->add(new Joomlatools\Console\Command\SiteDelete());
+$application->add(new Joomlatools\Console\Command\SiteSymlink());
+
 $application->run();
