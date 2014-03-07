@@ -38,7 +38,7 @@ class SiteCreate extends SiteAbstract
             ->addOption(
                 'symlink',
                 null,
-                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                InputOption::VALUE_OPTIONAL,
                 'A comma separated list of folders to symlink from projects folder'
             );
     }
@@ -49,6 +49,10 @@ class SiteCreate extends SiteAbstract
 
         $this->template = $input->getOption('template');
         $this->symlink = $input->getOption('symlink');
+
+        if (is_string($this->symlink)) {
+            $this->symlink = explode(',', $this->symlink);
+        }
 
         if ($this->template)
         {
