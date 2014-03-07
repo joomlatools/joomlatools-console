@@ -62,6 +62,7 @@ class SiteCreate extends SiteAbstract
         $this->modifyConfiguration($input, $output);
         $this->addVirtualHost($input, $output);
         $this->symlinkProjects($input, $output);
+        $this->installExtensions($input, $output);
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -165,6 +166,21 @@ class SiteCreate extends SiteAbstract
             $symlink = new SiteSymlink();
 
             $symlink->run($symlink_input, $output);
+        }
+    }
+
+    public function installExtensions(InputInterface $input, OutputInterface $output)
+    {
+        if ($this->symlink)
+        {
+            $extension_input = new ArrayInput(array(
+                'extension:install',
+                'site'      => $input->getArgument('site'),
+                'extension' => $this->symlink
+            ));
+            $installer = new ExtensionInstall();
+
+            $installer->run($extension_input, $output);
         }
     }
 }
