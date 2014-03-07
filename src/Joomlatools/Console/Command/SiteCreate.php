@@ -23,7 +23,7 @@ class SiteCreate extends SiteAbstract
         parent::configure();
 
         if (!self::$templates) {
-            self::$templates = __DIR__.'/joomla_files';
+            self::$templates = '/home/vagrant/scripts/joomla_files';
         }
 
         $this
