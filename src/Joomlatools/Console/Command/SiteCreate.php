@@ -157,7 +157,11 @@ class SiteCreate extends SiteAbstract
     {
         if ($this->symlink)
         {
-            $symlink_input = new ArrayInput(array('site:symlink', 'symlink' => array($this->symlink)));
+            $symlink_input = new ArrayInput(array(
+                'site:symlink',
+                'site'    => $input->getArgument('site'),
+                'symlink' => $this->symlink
+            ));
             $symlink = new SiteSymlink();
 
             $symlink->run($symlink_input, $output);
