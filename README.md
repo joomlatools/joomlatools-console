@@ -46,7 +46,7 @@ Symlink your code into a Joomla installation
 
 Let's say you are working on your own Joomla component called _Awesome_ and want to continue working on it using the Vagrant box.
 
-If your source code is located at _/Users/myname/Projects/awesome_, we should start by making this directory available to the Vagrant box. Please note that your source code should resemble the Joomla folder structure, for example your administrator section should reside in _/Users/myname/Projects/awesome/administrator/components/com_awesome_.
+If your source code is located at _/Users/myname/Projects/awesome_, we should start by making this directory available to the Vagrant box. Please note that your source code should resemble the Joomla folder structure, for example your administrator section should reside in /Users/myname/Projects/awesome/administrator/components/com_awesome.
 
 Copy the ```config.custom.yaml-dist``` file to ```config.custom.yaml``` and edit with your favorite text editor. Make it look like this:
 
