@@ -12,6 +12,13 @@ use Symfony\Component\Console\Helper\TableHelper;
 
 class Versions extends Command
 {
+    /**
+     * Cache file
+     *
+     * @var string
+     */
+    protected static $file = 'files/cache/.versions';
+
     protected function configure()
     {
         $this
@@ -46,26 +53,10 @@ class Versions extends Command
         }
     }
 
-    public function getVersions()
-    {
-        $file = 'versions.cache';
-
-        if(!file_exists($file)) {
-            $this->refresh();
-        }
-
-        $list = json_decode(file_get_contents($file), true);
-        $list = array_reverse($list, true);
-
-        return $list;
-    }
-
     public function refresh()
     {
-        $file = 'versions.cache';
-
-        if(file_exists($file)) {
-            unlink($file);
+        if(file_exists(self::$file)) {
+            unlink(self::$file);
         }
 
         $result = `git ls-remote https://github.com/joomla/joomla-cms.git | grep -E 'refs/(tags|heads)' | grep -v '{}'`;
@@ -91,6 +82,49 @@ class Versions extends Command
             }
         }
 
-        file_put_contents($file, json_encode($versions));
+        file_put_contents(self::$file, json_encode($versions));
+    }
+
+    public function getVersions()
+    {
+        if(!file_exists(self::$file)) {
+            $this->refresh();
+        }
+
+        $list = json_decode(file_get_contents(self::$file), true);
+        $list = array_reverse($list, true);
+
+        return $list;
+    }
+
+    public function getLatestRelease($prefix = null)
+    {
+        // Find the latest tag
+        $latest = '0.0.0';
+        $versions = $this->getVersions();
+
+        foreach($versions['tags'] as $version)
+        {
+            if(!preg_match('/\d\.\d+\.\d+.*/im', $version)) {
+                continue;
+            }
+
+            if(!is_null($prefix) && substr($version, 0, strlen($prefix)) != $prefix) {
+                continue;
+            }
+
+            if(version_compare($latest, strtolower($version), '<')) {
+                $latest = $version;
+            }
+        }
+
+        return $latest;
+    }
+
+    public function isBranch($version)
+    {
+        $versions = $this->getVersions();
+
+        return in_array($version, $versions['heads']);
     }
 }

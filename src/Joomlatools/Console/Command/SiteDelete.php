@@ -2,9 +2,7 @@
 
 namespace Joomlatools\Console\Command;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SiteDelete extends SiteAbstract
@@ -36,7 +34,7 @@ class SiteDelete extends SiteAbstract
     {
         $result = `echo 'DROP DATABASE IF EXISTS $this->target_db' | mysql -uroot -proot`;
         if (!empty($result)) { // MySQL returned an error
-            throw new Exception(sprintf('Cannot delete database %s. Error: %s', $this->target_db, $result));
+            throw new \RuntimeException(sprintf('Cannot delete database %s. Error: %s', $this->target_db, $result));
         }
     }
 

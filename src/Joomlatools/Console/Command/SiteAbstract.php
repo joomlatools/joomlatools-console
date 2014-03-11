@@ -12,8 +12,8 @@ abstract class SiteAbstract extends Command
 {
     protected $site;
 
-    public $target_dir;
-    public $target_db;
+    protected $target_dir;
+    protected $target_db;
 
     protected function configure()
     {
