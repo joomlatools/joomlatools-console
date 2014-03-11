@@ -271,8 +271,8 @@ class SiteCreate extends SiteAbstract
 
             'debug'     => '1',
             'lifetime'  => '600',
-            'tmp_path'  => sprintf('/var/www/%s/tmp',  $this->site),
-            'log_path'  => sprintf('/var/www/%s/logs', $this->site),
+            'tmp_path'  => $this->target_dir.'/tmp',
+            'log_path'  => $this->target_dir.'/logs',
             'sitename'  => $this->site,
 
             'secret'    => $random(16)
