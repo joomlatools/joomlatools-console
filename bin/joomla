@@ -14,4 +14,6 @@ $application->add(new Joomlatools\Console\Command\SiteDelete());
 $application->add(new Joomlatools\Console\Command\SiteSymlink());
 $application->add(new Joomlatools\Console\Command\ExtensionInstall());
 
+$application->add(new Joomlatools\Console\Command\Versions());
+
 $application->run();
