@@ -17,7 +17,7 @@ class Versions extends Command
      *
      * @var string
      */
-    protected static $file = 'files/cache/.versions';
+    protected static $file = '.files/cache/.versions';
 
     protected function configure()
     {
