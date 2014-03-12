@@ -4,6 +4,7 @@ namespace Joomlatools\Console\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SiteSymlink extends SiteAbstract
@@ -21,6 +22,13 @@ class SiteSymlink extends SiteAbstract
                 'symlink',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
                 'A list of folders to symlink from projects folder'
+            )
+            ->addOption(
+                'projects-dir',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Directory where your custom projects reside',
+                sprintf('%s/Projects', trim(`echo ~`))
             );
     }
 
@@ -49,7 +57,8 @@ class SiteSymlink extends SiteAbstract
             'fileman' => array('extman', 'koowa', 'com_files'),
             'logman'  => array('extman', 'koowa', 'com_activities')
         );
-        $project_folder = '/home/vagrant/Projects';
+
+        $project_folder = $input->getOption('projects-dir');
         $destination    = $this->target_dir;
 
         $projects = array();

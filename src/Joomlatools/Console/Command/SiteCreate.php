@@ -77,20 +77,20 @@ class SiteCreate extends SiteAbstract
             ->addOption(
                 'joomla',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 "Joomla version. Can be a release number (2, 3.2, ..) or branch name. Run `joomla versions` for a full list.\nUse \"none\" for an empty virtual host.",
                 'latest'
             )
             ->addOption(
                 'sample-data',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Sample data to install (default|blog|brochure|learn|testing)'
             )
             ->addOption(
                 'symlink',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'A comma separated list of folders to symlink from projects folder'
             )
             ->addOption(
@@ -98,6 +98,13 @@ class SiteCreate extends SiteAbstract
                 null,
                 InputOption::VALUE_NONE,
                 'Update the list of available tags and branches from the Joomla repository'
+            )
+            ->addOption(
+                'projects-dir',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Directory where your custom projects reside',
+                sprintf('%s/Projects', trim(`echo ~`))
             )
             ;
     }
@@ -171,8 +178,13 @@ class SiteCreate extends SiteAbstract
     {
         `mkdir -p $this->target_dir`;
 
-        if ($this->version) {
+        if ($this->version)
+        {
             `cd $this->target_dir; tar xzf $this->source_tarball --strip 1`;
+
+            if ($this->versions->isBranch($this->version)) {
+                unlink($this->source_tarball);
+            }
         }
     }
 
@@ -314,7 +326,8 @@ class SiteCreate extends SiteAbstract
             $symlink_input = new ArrayInput(array(
                 'site:symlink',
                 'site'    => $input->getArgument('site'),
-                'symlink' => $this->symlink
+                'symlink' => $this->symlink,
+                '--projects-dir' => $input->getOption('projects-dir')
             ));
             $symlink = new SiteSymlink();
 
