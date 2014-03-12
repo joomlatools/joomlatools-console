@@ -157,7 +157,13 @@ class SiteCreate extends SiteAbstract
 
         if ($this->version)
         {
-            $result = `echo 'SHOW DATABASES LIKE "$this->target_db"' | mysql -u{$this->mysql->user} -p{$this->mysql->password}`;
+            $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
+            $result = exec(sprintf(
+                    "echo 'SHOW DATABASES LIKE \"%s\"' | mysql -u %s %s",
+                    $this->target_db, $this->mysql->user, $password
+                )
+            );
+
             if (!empty($result)) { // Table exists
                 throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
             }
@@ -203,7 +209,14 @@ class SiteCreate extends SiteAbstract
             return;
         }
 
-        $result = `echo 'CREATE DATABASE $this->target_db CHARACTER SET utf8' | mysql -u{$this->mysql->user} -p{$this->mysql->password}`;
+        $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
+        $result = exec(
+            sprintf(
+                "echo 'CREATE DATABASE %s CHARACTER SET utf8' | mysql -u %s %s",
+                $this->target_db, $this->mysql->user, $password
+            )
+        );
+
         if (!empty($result)) { // MySQL returned an error
             throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
         }
@@ -231,7 +244,9 @@ class SiteCreate extends SiteAbstract
             $contents = str_replace('#__', 'j_', $contents);
             file_put_contents($import, $contents);
 
-            $result = `mysql -u{$this->mysql->user} -p{$this->mysql->password} $this->target_db < $import`;
+            $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
+            $result = exec(sprintf("mysql -u %s %s %s < %s", $this->mysql->user, $password, $this->target_db, $import));
+
             if (!empty($result)) { // MySQL returned an error
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
             }
@@ -279,8 +294,8 @@ class SiteCreate extends SiteAbstract
 
         $replacements = array(
             'db'        => $this->target_db,
-            'user'      => 'root',
-            'password'  => 'root',
+            'user'      => $this->mysql->user,
+            'password'  => $this->mysql->password,
             'dbprefix'  => 'j_',
             'dbtype'    => 'mysqli',
 
@@ -416,7 +431,8 @@ class SiteCreate extends SiteAbstract
         $sql = "INSERT INTO `j_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
         $sql = escapeshellarg($sql);
 
-        `mysql -u{$this->mysql->user} -p{$this->mysql->password} $this->target_db -e $sql`;
+        $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
+        exec(sprintf("mysql -u %s %s %s -e %s", $this->mysql->user, $password, $this->target_db, $sql));
     }
 
     public function setVersion($version)
