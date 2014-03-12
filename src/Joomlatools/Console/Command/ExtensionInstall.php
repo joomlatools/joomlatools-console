@@ -68,7 +68,8 @@ class ExtensionInstall extends SiteAbstract
                 array_unshift($install, $result->extension_id);
             }
 
-            if ($result->type === 'component' && in_array(substr($result->element, 4), $this->extension)) {
+            if ($result->type === 'component'
+                && (in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension))) {
                 $install[] = $result->extension_id;
             }
         }
