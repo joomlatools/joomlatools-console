@@ -17,10 +17,14 @@ class Versions extends Command
      *
      * @var string
      */
-    protected static $file = '.files/cache/.versions';
+    protected static $file;
 
     protected function configure()
     {
+        if (!self::$file) {
+            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache/.versions');
+        }
+
         $this
             ->setName('versions')
             ->setDescription('Show available versions in Joomla Git repository')
