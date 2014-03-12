@@ -1,4 +1,9 @@
 <?php
+/**
+ * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @license		Mozilla Public License, version 2.0
+ * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
+ */
 
 namespace Joomlatools\Console\Command\Symlink;
 

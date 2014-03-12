@@ -1,10 +1,8 @@
 <?php
 /**
- * Joomlatools Composer plugin - https://github.com/joomlatools/joomla-composer
- *
- * @copyright	Copyright (C) 2011 - 2013 Johan Janssens and Timble CVBA. (http://www.timble.net)
- * @license		GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
- * @link		http://github.com/joomlatools/joomla-composer for the canonical source repository
+ * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @license		Mozilla Public License, version 2.0
+ * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
 namespace Joomlatools\Console\Joomla;
