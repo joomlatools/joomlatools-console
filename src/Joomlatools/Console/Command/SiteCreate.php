@@ -249,8 +249,15 @@ class SiteCreate extends SiteAbstract
 
         $contents = file_get_contents($source);
         $replace  = function($name, $value, &$contents) {
-            $pattern     = sprintf("#%s = '.*?'#", $name);
-            $replacement = sprintf("%s = '%s'", $name, $value);
+            $pattern = sprintf("#%s = '.*?'#", $name);
+            $match   = preg_match($pattern, $contents);
+
+            if(!$match)
+            {
+                $pattern 	 = "/^\s?(\})\s?$/m";
+                $replacement = sprintf("\tpublic \$%s = '%s';\n}", $name, $value);
+            }
+            else $replacement = sprintf("%s = '%s'", $name, $value);
 
             $contents = preg_replace($pattern, $replacement, $contents);
         };
