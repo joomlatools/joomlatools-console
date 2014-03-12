@@ -22,7 +22,7 @@ class Versions extends Command
     protected function configure()
     {
         if (!self::$file) {
-            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache/.versions');
+            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/.versions';
         }
 
         $this
