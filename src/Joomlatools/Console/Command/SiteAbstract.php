@@ -42,6 +42,6 @@ abstract class SiteAbstract extends Command
         $this->www        = $input->getOption('www');
 
         $this->target_db  = 'sites_'.$this->site;
-        $this->target_dir = '/var/www/'.$this->site;
+        $this->target_dir = $this->www.'/'.$this->site;
     }
 }
