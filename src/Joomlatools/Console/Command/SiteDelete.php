@@ -40,8 +40,11 @@ class SiteDelete extends SiteAbstract
 
     public function deleteVirtualHost(InputInterface $input, OutputInterface $output)
     {
-        `sudo a2dissite 1-$this->site.conf`;
-        `sudo rm -f /etc/apache2/sites-available/1-$this->site.conf`;
-        `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+        if (is_file('/etc/apache2/sites-available/1-'.$this->site.'.conf'))
+        {
+            `sudo a2dissite 1-$this->site.conf`;
+            `sudo rm -f /etc/apache2/sites-available/1-$this->site.conf`;
+            `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+        }
     }
 }

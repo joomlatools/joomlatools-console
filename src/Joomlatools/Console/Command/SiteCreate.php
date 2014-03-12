@@ -305,18 +305,21 @@ class SiteCreate extends SiteAbstract
 
     public function addVirtualHost(InputInterface $input, OutputInterface $output)
     {
-        $template = file_get_contents(self::$files.'/vhost.conf');
-        $contents = sprintf($template, $this->site);
+        if (is_dir('/etc/apache2/sites-available'))
+        {
+            $template = file_get_contents(self::$files.'/vhost.conf');
+            $contents = sprintf($template, $this->site);
 
-        $tmp = self::$files.'/.vhost.tmp';
+            $tmp = self::$files.'/.vhost.tmp';
 
-        file_put_contents($tmp, $contents);
+            file_put_contents($tmp, $contents);
 
-        `sudo tee /etc/apache2/sites-available/1-$this->site.conf < $tmp`;
-        `sudo a2ensite 1-$this->site.conf`;
-        `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+            `sudo tee /etc/apache2/sites-available/1-$this->site.conf < $tmp`;
+            `sudo a2ensite 1-$this->site.conf`;
+            `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
 
-        @unlink($tmp);
+            @unlink($tmp);
+        }
     }
 
     public function symlinkProjects(InputInterface $input, OutputInterface $output)
