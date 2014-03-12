@@ -65,7 +65,7 @@ For more information on the symlinker, run:
 
 	  joomla site:symlink  --help
 
-Install extensions
+Install Joomla extensions
 ------------------
 You can use discover install on command line to install extensions.
 
@@ -76,4 +76,35 @@ You need to use the _element_ name in your extension manifest.
 For more information, run:
 
 	  joomla extension:install --help
+
+Installation instructions
+-------------------------
+1. Download or clone this repository.
+
+1. Make the 'joomla' command executable:
+
+    `$ chmod u+x /path/to/joomla-console/bin/joomla`
+
+1. Configure your system to recognize where the executable resides. There are 3 options:
+    1. Create a symbolic link in a directory that is already in your PATH, e.g.:
+
+        `$ ln -s /path/to/joomla-console/bin/joomla /usr/bin/joomla`
+
+    1. Explicitly add the executable to the PATH variable which is defined in the the shell configuration file called .profile, .bash_profile, .bash_aliases, or .bashrc that is located in your home folder, i.e.:
+
+        `export PATH="$PATH:/path/to/joomla-console/bin:/usr/local/bin"`
+
+    1. Add an alias for the executable by adding this to you shell configuration file (see list in previous option):
+
+        `$ alias joomla=/path/to/joomla-console/bin/joomla`
+
+    For options 2 and 3 above, you should log out and then back in to apply your changes to your current session.
+
+1. Test that joomla executable is found by your system:
+
+    `$ which joomla`
+
+1. From joomla-console root (/path/to/joomla-console), run Composer to fetch dependencies.
+
+    `$ composer install`
 
