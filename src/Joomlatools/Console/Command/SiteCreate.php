@@ -73,7 +73,7 @@ class SiteCreate extends SiteAbstract
         parent::configure();
 
         if (!self::$files) {
-            self::$files = realpath(__DIR__.'/../../../../bin/.files');;
+            self::$files = realpath(__DIR__.'/../../../../bin/.files');
         }
 
         $this
