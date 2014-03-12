@@ -21,6 +21,8 @@ abstract class SiteAbstract extends Command
     protected $target_dir;
     protected $target_db;
 
+    protected $mysql;
+
     protected function configure()
     {
         $this->addArgument(
@@ -33,7 +35,15 @@ abstract class SiteAbstract extends Command
             InputOption::VALUE_REQUIRED,
             "Web server root",
             '/var/www'
-        );
+        )
+        ->addOption(
+            'mysql',
+            null,
+            InputOption::VALUE_REQUIRED,
+            "MySQL credentials in the form of user:password",
+            'root:root'
+        )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -43,5 +53,8 @@ abstract class SiteAbstract extends Command
 
         $this->target_db  = 'sites_'.$this->site;
         $this->target_dir = $this->www.'/'.$this->site;
+
+        $credentials = explode(':', $input->getOption('mysql'), 2);
+        $this->mysql = (object) array('user' => $credentials[0], 'password' => $credentials[1]);
     }
 }

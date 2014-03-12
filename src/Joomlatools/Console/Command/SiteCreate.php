@@ -68,6 +68,10 @@ class SiteCreate extends SiteAbstract
      */
     protected $versions;
 
+    /**
+     *
+     */
+
     protected function configure()
     {
         parent::configure();
@@ -153,7 +157,7 @@ class SiteCreate extends SiteAbstract
 
         if ($this->version)
         {
-            $result = `echo 'SHOW DATABASES LIKE "$this->target_db"' | mysql -uroot -proot`;
+            $result = `echo 'SHOW DATABASES LIKE "$this->target_db"' | mysql -u{$this->mysql->user} -p{$this->mysql->password}`;
             if (!empty($result)) { // Table exists
                 throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
             }
@@ -199,7 +203,7 @@ class SiteCreate extends SiteAbstract
             return;
         }
 
-        $result = `echo 'CREATE DATABASE $this->target_db CHARACTER SET utf8' | mysql -uroot -proot`;
+        $result = `echo 'CREATE DATABASE $this->target_db CHARACTER SET utf8' | mysql -u{$this->mysql->user} -p{$this->mysql->password}`;
         if (!empty($result)) { // MySQL returned an error
             throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
         }
@@ -225,7 +229,7 @@ class SiteCreate extends SiteAbstract
         {
             `sed -i 's/#__/j_/g' $import`;
 
-            $result = `mysql -proot -uroot $this->target_db < $import`;
+            $result = `mysql -u{$this->mysql->user} -p{$this->mysql->password} $this->target_db < $import`;
             if (!empty($result)) { // MySQL returned an error
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
             }
@@ -403,7 +407,7 @@ class SiteCreate extends SiteAbstract
         $sql = "INSERT INTO `j_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
         $sql = escapeshellarg($sql);
 
-        `mysql -proot -uroot $this->target_db -e $sql`;
+        `mysql -u{$this->mysql->user} -p{$this->mysql->password} $this->target_db -e $sql`;
     }
 
     public function setVersion($version)

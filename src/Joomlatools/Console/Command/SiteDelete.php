@@ -37,7 +37,7 @@ class SiteDelete extends SiteAbstract
 
     public function deleteDatabase(InputInterface $input, OutputInterface $output)
     {
-        $result = `echo 'DROP DATABASE IF EXISTS $this->target_db' | mysql -uroot -proot`;
+        $result = `echo 'DROP DATABASE IF EXISTS $this->target_db' | mysql -u{$this->mysql->user} -p{$this->mysql->password}`;
         if (!empty($result)) { // MySQL returned an error
             throw new \RuntimeException(sprintf('Cannot delete database %s. Error: %s', $this->target_db, $result));
         }
