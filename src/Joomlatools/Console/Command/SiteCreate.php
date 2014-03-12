@@ -227,7 +227,9 @@ class SiteCreate extends SiteAbstract
 
         foreach($imports as $import)
         {
-            `sed -i 's/#__/j_/g' $import`;
+            $contents = file_get_contents($import);
+            $contents = str_replace('#__', 'j_', $contents);
+            file_put_contents($import, $contents);
 
             $result = `mysql -u{$this->mysql->user} -p{$this->mysql->password} $this->target_db < $import`;
             if (!empty($result)) { // MySQL returned an error
