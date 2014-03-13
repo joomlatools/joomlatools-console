@@ -157,9 +157,9 @@ class SiteCreate extends SiteAbstract
 
         if ($this->version)
         {
-            $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
+            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
             $result = exec(sprintf(
-                    "echo 'SHOW DATABASES LIKE \"%s\"' | mysql -u %s %s",
+                    "echo 'SHOW DATABASES LIKE \"%s\"' | mysql -u'%s' %s",
                     $this->target_db, $this->mysql->user, $password
                 )
             );
@@ -209,10 +209,10 @@ class SiteCreate extends SiteAbstract
             return;
         }
 
-        $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
+        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
         $result = exec(
             sprintf(
-                "echo 'CREATE DATABASE %s CHARACTER SET utf8' | mysql -u %s %s",
+                "echo 'CREATE DATABASE %s CHARACTER SET utf8' | mysql -u'%s' %s",
                 $this->target_db, $this->mysql->user, $password
             )
         );
@@ -244,8 +244,8 @@ class SiteCreate extends SiteAbstract
             $contents = str_replace('#__', 'j_', $contents);
             file_put_contents($import, $contents);
 
-            $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
-            $result = exec(sprintf("mysql -u %s %s %s < %s", $this->mysql->user, $password, $this->target_db, $import));
+            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
+            $result = exec(sprintf("mysql -u'%s' %s %s < %s", $this->mysql->user, $password, $this->target_db, $import));
 
             if (!empty($result)) { // MySQL returned an error
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
@@ -431,8 +431,8 @@ class SiteCreate extends SiteAbstract
         $sql = "INSERT INTO `j_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
         $sql = escapeshellarg($sql);
 
-        $password = empty($this->mysql->password) ? '' : sprintf('-p %', $this->mysql->password);
-        exec(sprintf("mysql -u %s %s %s -e %s", $this->mysql->user, $password, $this->target_db, $sql));
+        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
+        exec(sprintf("mysql -u'%s' %s %s -e %s", $this->mysql->user, $password, $this->target_db, $sql));
     }
 
     public function setVersion($version)
