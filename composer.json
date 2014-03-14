@@ -17,5 +17,6 @@
     },
     "autoload": {
         "psr-0": {"Joomlatools\\": "src/"}
-    }
+    },
+    "bin": ["bin/joomla"]
 }
