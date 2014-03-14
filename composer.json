@@ -1,4 +1,17 @@
 {
+    "name": "joomlatools/joomla-console",
+    "type": "project",
+    "license": "MPLv2",
+    "description": "This command-line script helps to ease the management of Joomla sites in your development environment.",
+    "keywords": ["joomla", "console", "tools"],
+    "homepage": "https://github.com/joomlatools/joomla-console",
+    "authors": [
+        {
+            "name": "Joomlatools",
+            "email": "info@joomlatools.com",
+            "homepage": "https://www.joomlatools.com"
+        }
+    ],
     "require": {
         "symfony/console": "2.4.*"
     },
