@@ -363,6 +363,7 @@ class SiteCreate extends SiteAbstract
                 'site:symlink',
                 'site'    => $input->getArgument('site'),
                 'symlink' => $this->symlink,
+                '--www'   => $this->www,
                 '--projects-dir' => $input->getOption('projects-dir')
             ));
             $symlink = new ExtensionSymlink();
@@ -378,7 +379,8 @@ class SiteCreate extends SiteAbstract
             $extension_input = new ArrayInput(array(
                 'extension:install',
                 'site'      => $input->getArgument('site'),
-                'extension' => $this->symlink
+                'extension' => $this->symlink,
+                '--www'     => $this->www
             ));
             $installer = new ExtensionInstall();
 
