@@ -55,7 +55,7 @@ Now to create a new site, execute the site:create command and add a symlink opti
 
 Or to symlink your code into an existing site:
 
-    joomla site:symlink testsite awesome
+    joomla extension:symlink testsite awesome
 
 This will symlink all the folders from the _awesome_ folder into _testsite.dev_.
 
@@ -63,7 +63,7 @@ Run discover install to make your component available to Joomla and you are good
 
 For more information on the symlinker, run:
 
-	  joomla site:symlink  --help
+	  joomla extension:symlink  --help
 
 Install Joomla extensions
 ------------------
