@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SiteSymlink extends SiteAbstract
+class ExtensionSymlink extends SiteAbstract
 {
     protected $symlink = array();
 
@@ -21,7 +21,7 @@ class SiteSymlink extends SiteAbstract
         parent::configure();
 
         $this
-            ->setName('site:symlink')
+            ->setName('extension:symlink')
             ->setDescription('Symlink projects into a site')
             ->addArgument(
                 'symlink',

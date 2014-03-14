@@ -365,7 +365,7 @@ class SiteCreate extends SiteAbstract
                 'symlink' => $this->symlink,
                 '--projects-dir' => $input->getOption('projects-dir')
             ));
-            $symlink = new SiteSymlink();
+            $symlink = new ExtensionSymlink();
 
             $symlink->run($symlink_input, $output);
         }
