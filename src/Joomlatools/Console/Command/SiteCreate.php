@@ -147,6 +147,12 @@ class SiteCreate extends SiteAbstract
         $this->symlinkProjects($input, $output);
         $this->installExtensions($input, $output);
         $this->enableWebInstaller($input, $output);
+
+        if ($this->version)
+        {
+            $output->writeln("Your new Joomla site has been created.");
+            $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
+        }
     }
 
     public function check(InputInterface $input, OutputInterface $output)
