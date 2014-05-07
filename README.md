@@ -16,8 +16,9 @@ To create a site with the latest Joomla version, run:
 
     joomla site:create testsite
 
-The newly installed site will be available at /var/www/testsite and testsite.dev after that.
-By default web server root is set to _/var/www_. You can pass _--www=/my/server/path_ to commands for custom values.
+The newly installed site will be available at /var/www/testsite and testsite.dev after that. You can login into your fresh Joomla installation using these credentials: `admin` / `admin`.
+
+By default the web server root is set to _/var/www_. You can pass _--www=/my/server/path_ to commands for custom values.
 
 You can choose the Joomla version or the sample data to be installed:
 
