@@ -66,7 +66,7 @@ class ExtensionInstallFile extends SiteAbstract
                 $dir = $package;
             } else {
                 $dir = \JInstallerHelper::unpack($package);
-                $dir = $dir ? $dir['extractdir'] : false;
+                $dir = $dir ? $dir['dir'] : false;
                 $remove = true;
             } 
             if ($dir) {
