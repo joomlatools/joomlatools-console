@@ -27,7 +27,7 @@ class ExtensionInstallFile extends SiteAbstract
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of file/directory extensions to install in the site'
+                'A list of full paths to extension packages (file or directory) to install'
             );
     }
 
@@ -58,21 +58,31 @@ class ExtensionInstallFile extends SiteAbstract
         
         $installer = $app->getInstaller();
         
-        foreach ($this->extension as $package) {
-            $file = $package;
+        foreach ($this->extension as $package)
+        {
             $remove = false;
 
-            if (is_dir($package)) {
-                $dir = $package;
-            } else {
-                $dir = \JInstallerHelper::unpack($package);
-                $dir = $dir ? $dir['dir'] : false;
+            if (is_file($package))
+            {
+                $result    = \JInstallerHelper::unpack($package);
+                $directory = isset($result['dir']) ? $result['dir'] : false;
+
                 $remove = true;
-            } 
-            if ($dir) {
-                $installer->install(realpath($dir));
+            }
+            else $directory = $package;
+
+            if ($directory !== false)
+            {
+                $path = realpath($directory);
+
+                if (!file_exists($path)) {
+                    continue;
+                }
+
+                $installer->install($path);
+
                 if ($remove) {
-                    \JFolder::delete($dir);
+                    \JFolder::delete($path);
                 }
             }
         }
