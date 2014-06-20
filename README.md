@@ -88,7 +88,7 @@ Installation instructions
 -------------------------
 1. Download or clone this repository.
 
-1. Make the 'joomla' command executable:
+1. Make the `joomla` command executable:
 
     `$ chmod u+x /path/to/joomla-console/bin/joomla`
 
