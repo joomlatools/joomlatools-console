@@ -74,12 +74,12 @@ class Versions extends Command
 
     public function clearcache(OutputInterface $output)
     {
-        $cachedir = realpath(__DIR__.'/../../../../bin/.files/cache');
+        $cachedir = dirname(self::$file);
 
-        if(file_exists($cachedir))
+        if(!empty($cachedir) && file_exists($cachedir))
         {
-            `rm -rf $cachedir./*`;
-            $output->writeln("<info>files in cache have been cleared.</info>");
+            `rm -rf $cachedir/*.tar.gz`;
+            $output->writeln("<info>Downloaded version cache has been cleared.</info>\n");
         }
     }
 
