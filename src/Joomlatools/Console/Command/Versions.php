@@ -38,6 +38,12 @@ class Versions extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Refresh the versions cache'
+            )
+            ->addOption(
+                'clear-cache',
+                null,
+                InputOption::VALUE_NONE,
+                'Clear the downloaded files cache'
             );
     }
 
@@ -45,6 +51,10 @@ class Versions extends Command
     {
         if ($input->getOption('refresh')) {
             $this->refresh();
+        }
+
+        if ($input->getOption('clear-cache')) {
+            $this->clearcache($output);
         }
 
         $list = $this->getVersions();
@@ -59,6 +69,17 @@ class Versions extends Command
                 ->setRows($chunks)
                 ->setLayout(TableHelper::LAYOUT_COMPACT)
                 ->render($output);
+        }
+    }
+
+    public function clearcache(OutputInterface $output)
+    {
+        $cachedir = realpath(__DIR__.'/../../../../bin/.files/cache');
+
+        if(file_exists($cachedir))
+        {
+            `rm -rf $cachedir./*`;
+            $output->writeln("<info>files in cache have been cleared.</info>");
         }
     }
 
