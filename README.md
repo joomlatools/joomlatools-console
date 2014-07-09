@@ -41,8 +41,8 @@ You can delete the sites you have created by running:
 
     joomla site:delete testsite
 
-Symlink your code into a Joomla installation
---------------------------------------------
+Symlink Extensions
+------------------
 
 Let's say you are working on your own Joomla component called _Awesome_ and want to develop it with the latest Joomla version.
 
@@ -66,7 +66,7 @@ For more information on the symlinker, run:
 
 	  joomla extension:symlink  --help
 
-Install Joomla extensions
+Install Extensions
 ------------------
 You can use discover install on command line to install extensions.
 
