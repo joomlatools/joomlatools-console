@@ -437,4 +437,21 @@ class Application extends JApplicationCli
 
         return $new_state;
     }
+    
+    /**
+     * Just a stub to catch anything that calls $app->redirect(), expecting us to be JApplication,
+     * rather than JApplicationCLI.  Such as installer code in extenions:install calls.
+     * 
+     * @param   string   $url    does nothing
+     * @param   boolean  $moved  does nothing
+     * 
+     * @return  void
+     */
+    public function redirect($url, $moved = false)
+    {
+    	// A do nothing line of code, in case anyone needs a break point in here
+    	$foo = 'foo';
+    	throw new \RuntimeException(sprintf('Redirect called: %s', $url));
+    }
+    
 }
