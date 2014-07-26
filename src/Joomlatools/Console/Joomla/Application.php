@@ -440,7 +440,8 @@ class Application extends JApplicationCli
     
     /**
      * Just a stub to catch anything that calls $app->redirect(), expecting us to be JApplication,
-     * rather than JApplicationCLI.  Such as installer code in extenions:install calls.
+     * rather than JApplicationCLI, such as installer code run via extension:install, so it doesn't
+     * drop dead from a fatal PHP error.
      * 
      * @param   string   $url    does nothing
      * @param   boolean  $moved  does nothing
@@ -449,8 +450,12 @@ class Application extends JApplicationCli
      */
     public function redirect($url, $moved = false)
     {
-    	// A do nothing line of code, in case anyone needs a break point in here
-    	$foo = 'foo';
+		/**
+		 * Throw an exception, to short circuit whatever code called us, as the J! redirect()
+		 * would usually close() and go no futher, so we don't want to just return.
+		 * We can then catch this exception in (for instance) ExtensionInstallFile, and
+		 * go about our business.
+		 */
     	throw new \RuntimeException(sprintf('Redirect called: %s', $url));
     }
     
