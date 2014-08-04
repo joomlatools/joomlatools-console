@@ -76,10 +76,16 @@ class ExtensionInstallFile extends SiteAbstract
                 $path = realpath($directory);
 
                 if (!file_exists($path)) {
+                	$output->writeln("<info>File not found: " . $directory . "</info>\n");
                     continue;
                 }
 
-                $installer->install($path);
+                try {
+                	$installer->install($path);
+                }
+                catch (\Exception $e) {
+                	$output->writeln("<info>Caught exception during install: " . $e->getMessage() . "</info>\n");
+                }
 
                 if ($remove) {
                     \JFolder::delete($path);

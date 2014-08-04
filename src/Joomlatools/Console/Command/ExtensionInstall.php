@@ -87,8 +87,14 @@ class ExtensionInstall extends SiteAbstract
 
         $install = array_unique($install);
 
-        foreach ($install as $extension_id) {
-            $installer->discover_install($extension_id);
+        foreach ($install as $extension_id)
+        {
+            try {
+                $installer->discover_install($extension_id);
+            }
+            catch (\Exception $e) {
+                $output->writeln("<info>Caught exception during install: " . $e->getMessage() . "</info>\n");
+            }
         }
     }
 }
