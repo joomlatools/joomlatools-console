@@ -80,15 +80,12 @@ class ExtensionInstallFile extends SiteAbstract
                     continue;
                 }
 
-                try
-                {
+                try {
                 	$installer->install($path);
                 }
-                catch (\Exception $e)
-                {
+                catch (\Exception $e) {
                 	$output->writeln("<info>Caught exception during install: " . $e->getMessage() . "</info>\n");
                 }
-                
 
                 if ($remove) {
                     \JFolder::delete($path);

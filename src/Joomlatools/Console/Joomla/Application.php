@@ -456,7 +456,7 @@ class Application extends JApplicationCli
 		 * We can then catch this exception in (for instance) ExtensionInstallFile, and
 		 * go about our business.
 		 */
-    	throw new \RuntimeException(sprintf('Redirect called: %s', $url));
+    	throw new \RuntimeException(sprintf('Application tried to redirect to %s', $url));
     }
     
 }
