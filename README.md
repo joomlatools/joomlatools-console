@@ -41,8 +41,8 @@ You can delete the sites you have created by running:
 
     joomla site:delete testsite
 
-Symlink your code into a Joomla installation
---------------------------------------------
+Symlink Extensions
+------------------
 
 Let's say you are working on your own Joomla component called _Awesome_ and want to develop it with the latest Joomla version.
 
@@ -66,7 +66,7 @@ For more information on the symlinker, run:
 
 	  joomla extension:symlink  --help
 
-Install Joomla extensions
+Install Extensions
 ------------------
 You can use discover install on command line to install extensions.
 
@@ -83,6 +83,16 @@ Alternatively, you can install extensions using their installation packages usin
     joomla extension:installfile testsite /home/vagrant/com_component.v1.x.zip /home/vagrant/plg_plugin.v2.x.tar.gz
     
 This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz packages.
+
+Extra commands
+------------
+
+There a few other commands available for you to try out as well :
+
+* `joomla site:token sitename user` : generates an authentication token for the given `user` to automatically login to `sitename` using the ?auth_token query argument. *Note* requires the [Koowa framework](https://github.com/joomlatools/koowa) to be installed in your `site`.
+* `joomla versions` : list the available Joomla versions. 
+ * Use `joomla versions refresh` to get the latest tags and branches from the official [Joomla CMS](https://github.com/joomla/joomla-cms) repository.
+ * To purge the cache of all Joomla packages, add the `--clear-cache` flag to this command.
 
 Installation instructions
 -------------------------
