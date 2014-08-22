@@ -91,7 +91,7 @@ There a few other commands available for you to try out as well :
 
 * `joomla site:token sitename user` : generates an authentication token for the given `user` to automatically login to `sitename` using the ?auth_token query argument. *Note* requires the [Koowa framework](https://github.com/joomlatools/koowa) to be installed in your `site`.
 * `joomla versions` : list the available Joomla versions. 
- * Use `joomla versions refresh` to get the latest tags and branches from the official [Joomla CMS](https://github.com/joomla/joomla-cms) repository.
+ * Use `joomla versions --refresh` to get the latest tags and branches from the official [Joomla CMS](https://github.com/joomla/joomla-cms) repository.
  * To purge the cache of all Joomla packages, add the `--clear-cache` flag to this command.
 
 Installation instructions
