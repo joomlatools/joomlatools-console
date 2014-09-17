@@ -14,6 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SiteCreate extends SiteAbstract
 {
+    const DB_PREFIX = "j_";
+
     /**
      * File cache
      *
@@ -163,15 +165,8 @@ class SiteCreate extends SiteAbstract
 
         if ($this->version)
         {
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf(
-                    "echo 'SHOW DATABASES LIKE \"%s\"' | mysql -u'%s' %s",
-                    $this->target_db, $this->mysql->user, $password
-                )
-            );
-
-            if (!empty($result)) { // Table exists
-                throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
+            if ($this->checkDatabaseExists($this->target_db) && $this->checkDatabasePopulated($this->target_db, self::DB_PREFIX)) {
+                throw new \RuntimeException(sprintf('A database with name %s is already populated', $this->target_db));
             }
 
             $this->source_tarball = $this->getTarball($this->version, $output);
@@ -195,6 +190,26 @@ class SiteCreate extends SiteAbstract
         }
     }
 
+    /**
+     * @param string $db_name
+     * @return bool
+     */
+    public function checkDatabaseExists($db_name)
+    {
+        $result = $this->executeMysqlCli(sprintf('SHOW DATABASES LIKE "%s"', $db_name));
+        return !empty($result);
+    }
+
+    /**
+     * @param string $db_name
+     * @param string $db_prefix
+     * @return bool
+     */
+    function checkDatabasePopulated($db_name, $db_prefix = self::DB_PREFIX) {
+        $result = $this->executeMysqlCli(sprintf('CONNECT %s; SHOW TABLES LIKE "%s"', $db_name, $db_prefix . '%'));
+        return !empty($result);
+    }
+
     public function createFolder(InputInterface $input, OutputInterface $output)
     {
         `mkdir -p $this->target_dir`;
@@ -215,16 +230,11 @@ class SiteCreate extends SiteAbstract
             return;
         }
 
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        $result = exec(
-            sprintf(
-                "echo 'CREATE DATABASE %s CHARACTER SET utf8' | mysql -u'%s' %s",
-                $this->target_db, $this->mysql->user, $password
-            )
-        );
-
-        if (!empty($result)) { // MySQL returned an error
-            throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
+        if (!$this->checkDatabaseExists($this->target_db)) {
+            $result = $this->executeMysqlCli(sprintf('CREATE DATABASE %s CHARACTER SET utf8', $this->target_db));
+            if (!empty($result)) { // MySQL returned an error
+                throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
+            }
         }
 
         $imports = array($this->target_dir.'/installation/sql/mysql/joomla.sql');
@@ -247,7 +257,7 @@ class SiteCreate extends SiteAbstract
         foreach($imports as $import)
         {
             $contents = file_get_contents($import);
-            $contents = str_replace('#__', 'j_', $contents);
+            $contents = str_replace('#__', self::DB_PREFIX, $contents);
             file_put_contents($import, $contents);
 
             $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
@@ -302,7 +312,7 @@ class SiteCreate extends SiteAbstract
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
-            'dbprefix'  => 'j_',
+            'dbprefix'  => self::DB_PREFIX,
             'dbtype'    => 'mysqli',
 
             'mailer' => 'smtp',
@@ -491,5 +501,19 @@ class SiteCreate extends SiteAbstract
         }
 
         return $cache;
+    }
+
+    /**
+     * @param string $sql
+     * @return string console output
+     */
+    protected function executeMysqlCli($sql) {
+        $password = empty($this->mysql->password) ? '' : sprintf("-p%s", escapeshellarg($this->mysql->password));
+        $cmd = sprintf(
+            "echo %s | mysql -u%s %s",
+            escapeshellarg($sql), escapeshellarg($this->mysql->user), $password
+        );
+        $result = exec($cmd);
+        return $result;
     }
 }
