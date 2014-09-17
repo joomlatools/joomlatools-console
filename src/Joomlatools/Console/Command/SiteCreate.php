@@ -14,8 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SiteCreate extends SiteAbstract
 {
-    const DB_PREFIX = "j_";
-
     /**
      * File cache
      *
@@ -215,7 +213,7 @@ class SiteCreate extends SiteAbstract
 
         if ($this->is_install_enabled)
         {
-            if ($this->checkDatabaseExists($this->target_db) && $this->checkDatabasePopulated($this->target_db, self::DB_PREFIX)) {
+            if ($this->checkDatabaseExists($this->target_db) && $this->checkDatabasePopulated($this->target_db, $this->dbprefix . '_')) {
                 throw new \RuntimeException(sprintf('A database with name %s is already populated', $this->target_db));
             }
         }
@@ -320,12 +318,10 @@ class SiteCreate extends SiteAbstract
         foreach($imports as $import)
         {
             $contents = file_get_contents($import);
-            $contents = str_replace('#__', self::DB_PREFIX, $contents);
+            $contents = str_replace('#__', $this->dbprefix . '_', $contents);
             file_put_contents($import, $contents);
 
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf("mysql -u'%s' %s %s < %s", $this->mysql->user, $password, $this->target_db, $import));
-
+            $result = $this->executeMysqlFile($this->target_db, $import);
             if (!empty($result)) { // MySQL returned an error
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
             }
@@ -375,7 +371,7 @@ class SiteCreate extends SiteAbstract
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
-            'dbprefix'  => self::DB_PREFIX,
+            'dbprefix'  => $this->dbprefix . '_',
             'dbtype'    => 'mysqli',
 
             'mailer' => 'smtp',
@@ -509,7 +505,7 @@ class SiteCreate extends SiteAbstract
         `mkdir -p $this->target_dir/plugins/installer`;
         `cd $this->target_dir/plugins/installer/ && unzip -o $filename`;
 
-        $sql = "INSERT INTO `j_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
+        $sql = "INSERT INTO `{$this->dbprefix}_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
         $sql = escapeshellarg($sql);
 
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
@@ -572,9 +568,29 @@ class SiteCreate extends SiteAbstract
      */
     protected function executeMysqlCli($sql) {
         $password = empty($this->mysql->password) ? '' : sprintf("-p%s", escapeshellarg($this->mysql->password));
+        $host = empty($this->mysql->host) ? '' : sprintf("-h%s", $this->mysql->host);
+        $port = empty($this->mysql->port) ? '' : sprintf("-P%d", $this->mysql->port);
         $cmd = sprintf(
-            "echo %s | mysql -u%s %s",
-            escapeshellarg($sql), escapeshellarg($this->mysql->user), $password
+            "echo %s | mysql -u%s %s %s %s",
+            escapeshellarg($sql), escapeshellarg($this->mysql->user), $password, $host, $port
+        );
+        $result = exec($cmd);
+        return $result;
+    }
+
+
+    /**
+     * @param string $db_name
+     * @param string $sql_file
+     * @return string console output
+     */
+    protected function executeMysqlFile($db_name, $sql_file) {
+        $password = empty($this->mysql->password) ? '' : sprintf("-p%s", escapeshellarg($this->mysql->password));
+        $host = empty($this->mysql->host) ? '' : sprintf("-h%s", $this->mysql->host);
+        $port = empty($this->mysql->port) ? '' : sprintf("-P%d", $this->mysql->port);
+        $cmd = sprintf(
+            "mysql -u%s %s %s %s %s < %s",
+            escapeshellarg($this->mysql->user), $password, $host, $port, escapeshellarg($db_name), escapeshellarg($sql_file)
         );
         $result = exec($cmd);
         return $result;
