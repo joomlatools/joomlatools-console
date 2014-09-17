@@ -69,9 +69,18 @@ class SiteCreate extends SiteAbstract
     protected $versions;
 
     /**
+     * @var bool
+     */
+    protected $is_download_enabled;
+
+    /**
+     * @var bool
+     */
+    protected $is_install_enabled;
+
+    /**
      *
      */
-
     protected function configure()
     {
         parent::configure();
@@ -115,6 +124,20 @@ class SiteCreate extends SiteAbstract
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
             )
+            ->addOption(
+                'download',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Whether to download fresh code (yes|no). If Joomla is already downloaded, then use "no".',
+                'yes'
+            )
+            ->addOption(
+                'install',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Whether to setup database and config files (yes|no)',
+                'yes'
+            )
             ;
     }
 
@@ -130,6 +153,9 @@ class SiteCreate extends SiteAbstract
 
         $this->setVersion($input->getOption('joomla'));
 
+        $this->is_download_enabled = $input->getOption('download') === 'yes' && !empty($this->version);
+        $this->is_install_enabled = $input->getOption('install') === 'yes';
+
         $this->symlink = $input->getOption('symlink');
         if (is_string($this->symlink)) {
             $this->symlink = explode(',', $this->symlink);
@@ -140,13 +166,30 @@ class SiteCreate extends SiteAbstract
         $this->source_db = $this->target_dir.'/installation/sql/mysql/joomla.sql';
 
         $this->check($input, $output);
-        $this->createFolder($input, $output);
-        $this->createDatabase($input, $output);
-        $this->modifyConfiguration($input, $output);
-        $this->addVirtualHost($input, $output);
-        $this->symlinkProjects($input, $output);
-        $this->installExtensions($input, $output);
-        $this->enableWebInstaller($input, $output);
+
+        if ($this->is_download_enabled)
+        {
+            $this->createFolder($input, $output);
+        }
+        else
+        {
+            $output->writeln("<info>Skipped download</info>");
+            $this->restoreInstallationFolder();
+        }
+
+        if ($this->is_install_enabled)
+        {
+            $this->createDatabase($input, $output);
+            $this->modifyConfiguration($input, $output);
+            $this->addVirtualHost($input, $output);
+            $this->symlinkProjects($input, $output);
+            $this->installExtensions($input, $output);
+            $this->enableWebInstaller($input, $output);
+        }
+        else
+        {
+            $output->writeln("<info>Skipped installation</info>");
+        }
 
         if ($this->version)
         {
@@ -157,30 +200,33 @@ class SiteCreate extends SiteAbstract
 
     public function check(InputInterface $input, OutputInterface $output)
     {
-        if (file_exists($this->target_dir)) {
+        if ($this->is_download_enabled && file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('A site with name %s already exists', $this->site));
         }
 
-        if ($this->version)
+        if (!$this->is_download_enabled)
         {
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf(
-                    "echo 'SHOW DATABASES LIKE \"%s\"' | mysql -u'%s' %s",
-                    $this->target_db, $this->mysql->user, $password
-                )
-            );
-
-            if (!empty($result)) { // Table exists
-                throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
+            if (!is_dir($this->target_dir . DIRECTORY_SEPARATOR . 'installation') && !is_dir($this->target_dir . DIRECTORY_SEPARATOR . '_installation')) {
+                throw new \RuntimeException(sprintf("Target directory %s is missing or incorrect. (Failed to locate installer.)", $this->target_dir));
             }
+        }
 
+        if ($this->is_install_enabled)
+        {
+            if ($this->checkDatabaseExists($this->target_db) && $this->checkDatabasePopulated($this->target_db, $this->dbprefix . '_')) {
+                throw new \RuntimeException(sprintf('A database with name %s is already populated', $this->target_db));
+            }
+        }
+
+        if ($this->is_download_enabled)
+        {
             $this->source_tarball = $this->getTarball($this->version, $output);
             if(!file_exists($this->source_tarball)) {
                 throw new \RuntimeException(sprintf('File %s does not exist', $this->source_tarball));
             }
         }
 
-        if ($this->version && $this->sample_data)
+        if ($this->is_install_enabled && $this->sample_data)
         {
             if (!in_array($this->sample_data, array('default', 'blog', 'brochure', 'testing', 'learn'))) {
                 throw new \RuntimeException(sprintf('Unknown sample data "%s"', $this->sample_data));
@@ -193,6 +239,30 @@ class SiteCreate extends SiteAbstract
                 }
             }
         }
+    }
+
+    /**
+     * @param string $db_name
+     * @return bool
+     */
+    public function checkDatabaseExists($db_name)
+    {
+        $result = $this->executeMysqlCli(
+            sprintf('SHOW DATABASES LIKE "%s"', $db_name)
+        );
+        return !empty($result);
+    }
+
+    /**
+     * @param string $db_name
+     * @param string $db_prefix
+     * @return bool
+     */
+    function checkDatabasePopulated($db_name, $db_prefix) {
+        $result = $this->executeMysqlCli(
+            sprintf('CONNECT %s; SHOW TABLES LIKE "%s"', $db_name, $db_prefix . '%')
+        );
+        return !empty($result);
     }
 
     public function createFolder(InputInterface $input, OutputInterface $output)
@@ -209,22 +279,23 @@ class SiteCreate extends SiteAbstract
         }
     }
 
+    public function restoreInstallationFolder() {
+        if (is_dir($this->target_dir . DIRECTORY_SEPARATOR . '_installation') && !is_dir($this->target_dir . DIRECTORY_SEPARATOR . 'installation')) {
+            `mv $this->target_dir/_installation $this->target_dir/installation`;
+        }
+    }
+
     public function createDatabase()
     {
         if (!$this->version) {
             return;
         }
 
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        $result = exec(
-            sprintf(
-                "echo 'CREATE DATABASE %s CHARACTER SET utf8' | mysql -u'%s' %s",
-                $this->target_db, $this->mysql->user, $password
-            )
-        );
-
-        if (!empty($result)) { // MySQL returned an error
-            throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
+        if (!$this->checkDatabaseExists($this->target_db)) {
+            $result = $this->executeMysqlCli(sprintf('CREATE DATABASE %s CHARACTER SET utf8', $this->target_db));
+            if (!empty($result)) { // MySQL returned an error
+                throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
+            }
         }
 
         $imports = array($this->target_dir.'/installation/sql/mysql/joomla.sql');
@@ -247,12 +318,10 @@ class SiteCreate extends SiteAbstract
         foreach($imports as $import)
         {
             $contents = file_get_contents($import);
-            $contents = str_replace('#__', 'j_', $contents);
+            $contents = str_replace('#__', $this->dbprefix . '_', $contents);
             file_put_contents($import, $contents);
 
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf("mysql -u'%s' %s %s < %s", $this->mysql->user, $password, $this->target_db, $import));
-
+            $result = $this->executeMysqlFile($this->target_db, $import);
             if (!empty($result)) { // MySQL returned an error
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
             }
@@ -302,7 +371,7 @@ class SiteCreate extends SiteAbstract
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
-            'dbprefix'  => 'j_',
+            'dbprefix'  => $this->dbprefix . '_',
             'dbtype'    => 'mysqli',
 
             'mailer' => 'smtp',
@@ -436,7 +505,7 @@ class SiteCreate extends SiteAbstract
         `mkdir -p $this->target_dir/plugins/installer`;
         `cd $this->target_dir/plugins/installer/ && unzip -o $filename`;
 
-        $sql = "INSERT INTO `j_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
+        $sql = "INSERT INTO `{$this->dbprefix}_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
         $sql = escapeshellarg($sql);
 
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
@@ -491,5 +560,39 @@ class SiteCreate extends SiteAbstract
         }
 
         return $cache;
+    }
+
+    /**
+     * @param string $sql
+     * @return string console output
+     */
+    protected function executeMysqlCli($sql) {
+        $password = empty($this->mysql->password) ? '' : sprintf("-p%s", escapeshellarg($this->mysql->password));
+        $host = empty($this->mysql->host) ? '' : sprintf("-h%s", $this->mysql->host);
+        $port = empty($this->mysql->port) ? '' : sprintf("-P%d", $this->mysql->port);
+        $cmd = sprintf(
+            "echo %s | mysql -u%s %s %s %s",
+            escapeshellarg($sql), escapeshellarg($this->mysql->user), $password, $host, $port
+        );
+        $result = exec($cmd);
+        return $result;
+    }
+
+
+    /**
+     * @param string $db_name
+     * @param string $sql_file
+     * @return string console output
+     */
+    protected function executeMysqlFile($db_name, $sql_file) {
+        $password = empty($this->mysql->password) ? '' : sprintf("-p%s", escapeshellarg($this->mysql->password));
+        $host = empty($this->mysql->host) ? '' : sprintf("-h%s", $this->mysql->host);
+        $port = empty($this->mysql->port) ? '' : sprintf("-P%d", $this->mysql->port);
+        $cmd = sprintf(
+            "mysql -u%s %s %s %s %s < %s",
+            escapeshellarg($this->mysql->user), $password, $host, $port, escapeshellarg($db_name), escapeshellarg($sql_file)
+        );
+        $result = exec($cmd);
+        return $result;
     }
 }

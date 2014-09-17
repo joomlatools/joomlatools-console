@@ -23,6 +23,8 @@ abstract class SiteAbstract extends Command
 
     protected $mysql;
 
+    protected $dbprefix;
+
     protected function configure()
     {
         $this->addArgument(
@@ -40,9 +42,23 @@ abstract class SiteAbstract extends Command
             'mysql',
             null,
             InputOption::VALUE_REQUIRED,
-            "MySQL credentials in the form of user:password",
+            "MySQL credentials in the form of user:password[@host:port]",
             'root:root'
         )
+        ->addOption(
+            'dbname',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Database where joomla will be installed (Default: "site_{SITENAME}")'
+        )
+//      WIP: Installation process currently uses .sql files which have the j_ prefix hardcoded
+//        ->addOption(
+//            'dbprefix',
+//            null,
+//            InputOption::VALUE_OPTIONAL,
+//            'Prefix for the Joomla database tables',
+//            'j'
+//        )
         ;
     }
 
@@ -51,10 +67,22 @@ abstract class SiteAbstract extends Command
         $this->site       = $input->getArgument('site');
         $this->www        = $input->getOption('www');
 
-        $this->target_db  = 'sites_'.$this->site;
+        $this->target_db  = $input->getOption('dbname') ? $input->getOption('dbname') : 'sites_'.$this->site;
         $this->target_dir = $this->www.'/'.$this->site;
+        $this->dbprefix   = 'j'; // $input->getOption('dbprefix');
 
-        $credentials = explode(':', $input->getOption('mysql'), 2);
-        $this->mysql = (object) array('user' => $credentials[0], 'password' => $credentials[1]);
+        if (strpos($input->getOption('mysql'), '@') !== false)
+        {
+            $dbstring = explode('@',$input->getOption('mysql'),2);
+            $credentials = explode(':', $dbstring[0], 2);
+            $hostport = explode(':', $dbstring[1],2);
+            $this->mysql = (object) array('user' => $credentials[0], 'password' => $credentials[1], 'host' => $hostport[0]);
+            $this->mysql->port = (count($hostport) > 1) ? $hostport[1] : 3306;
+        }
+        else
+        {
+            $credentials = explode(':', $input->getOption('mysql'), 2);
+            $this->mysql = (object) array('user' => $credentials[0], 'password' => $credentials[1]);
+        }
     }
 }
