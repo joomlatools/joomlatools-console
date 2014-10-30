@@ -218,7 +218,7 @@ class SiteCreate extends SiteAbstract
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
         $result = exec(
             sprintf(
-                "echo 'CREATE DATABASE %s CHARACTER SET utf8' | mysql -u'%s' %s",
+                "echo 'CREATE DATABASE `%s` CHARACTER SET utf8' | mysql -u'%s' %s",
                 $this->target_db, $this->mysql->user, $password
             )
         );
