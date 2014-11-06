@@ -64,7 +64,6 @@ class ExtensionSymlink extends SiteAbstract
         );
 
         $project_folder = $input->getOption('projects-dir');
-        $destination    = $this->target_dir;
 
         $projects = array();
         foreach ($this->symlink as $symlink)
@@ -95,15 +94,50 @@ class ExtensionSymlink extends SiteAbstract
                 continue;
             }
 
-            if (is_dir($root.'/code')) {
-                $root = $root.'/code';
+            if ($this->_isKoowaComponent($root)) {
+                $this->_symlinkKoowaComponent($root);
             }
+            else
+            {
+                if (is_dir($root.'/code')) {
+                    $root = $root.'/code';
+                }
 
-            $iterator = new Symlink\Iterator($root, $destination);
+                $iterator = new Symlink\Iterator($root, $this->target_dir);
 
-            while ($iterator->valid()) {
-                $iterator->next();
+                while ($iterator->valid()) {
+                    $iterator->next();
+                }
             }
         }
+    }
+
+    protected function _isKoowaComponent($folder)
+    {
+        return is_file($folder.'/koowa-component.xml');
+    }
+
+    protected function _symlinkKoowaComponent($folder)
+    {
+        if (is_file($folder.'/koowa-component.xml'))
+        {
+            $xml       = simplexml_load_file($folder.'/koowa-component.xml');
+            $component = 'com_'.$xml->name;
+
+            $destination = $this->target_dir.'/libraries/koowa/components/'.$component;
+
+            `ln -sf $folder $destination`;
+
+            // Special treatment for media files
+            $media = $folder.'/resources/assets';
+            $target = $this->target_dir.'/media/koowa/'.$component;
+
+            if (is_dir($media) && !file_exists($target)) {
+                `ln -sf $media $target`;
+            }
+
+            return true;
+        }
+        else return false;
     }
 }
