@@ -25,9 +25,17 @@ class SiteDelete extends SiteAbstract
     {
         parent::execute($input, $output);
 
+        $this->check($input, $output);
         $this->deleteFolder($input, $output);
         $this->deleteVirtualHost($input, $output);
         $this->deleteDatabase($input, $output);
+    }
+
+    public function check(InputInterface $input, OutputInterface $output)
+    {
+        if ((strpos(getcwd(), $this->target_dir) === 0) && (getcwd() !== $this->www)) {
+            throw new \RuntimeException('You are currently in the directory you are trying to delete. Aborting');
+        }
     }
 
     public function deleteFolder(InputInterface $input, OutputInterface $output)
