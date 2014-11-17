@@ -78,7 +78,7 @@ class ExtensionRegister extends SiteAbstract
             if ($table->save($data->getProperties())) {
                 $id = $table->extension_id;
                 // give user some feedback
-                $output->writeln("<info>Your extension registered with extension_id: $id</info>");
+                $output->writeln("<info>Your extension registered as a '{$this->type}', with extension_id: $id</info>");
             } else {
                 $error = $table->getError();
                 // give user some feedback
