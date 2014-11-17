@@ -58,7 +58,6 @@ class ExtensionRegister extends SiteAbstract
 
         $model = new \InstallerModel();
 
-
         // build the record.
         $data = new \JObject;
         $data->name = $this->extension;
