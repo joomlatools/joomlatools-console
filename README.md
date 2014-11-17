@@ -88,11 +88,11 @@ Register Extensions
 ------------------
 
 You can insert your extension into the `extensions` table. This lets you work without an extension manifest.
-Like `extension:install`, you must also use what would be the _element_ name from your manifest.
+Like `extension:install`, you should also use what would be the _element_ name from your manifest.
 
     joomla extension:register testsite com_awesome
 
-The type of extension that gets registered is based on the first 4 characters of your extension.
+The type of extension that gets registered is based on the first 4 characters of your extension argument you pass in.
 
 This command registers an extension of the 'module' type:
 
@@ -110,7 +110,7 @@ You have the option of adding a type argument to the end of the command.
 
     joomla extension:register testsite mod_awesome package
 
-If the type is not recognized then **component** will be used.
+In all cases, if the type is not recognized then **component** will be used.
 
 Extra commands
 ------------
