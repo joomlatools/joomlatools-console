@@ -98,11 +98,11 @@ will be used.
 
 Here are the mappings:
 
-* `com_` => 'component'
-* `mod_` => 'module'
-* `plg_` => 'plugin'
-* `lib_` => 'library'
-* `pkg_` => 'package'
+* `com_` => component
+* `mod_` => module
+* `plg_` => plugin
+* `lib_` => library
+* `pkg_` => package
 
 Extra commands
 ------------
