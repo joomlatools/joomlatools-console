@@ -59,32 +59,32 @@ class ExtensionRegister extends SiteAbstract
         $model = new \InstallerModel();
 
 
-            // build the record.
-            $data = new \JObject;
-            $data->name = $this->extension;
-            $data->type = $this->type;
-            $data->element = $this->extension;
+        // build the record.
+        $data = new \JObject;
+        $data->name = $this->extension;
+        $data->type = $this->type;
+        $data->element = $this->extension;
 
-            $table = $model->getTable('extension', 'JTable');
+        $table = $model->getTable('extension', 'JTable');
 
-            if ($table->load($data->getProperties())) {
-                // already exists.
-                $output->writeln("<error>{$this->extension} {$this->type}: That extension already exists.</error>");
-                return;
+        if ($table->load($data->getProperties())) {
+            // already exists.
+            $output->writeln("<error>{$this->extension} {$this->type}: That extension already exists.</error>");
+            return;
+        } else {
+
+            // save the new record
+
+            if ($table->save($data->getProperties())) {
+                $id = $table->extension_id;
+                // give user some feedback
+                $output->writeln("<info>Your extension registered with extension_id: $id</info>");
             } else {
-
-                // save the new record
-
-                if ($table->save($data->getProperties())) {
-                    $id = $table->extension_id;
-                    // give user some feedback
-                    $output->writeln("<info>Your extension registered with extension_id: $id</info>");
-                } else {
-                    $error = $table->getError();
-                    // give user some feedback
-                    $output->writeln("<info>" . $error . "</info>");
-                }
+                $error = $table->getError();
+                // give user some feedback
+                $output->writeln("<info>" . $error . "</info>");
             }
+        }
 
 
         ob_end_clean();
@@ -95,12 +95,27 @@ class ExtensionRegister extends SiteAbstract
     {
         parent::execute($input, $output);
 
+        $type = false;
+        $typeMap = array('com_' => 'component', 'mod_' => 'module', 'plg_' => 'plugin', 'pkg_' => 'package', 'lib_' => 'library');
+
         $this->extension = $input->getArgument('extension');
-        $type = $input->getArgument('type');
 
-        $allowed = array('component', 'module', 'plugin', 'package', 'library');
+        $forceType = $input->getArgument('type');
 
-        if($type && in_array($type, $allowed)){
+
+         // Try to load the type based on naming convention if we aren't passing a 'type' argument
+
+        if (!$forceType) {
+
+            $prefix = substr($this->extension, 0, 4);
+            $type = isset($typeMap[$prefix]) ? $typeMap[$prefix] : false;
+
+        } else if (in_array($forceType, $typeMap)) {
+         // only allow ones that exist.
+            $type = $forceType;
+        }
+
+        if ($type) {
             $this->type = $type;
         } else {
             $output->writeln("<comment>'{$type}' is not allowed as an extension type. Changing to 'component'</comment>");

@@ -84,6 +84,26 @@ Alternatively, you can install extensions using their installation packages usin
     
 This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz packages.
 
+Register Extensions
+------------------
+
+You can insert your extension into the extensions table. This lets you work without an extension manifest.
+
+    joomla extension:register testsite com_awesome
+
+The type of extension that gets registered is based on the first 4 characters of your extension. If none is recognized then 'component'
+will be used.
+
+    joomla extension:register testsite mod_awesome // registers an extension of the 'module' type
+
+Here are the mappings:
+
+* `com_` => 'component'
+* `mod_` => 'module'
+* `plg_` => 'plugin'
+* `lib_` => 'library'
+* `pkg_` => 'package'
+
 Extra commands
 ------------
 
