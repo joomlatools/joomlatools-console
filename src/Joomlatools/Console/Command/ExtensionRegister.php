@@ -18,7 +18,9 @@ use Joomlatools\Console\Joomla\Bootstrapper;
 class ExtensionRegister extends SiteAbstract
 {
 
-    protected $extension = array();
+    protected $extension = '';
+
+    protected $type = '';
 
 
     protected function configure()
@@ -28,11 +30,14 @@ class ExtensionRegister extends SiteAbstract
         $this
             ->setName('extension:register')
             ->setDescription('Register an extension with the with the `#__extensions` table.')
+
             ->addArgument(
                 'extension',
-                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of full paths to extension packages (file or directory) to install'
-            );
+                InputArgument::REQUIRED,
+                'The extension name to register'
+            )->addArgument('type',
+                InputArgument::OPTIONAL,
+                'Type of extension being registered. ');
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -49,47 +54,58 @@ class ExtensionRegister extends SiteAbstract
         // get the #__extensions model
 
         ob_start();
-        require_once $app->getPath().'/administrator/components/com_installer/models/extension.php';
+        require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
 
         $model = new \InstallerModel();
 
 
-        foreach($this->extension as $extension )
-        {
-
             // build the record.
             $data = new \JObject;
-            $data->name = $extension;
-            $data->type = 'component'; // TODO: add argument to allow for other types
-            $data->element = $extension;
+            $data->name = $this->extension;
+            $data->type = $this->type;
+            $data->element = $this->extension;
 
             $table = $model->getTable('extension', 'JTable');
 
-            if($table->load($data->getProperties())){
+            if ($table->load($data->getProperties())) {
                 // already exists.
-                $output->writeln("<info>$extension: That extension already exists.</info>");
-
+                $output->writeln("<error>{$this->extension} {$this->type}: That extension already exists.</error>");
+                return;
             } else {
-                $table->save($data->getProperties());
 
-                $id = $table->extension_id;
-                if($id){
+                // save the new record
+
+                if ($table->save($data->getProperties())) {
+                    $id = $table->extension_id;
+                    // give user some feedback
                     $output->writeln("<info>Your extension registered with extension_id: $id</info>");
                 } else {
                     $error = $table->getError();
-                    $output->writeln("<info>".$error."</info>");
+                    // give user some feedback
+                    $output->writeln("<info>" . $error . "</info>");
                 }
             }
-        }
+
 
         ob_end_clean();
 
     }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
 
         $this->extension = $input->getArgument('extension');
+        $type = $input->getArgument('type');
+
+        $allowed = array('component', 'module', 'plugin', 'package', 'library');
+
+        if($type && in_array($type, $allowed)){
+            $this->type = $type;
+        } else {
+            $output->writeln("<comment>'{$type}' is not allowed as an extension type. Changing to 'component'</comment>");
+            $this->type = 'component';
+        }
 
         $this->check($input, $output);
         $this->register($input, $output);
