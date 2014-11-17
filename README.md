@@ -91,10 +91,13 @@ You can insert your extension into the extensions table. This lets you work with
 
     joomla extension:register testsite com_awesome
 
-The type of extension that gets registered is based on the first 4 characters of your extension. If none is recognized then **'component'**
-will be used.
+The type of extension that gets registered is based on the first 4 characters of your extension.
 
-    joomla extension:register testsite mod_awesome // registers an extension of the 'module' type
+This command registers an extension of the 'module' type:
+
+    joomla extension:register testsite mod_awesome
+
+If the type is not recognized then **component** will be used.
 
 Here are the mappings:
 
