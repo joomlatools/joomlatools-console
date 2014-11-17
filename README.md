@@ -87,7 +87,8 @@ This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz pac
 Register Extensions
 ------------------
 
-You can insert your extension into the extensions table. This lets you work without an extension manifest.
+You can insert your extension into the `extensions` table. This lets you work without an extension manifest.
+Like `extension:install`, you must also use what would be the _element_ name from your manifest.
 
     joomla extension:register testsite com_awesome
 
@@ -97,8 +98,6 @@ This command registers an extension of the 'module' type:
 
     joomla extension:register testsite mod_awesome
 
-If the type is not recognized then **component** will be used.
-
 Here are the mappings:
 
 * `com_` => component
@@ -106,6 +105,12 @@ Here are the mappings:
 * `plg_` => plugin
 * `lib_` => library
 * `pkg_` => package
+
+You have the option of adding a type argument to the end of the command.
+
+    joomla extension:register testsite mod_awesome package
+
+If the type is not recognized then **component** will be used.
 
 Extra commands
 ------------
