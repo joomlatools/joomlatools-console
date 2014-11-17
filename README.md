@@ -105,6 +105,9 @@ Here are the mappings:
 * `plg_` => plugin
 * `lib_` => library
 * `pkg_` => package
+* `tpl_` => template
+* `lng_` => language
+
 
 You have the option of adding a type argument to the end of the command.
 

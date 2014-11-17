@@ -94,13 +94,21 @@ class ExtensionRegister extends SiteAbstract
     {
         parent::execute($input, $output);
 
-        $type = false;
-        $typeMap = array('com_' => 'component', 'mod_' => 'module', 'plg_' => 'plugin', 'pkg_' => 'package', 'lib_' => 'library');
-
         $this->extension = $input->getArgument('extension');
 
-        $forceType = $input->getArgument('type');
+        $type = false;
 
+        $typeMap = array(
+            'com_' => 'component',
+            'mod_' => 'module',
+            'plg_' => 'plugin',
+            'pkg_' => 'package',
+            'lib_' => 'library',
+            'tpl_' => 'template',
+            'lng_' => 'language'
+        );
+
+        $forceType = $input->getArgument('type');
 
          // Try to load the type based on naming convention if we aren't passing a 'type' argument
 
