@@ -24,6 +24,7 @@ $application->add(new Joomlatools\Console\Command\SiteDelete());
 $application->add(new Joomlatools\Console\Command\SiteToken());
 $application->add(new Joomlatools\Console\Command\ExtensionSymlink());
 $application->add(new Joomlatools\Console\Command\ExtensionInstall());
+$application->add(new Joomlatools\Console\Command\ExtensionRegister());
 $application->add(new Joomlatools\Console\Command\ExtensionInstallFile());
 
 $application->add(new Joomlatools\Console\Command\Versions());
