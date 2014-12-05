@@ -11,6 +11,7 @@ namespace Joomlatools\Console\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
@@ -37,7 +38,23 @@ class ExtensionRegister extends SiteAbstract
                 'The extension name to register'
             )->addArgument('type',
                 InputArgument::OPTIONAL,
-                'Type of extension being registered. ');
+                'Type of extension being registered. ')
+            ->addOption(
+                'folder',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Specifically for the Plugin typed extension, default "system"'
+            )->addOption(
+                'enabled',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Enabled or not, default is "1"'
+            )->addOption(
+                'client_id',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                '"0" for Site, "1" for Administrator'
+            );
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -54,19 +71,33 @@ class ExtensionRegister extends SiteAbstract
         // get the #__extensions model
 
         ob_start();
-        require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
-
-        $model = new \InstallerModel();
 
         // build the record.
         $data = new \JObject;
         $data->name = $this->extension;
         $data->type = $this->type;
         $data->element = $this->extension;
+        $data->client_id = $input->getOption('client_id');
+        $data->enabled = $input->getOption('enabled');
 
+        // special case for plugin, naming and folder.
+        if($this->type == 'plugin'){
+
+            if(substr($data->element, 0, 4) == 'plg_')
+                $data->element = substr($data->element, 4);
+
+          $data->folder = $input->getOption('folder') ? $input->getOption('folder') : 'system';
+        }
+
+        require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
+
+        $model = new \InstallerModel();
         $table = $model->getTable('extension', 'JTable');
 
-        if ($table->load($data->getProperties())) {
+        // restrict on same name and type
+        $unique = array('name' => $data->name, 'type' => $data->type);
+
+        if ($table->load($unique)) {
             // already exists.
             $output->writeln("<error>{$this->extension} {$this->type}: That extension already exists.</error>");
             return;
