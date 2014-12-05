@@ -23,6 +23,16 @@ class ExtensionRegister extends SiteAbstract
 
     protected $type = '';
 
+    protected $typeMap = array(
+        'com_' => 'component',
+        'mod_' => 'module',
+        'plg_' => 'plugin',
+        'pkg_' => 'package',
+        'lib_' => 'library',
+        'tpl_' => 'template',
+        'lng_' => 'language'
+    );
+
 
     protected function configure()
     {
@@ -68,8 +78,6 @@ class ExtensionRegister extends SiteAbstract
     {
         $app = Bootstrapper::getApplication($this->target_dir);
 
-        // get the #__extensions model
-
         ob_start();
 
         // build the record.
@@ -81,14 +89,19 @@ class ExtensionRegister extends SiteAbstract
         $data->enabled = $input->getOption('enabled');
 
         // special case for plugin, naming and folder.
-        if($this->type == 'plugin'){
+        if($this->type == 'plugin')
+        {
+            // set the default folder for plugins only.
+            $data->folder = $input->getOption('folder') ? $input->getOption('folder') : 'system';
 
-            if(substr($data->element, 0, 4) == 'plg_')
+            // special case for the plugins only.
+            if(substr($data->element, 0, 4) == 'plg_') {
                 $data->element = substr($data->element, 4);
+            }
 
-          $data->folder = $input->getOption('folder') ? $input->getOption('folder') : 'system';
         }
 
+        // get the #__extensions model and table
         require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
 
         $model = new \InstallerModel();
@@ -97,25 +110,16 @@ class ExtensionRegister extends SiteAbstract
         // restrict on same name and type
         $unique = array('name' => $data->name, 'type' => $data->type);
 
-        if ($table->load($unique)) {
-            // already exists.
-            $output->writeln("<error>{$this->extension} {$this->type}: That extension already exists.</error>");
-            return;
-        } else {
-
-            // save the new record
-
+        // does the extension exist?
+        if (!$table->load($unique))
+        {
             if ($table->save($data->getProperties())) {
-                $id = $table->extension_id;
-                // give user some feedback
-                $output->writeln("<info>Your extension registered as a '{$this->type}', with extension_id: $id</info>");
+                $output->writeln("<info>Your extension registered as a '{$this->type}', with extension_id: {$table->extension_id}</info>");
             } else {
-                $error = $table->getError();
-                // give user some feedback
-                $output->writeln("<info>" . $error . "</info>");
+                $output->writeln("<info>" . $table->getError() . "</info>");
             }
         }
-
+        else $output->writeln("<error>{$this->extension} {$this->type}: That extension already exists.</error>");
 
         ob_end_clean();
 
@@ -125,40 +129,33 @@ class ExtensionRegister extends SiteAbstract
     {
         parent::execute($input, $output);
 
-        $this->extension = $input->getArgument('extension');
-
         $type = false;
 
-        $typeMap = array(
-            'com_' => 'component',
-            'mod_' => 'module',
-            'plg_' => 'plugin',
-            'pkg_' => 'package',
-            'lib_' => 'library',
-            'tpl_' => 'template',
-            'lng_' => 'language'
-        );
+        $this->extension = $input->getArgument('extension');
 
+        // passed in type argument
         $forceType = $input->getArgument('type');
 
          // Try to load the type based on naming convention if we aren't passing a 'type' argument
-
-        if (!$forceType) {
-
+        if (!$forceType)
+        {
             $prefix = substr($this->extension, 0, 4);
-            $type = isset($typeMap[$prefix]) ? $typeMap[$prefix] : false;
+            $type = isset($this->typeMap[$prefix]) ? $this->typeMap[$prefix] : false;
+        }
 
-        } else if (in_array($forceType, $typeMap)) {
-         // only allow ones that exist.
+        // only allow ones that exist.
+        if (in_array($forceType, $this->typeMap)) {
             $type = $forceType;
         }
 
-        if ($type) {
-            $this->type = $type;
-        } else {
+        // set the type.
+        if (!$type)
+        {
             $output->writeln("<comment>'{$type}' is not allowed as an extension type. Changing to 'component'</comment>");
             $this->type = 'component';
         }
+        else $this->type = $type;
+
 
         $this->check($input, $output);
         $this->register($input, $output);
