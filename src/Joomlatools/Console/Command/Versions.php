@@ -135,7 +135,7 @@ class Versions extends Command
 
         foreach($versions['tags'] as $version)
         {
-            if(!preg_match('/\d\.\d+\.\d+.*/im', $version)) {
+            if(!preg_match('/\d\.\d+\.\d+.*/im', $version) || preg_match('#(?:alpha|beta|rc)#i', $version)) {
                 continue;
             }
 
