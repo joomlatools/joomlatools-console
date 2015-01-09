@@ -346,12 +346,23 @@ class SiteCreate extends SiteAbstract
     {
         if (is_dir('/etc/apache2/sites-available'))
         {
-            $template = file_get_contents(self::$files.'/vhost.conf');
-            $contents = sprintf($template, $this->site);
-
             $tmp = self::$files.'/.vhost.tmp';
 
-            file_put_contents($tmp, $contents);
+            $template = file_get_contents(self::$files.'/vhost.conf');
+
+            file_put_contents($tmp, sprintf($template, $this->site));
+
+            // TODO: Console should provide an option to enable/disable SSL, to provide the location of the
+            // certificate files and the port to listen.
+            $ssl_crt  = '/etc/apache2/server.crt';
+            $ssl_key  = '/etc/apache2/server.key';
+            $ssl_port = 443;
+
+            if (file_exists($ssl_crt) && file($ssl_key))
+            {
+                $template = file_get_contents(self::$files . '/vhost.ssl.conf');
+                file_put_contents($tmp, sprintf($template, 443, $this->site, $ssl_crt, $ssl_key), FILE_APPEND);
+            }
 
             `sudo tee /etc/apache2/sites-available/1-$this->site.conf < $tmp`;
             `sudo a2ensite 1-$this->site.conf`;
