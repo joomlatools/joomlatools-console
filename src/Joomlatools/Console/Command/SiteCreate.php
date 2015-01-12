@@ -380,11 +380,11 @@ class SiteCreate extends SiteAbstract
 
             file_put_contents($tmp, sprintf($template, $this->site));
 
-            if (strtolower($input->getArgument('enable-ssl')) == 'yes')
+            if (strtolower($input->getOption('enable-ssl')) == 'yes')
             {
-                $ssl_crt = $input->getArgument('ssl-crt');
-                $ssl_key = $input->getArgument('ssl-key');
-                $ssl_port = $input->getArgument('ssl-port');
+                $ssl_crt = $input->getOption('ssl-crt');
+                $ssl_key = $input->getOption('ssl-key');
+                $ssl_port = $input->getOption('ssl-port');
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
