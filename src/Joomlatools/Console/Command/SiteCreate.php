@@ -388,7 +388,7 @@ class SiteCreate extends SiteAbstract
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
-                    $template = file_get_contents(self::$files . '/vhost.ssl.conf');
+                    $template = "\n\n" . file_get_contents(self::$files . '/vhost.ssl.conf');
                     file_put_contents($tmp, sprintf($template, $ssl_port, $this->site, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
             }
