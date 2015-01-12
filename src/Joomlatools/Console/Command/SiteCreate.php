@@ -380,7 +380,7 @@ class SiteCreate extends SiteAbstract
 
             file_put_contents($tmp, sprintf($template, $this->site));
 
-            if (strtolower($input->getArgument('ssl')) == 'yes')
+            if (strtolower($input->getArgument('enable-ssl')) == 'yes')
             {
                 $ssl_crt = $input->getArgument('ssl-crt');
                 $ssl_key = $input->getArgument('ssl-key');
