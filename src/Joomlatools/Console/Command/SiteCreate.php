@@ -390,6 +390,7 @@ class SiteCreate extends SiteAbstract
                     $template = "\n\n" . file_get_contents(self::$files . '/vhost.ssl.conf');
                     file_put_contents($tmp, sprintf($template, $ssl_port, $this->site, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
+                else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
             }
 
             `sudo tee /etc/apache2/sites-available/1-$this->site.conf < $tmp`;
