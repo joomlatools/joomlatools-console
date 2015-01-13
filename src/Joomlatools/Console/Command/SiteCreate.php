@@ -116,11 +116,10 @@ class SiteCreate extends SiteAbstract
                 sprintf('%s/Projects', trim(`echo ~`))
             )
             ->addOption(
-                'enable-ssl',
+                'disable-ssl',
                 null,
-                InputOption::VALUE_OPTIONAL,
-                'Enable SSL for this site (Yes for enable it, No for not enable it)',
-                'No'
+                InputOption::VALUE_NONE,
+                'Disable SSL for this site'
             )
             ->addOption(
                 'ssl-crt',
@@ -380,7 +379,7 @@ class SiteCreate extends SiteAbstract
 
             file_put_contents($tmp, sprintf($template, $this->site));
 
-            if (strtolower($input->getOption('enable-ssl')) == 'yes')
+            if (!$input->getOption('disable-ssl'))
             {
                 $ssl_crt = $input->getOption('ssl-crt');
                 $ssl_key = $input->getOption('ssl-key');
