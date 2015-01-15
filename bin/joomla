@@ -14,6 +14,7 @@ if(is_file($autoload)) {
 }
 
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
 
 $application = new Application('Joomla console tools', '1.0');
 
@@ -26,6 +27,61 @@ $application->add(new Joomlatools\Console\Command\ExtensionSymlink());
 $application->add(new Joomlatools\Console\Command\ExtensionInstall());
 $application->add(new Joomlatools\Console\Command\ExtensionInstallFile());
 
+$application->add(new Joomlatools\Console\Command\PluginInstall());
+$application->add(new Joomlatools\Console\Command\PluginUninstall());
+
 $application->add(new Joomlatools\Console\Command\Versions());
 
+loadPlugins($application);
+
 $application->run();
+
+/**
+ * Load plugins into an application.
+ *
+ * @param Application $application The application.
+ */
+function loadPlugins(Application $application)
+{
+    $plugins_dir = dirname(__FILE__) . '/../plugins/';
+
+    $autoload = $plugins_dir . 'vendor/autoload.php';
+
+    if (file_exists($autoload)) {
+        require_once $autoload;
+    }
+
+    $contents = file_get_contents($plugins_dir . 'composer.json');
+
+    if ($contents && ($data = json_decode($contents)) && isset($data->require))
+    {
+        foreach ($data->require as $package => $version)
+        {
+            $package_dir = $plugins_dir . 'vendor/' . $package . '/Joomlatools/Console/Command/';
+
+            if (file_exists($package_dir))
+            {
+                $iterator = new DirectoryIterator($package_dir);
+
+                foreach ($iterator as $file)
+                {
+                    if ($file->getExtension() == 'php')
+                    {
+                        $class_name = 'Joomlatools\Console\Command\\' . $file->getBasename('.php');
+
+                        if (class_exists($class_name))
+                        {
+                            $command = new $class_name();
+
+                            // If a command with the current command name was already added, ignore it.
+                            if ($command instanceof Command && !$application->has($command->getName())) {
+                                $application->add($command);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
