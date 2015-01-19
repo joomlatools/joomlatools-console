@@ -33,9 +33,6 @@ class ExtensionRegister extends SiteAbstract
         'lng_' => 'language'
     );
 
-
-    protected $exceptions2 = array('module', 'template');
-
     protected $exceptions = array(
         'module' => array(
             'require' => array(
@@ -56,7 +53,7 @@ class ExtensionRegister extends SiteAbstract
             'table' => array(
             'type' => 'Style',
             'prefix' => 'TemplatesTable'
-        ),
+            ),
     ));
 
 
@@ -124,7 +121,6 @@ class ExtensionRegister extends SiteAbstract
             if(substr($data->element, 0, 4) == 'plg_') {
                 $data->element = substr($data->element, 4);
             }
-
         }
 
         // get the #__extensions model and table
@@ -141,9 +137,8 @@ class ExtensionRegister extends SiteAbstract
         {
             if ($table->save($data->getProperties()))
             {
-                if($this->type == 'module' || $this->type == 'template')
+                if(array_key_exists($this->type, $this->exceptions))
                 {
-                    $this->handleExceptions($input, $output, $data);
                     $data = $this->extendData($data);
 
                     $exception = $this->exceptions[$this->type];
@@ -207,7 +202,7 @@ class ExtensionRegister extends SiteAbstract
         $this->register($input, $output);
     }
 
-    protected function handleExceptions(InputInterface $input, OutputInterface $output, $data)
+    public function extendData($data)
     {
         $data->title = $this->extension;
         $data->template = $this->extension;
