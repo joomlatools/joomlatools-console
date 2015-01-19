@@ -34,6 +34,32 @@ class ExtensionRegister extends SiteAbstract
     );
 
 
+    protected $exceptions2 = array('module', 'template');
+
+    protected $exceptions = array(
+        'module' => array(
+            'require' => array(
+                'model' => '/administrator/components/com_modules/models/module.php'
+            ),
+            'model' => '\\ModulesModelModule',
+            'table' => array(
+            'type' => 'module',
+            'prefix' => 'JTable'
+            ),
+        ),
+        'template' => array(
+            'require' => array(
+                'model' => '/administrator/components/com_templates/models/style.php',
+                'table' => '/administrator/components/com_templates/tables/style.php'
+        ),
+            'model' => 'TemplatesModelStyle',
+            'table' => array(
+            'type' => 'Style',
+            'prefix' => 'TemplatesTable'
+        ),
+    ));
+
+
     protected function configure()
     {
         parent::configure();
@@ -113,7 +139,27 @@ class ExtensionRegister extends SiteAbstract
         // does the extension exist?
         if (!$table->load($unique))
         {
-            if ($table->save($data->getProperties())) {
+            if ($table->save($data->getProperties()))
+            {
+                if($this->type == 'module' || $this->type == 'template')
+                {
+                    $this->handleExceptions($input, $output, $data);
+                    $data = $this->extendData($data);
+
+                    $exception = $this->exceptions[$this->type];
+
+                    foreach($exception['require'] AS $require){
+                        require_once $app->getPath() . $require;
+                    }
+
+                    $model = new $exception['model'];
+                    $exception_table = $model->getTable($exception['table']['type'], $exception['table']['prefix']);
+
+                    if(!$exception_table->save($data->getProperties())){
+                        $output->writeln("<info>" . $table->getError() . "</info>");
+                    }
+                }
+
                 $output->writeln("<info>Your extension registered as a '{$this->type}', with extension_id: {$table->extension_id}</info>");
             } else {
                 $output->writeln("<info>" . $table->getError() . "</info>");
@@ -136,7 +182,7 @@ class ExtensionRegister extends SiteAbstract
         // passed in type argument
         $forceType = $input->getArgument('type');
 
-         // Try to load the type based on naming convention if we aren't passing a 'type' argument
+        // Try to load the type based on naming convention if we aren't passing a 'type' argument
         if (!$forceType)
         {
             $prefix = substr($this->extension, 0, 4);
@@ -159,6 +205,18 @@ class ExtensionRegister extends SiteAbstract
 
         $this->check($input, $output);
         $this->register($input, $output);
+    }
+
+    protected function handleExceptions(InputInterface $input, OutputInterface $output, $data)
+    {
+        $data->title = $this->extension;
+        $data->template = $this->extension;
+        $data->module = $this->extension;
+        $data->element = $this->extension;
+        $data->published = $data->enabled;
+        $data->home = 0; //refers to template style creation can't be home tpl its new!
+
+        return $data;
     }
 
 }
