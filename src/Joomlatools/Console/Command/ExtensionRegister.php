@@ -64,7 +64,6 @@ class ExtensionRegister extends SiteAbstract
         $this
             ->setName('extension:register')
             ->setDescription('Register an extension with the with the `#__extensions` table.')
-
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED,
@@ -88,6 +87,42 @@ class ExtensionRegister extends SiteAbstract
                 InputOption::VALUE_OPTIONAL,
                 '"0" for Site, "1" for Administrator'
             );
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        parent::execute($input, $output);
+
+        $type = false;
+
+        $this->extension = $input->getArgument('extension');
+
+        // passed in type argument
+        $forceType = $input->getArgument('type');
+
+        // Try to load the type based on naming convention if we aren't passing a 'type' argument
+        if (!$forceType)
+        {
+            $prefix = substr($this->extension, 0, 4);
+            $type = isset($this->typeMap[$prefix]) ? $this->typeMap[$prefix] : false;
+        }
+
+        // only allow ones that exist.
+        if (in_array($forceType, $this->typeMap)) {
+            $type = $forceType;
+        }
+
+        // set the type.
+        if (!$type)
+        {
+            $output->writeln("<comment>'{$type}' is not allowed as an extension type. Changing to 'component'</comment>");
+            $this->type = 'component';
+        }
+        else $this->type = $type;
+
+
+        $this->check($input, $output);
+        $this->register($input, $output);
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -170,43 +205,6 @@ class ExtensionRegister extends SiteAbstract
         else $output->writeln("<error>{$this->extension} {$this->type}: That extension already exists.</error>");
 
         ob_end_clean();
-
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        parent::execute($input, $output);
-
-        $type = false;
-
-        $this->extension = $input->getArgument('extension');
-
-        // passed in type argument
-        $forceType = $input->getArgument('type');
-
-        // Try to load the type based on naming convention if we aren't passing a 'type' argument
-        if (!$forceType)
-        {
-            $prefix = substr($this->extension, 0, 4);
-            $type = isset($this->typeMap[$prefix]) ? $this->typeMap[$prefix] : false;
-        }
-
-        // only allow ones that exist.
-        if (in_array($forceType, $this->typeMap)) {
-            $type = $forceType;
-        }
-
-        // set the type.
-        if (!$type)
-        {
-            $output->writeln("<comment>'{$type}' is not allowed as an extension type. Changing to 'component'</comment>");
-            $this->type = 'component';
-        }
-        else $this->type = $type;
-
-
-        $this->check($input, $output);
-        $this->register($input, $output);
     }
 
     public function extendData($data, $extension)
@@ -218,7 +216,8 @@ class ExtensionRegister extends SiteAbstract
             $data->module = $this->extension;
         }
 
-        if($extension == "template"){
+        if($extension == "template")
+        {
             $data->template = $this->extension;
             $data->home = 1;
         }
