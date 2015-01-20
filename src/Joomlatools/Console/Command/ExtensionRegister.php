@@ -139,7 +139,7 @@ class ExtensionRegister extends SiteAbstract
             {
                 if(array_key_exists($this->type, $this->exceptions))
                 {
-                    $data = $this->extendData($data);
+                    $data = $this->extendData($data, $this->type);
 
                     $exception = $this->exceptions[$this->type];
 
@@ -202,14 +202,19 @@ class ExtensionRegister extends SiteAbstract
         $this->register($input, $output);
     }
 
-    public function extendData($data)
+    public function extendData($data, $extension)
     {
         $data->title = $this->extension;
-        $data->template = $this->extension;
-        $data->module = $this->extension;
-        $data->element = $this->extension;
         $data->published = $data->enabled;
-        $data->home = 0; //refers to template style creation can't be home tpl its new!
+
+        if($extension == "module"){
+            $data->module = $this->extension;
+        }
+
+        if($extension == "template"){
+            $data->template = $this->extension;
+            $data->home = 1;
+        }
 
         return $data;
     }
