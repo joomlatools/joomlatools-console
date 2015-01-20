@@ -154,22 +154,8 @@ class ExtensionRegister extends SiteAbstract
         {
             if ($table->save($data->getProperties()))
             {
-                if(array_key_exists($this->type, $this->exceptions))
-                {
-                    $data = $this->extendData($data, $this->type);
-
-                    $exception = $this->exceptions[$this->type];
-
-                    foreach($exception['require'] AS $require){
-                        require_once $app->getPath() . $require;
-                    }
-
-                    $model = new $exception['model'];
-                    $exception_table = $model->getTable($exception['table']['type'], $exception['table']['prefix']);
-
-                    if(!$exception_table->save($data->getProperties())){
-                        $output->writeln("<info>" . $table->getError() . "</info>");
-                    }
+                if(array_key_exists($this->type, $this->exceptions)){
+                    $this->handleExceptions($output, $app, $data, $this->type);
                 }
 
                 $output->writeln("<info>Your extension registered as a '{$this->type}', with extension_id: {$table->extension_id}</info>");
@@ -182,7 +168,7 @@ class ExtensionRegister extends SiteAbstract
         ob_end_clean();
     }
 
-    public function extendData($data, $extension)
+    public function handleExceptions(OutputInterface $output, $app, $data, $extension)
     {
         $data->title = $this->extension;
         $data->published = $data->enabled;
@@ -197,6 +183,19 @@ class ExtensionRegister extends SiteAbstract
             $data->home = 1;
         }
 
-        return $data;
+        $exception = $this->exceptions[$this->type];
+
+        foreach($exception['require'] AS $require){
+            require_once $app->getPath() . $require;
+        }
+
+        $model = new $exception['model'];
+        $exception_table = $model->getTable($exception['table']['type'], $exception['table']['prefix']);
+
+        if(!$exception_table->save($data->getProperties()))
+        {
+            $output->writeln("<info>" . $exception_table->getError() . "</info>");
+            die();
+        }
     }
 }
