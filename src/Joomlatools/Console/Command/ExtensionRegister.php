@@ -5,9 +5,7 @@
  * @link        http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-
 namespace Joomlatools\Console\Command;
-
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,15 +16,33 @@ use Joomlatools\Console\Joomla\Bootstrapper;
 
 class ExtensionRegister extends SiteAbstract
 {
-
+    /**
+     * name of extension
+     *
+     * @var string
+     */
     protected $extension = '';
-
+    /**
+     * type of extension
+     *
+     * @var string
+     */
     protected $type = '';
-
+    /**
+     * File cache
+     *
+     * @var array
+     */
     protected $typeMap = '';
-
+    /**
+     * default values
+     * @var array
+     */
     protected $defaults = '';
-
+    /**
+     * extension exceptions
+     * @var string
+     */
     protected $exceptions = '';
 
     protected function configure()
@@ -94,7 +110,6 @@ class ExtensionRegister extends SiteAbstract
             $this->type = 'component';
         }
         else $this->type = $type;
-
 
         $this->check($input, $output);
         $this->register($input, $output);
