@@ -123,6 +123,13 @@ class ExtensionRegister extends SiteAbstract
             }
         }
 
+        //need to be sure that a prefix is provided for components and modules
+        if(($this->type == "component" || $this->type == "module") && (strpos($data->element, '_') === false))
+        {
+            $prefix = array_search($this->type, $this->typeMap);
+            $data->element = $prefix . $this->extension;
+        }
+
         // get the #__extensions model and table
         require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
 
