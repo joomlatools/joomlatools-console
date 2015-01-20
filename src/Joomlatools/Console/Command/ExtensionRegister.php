@@ -23,39 +23,11 @@ class ExtensionRegister extends SiteAbstract
 
     protected $type = '';
 
-    protected $typeMap = array(
-        'com_' => 'component',
-        'mod_' => 'module',
-        'plg_' => 'plugin',
-        'pkg_' => 'package',
-        'lib_' => 'library',
-        'tpl_' => 'template',
-        'lng_' => 'language'
-    );
+    protected $typeMap = '';
 
-    protected $exceptions = array(
-        'module' => array(
-            'require' => array(
-                'model' => '/administrator/components/com_modules/models/module.php'
-            ),
-            'model' => '\\ModulesModelModule',
-            'table' => array(
-            'type' => 'module',
-            'prefix' => 'JTable'
-            ),
-        ),
-        'template' => array(
-            'require' => array(
-                'model' => '/administrator/components/com_templates/models/style.php',
-                'table' => '/administrator/components/com_templates/tables/style.php'
-        ),
-            'model' => 'TemplatesModelStyle',
-            'table' => array(
-            'type' => 'Style',
-            'prefix' => 'TemplatesTable'
-            ),
-    ));
+    protected $defaults = '';
 
+    protected $exceptions = '';
 
     protected function configure()
     {
@@ -96,6 +68,9 @@ class ExtensionRegister extends SiteAbstract
         $type = false;
 
         $this->extension = $input->getArgument('extension');
+        $this->defaults = new ExtensionRegisterDefaults();
+        $this->typeMap = $this->defaults->typeMap;
+        $this->exceptions = $this->defaults->exceptions;
 
         // passed in type argument
         $forceType = $input->getArgument('type');
@@ -224,5 +199,4 @@ class ExtensionRegister extends SiteAbstract
 
         return $data;
     }
-
 }
