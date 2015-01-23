@@ -52,11 +52,11 @@ Please note that your source code should resemble the Joomla folder structure fo
 
 Now to create a new site, execute the site:create command and add a symlink option:
 
-	  joomla site:create testsite --symlink=awesome
+	joomla site:create testsite --symlink=awesome
 
 Or to symlink your code into an existing site:
 
-    joomla extension:symlink testsite awesome
+	joomla extension:symlink testsite awesome
 
 This will symlink all the folders from the _awesome_ folder into _testsite.dev_.
 
@@ -64,19 +64,19 @@ Run discover install to make your component available to Joomla and you are good
 
 For more information on the symlinker, run:
 
-	  joomla extension:symlink  --help
+	joomla extension:symlink  --help
 
 Install Extensions
 ------------------
 You can use discover install on command line to install extensions.
 
-    joomla extension:install testsite com_awesome
+	joomla extension:install testsite com_awesome
 
 You need to use the _element_ name in your extension manifest.
 
 For more information, run:
 
-	  joomla extension:install --help
+	joomla extension:install --help
 	  
 Alternatively, you can install extensions using their installation packages using the `extension:installfile` command. Example:
 
