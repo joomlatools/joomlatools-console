@@ -5,12 +5,46 @@ This is a script developed by [Joomlatools](http://joomlatools.com) to ease the 
 
 It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Vagrant box](https://github.com/joomlatools/joomla-vagrant)
 
+Installation
+------------
+
+1. Download or clone this repository.
+
+1. Make the `joomla` command executable:
+
+    `$ chmod u+x /path/to/joomla-console/bin/joomla`
+
+1. Configure your system to recognize where the executable resides. There are 3 options:
+    1. Create a symbolic link in a directory that is already in your PATH, e.g.:
+
+        `$ ln -s /path/to/joomla-console/bin/joomla /usr/bin/joomla`
+
+    1. Explicitly add the executable to the PATH variable which is defined in the the shell configuration file called .profile, .bash_profile, .bash_aliases, or .bashrc that is located in your home folder, i.e.:
+
+        `export PATH="$PATH:/path/to/joomla-console/bin:/usr/local/bin"`
+
+    1. Add an alias for the executable by adding this to you shell configuration file (see list in previous option):
+
+        `$ alias joomla=/path/to/joomla-console/bin/joomla`
+
+    For options 2 and 3 above, you should log out and then back in to apply your changes to your current session.
+
+1. Test that joomla executable is found by your system:
+
+    `$ which joomla`
+
+1. From joomla-console root (/path/to/joomla-console), run Composer to fetch dependencies.
+
+    `$ composer install`
+
 For available options, try running:
 
     joomla --list
+    
+Usage 
+-----
 
-Create Sites
-------------
+### Create Sites
 
 To create a site with the latest Joomla version, run:
 
@@ -34,15 +68,13 @@ For more information and available options, try running:
 
     joomla site:create --help
 
-Delete Sites
-------------
+### Delete Sites
 
 You can delete the sites you have created by running:
 
     joomla site:delete testsite
 
-Symlink Extensions
-------------------
+### Symlink Extensions
 
 Let's say you are working on your own Joomla component called _Awesome_ and want to develop it with the latest Joomla version.
 
@@ -66,8 +98,8 @@ For more information on the symlinker, run:
 
 	joomla extension:symlink  --help
 
-Install Extensions
-------------------
+### Install Extensions
+
 You can use discover install on command line to install extensions.
 
 	joomla extension:install testsite com_awesome
@@ -84,8 +116,7 @@ Alternatively, you can install extensions using their installation packages usin
     
 This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz packages.
 
-Register Extensions
-------------------
+###Register Extensions
 
 With the `extension:register` command you can insert your extension into the `extensions` table without a manifest file. This is a really quick way to start developing your extensions.
 
@@ -121,8 +152,7 @@ For a `plugin` type you should use the `--folder` option specify the plugin grou
 
 Other options: `--enabled`, `--client_id`
 
-Extra commands
-------------
+## Extra commands
 
 There a few other commands available for you to try out as well :
 
@@ -131,34 +161,19 @@ There a few other commands available for you to try out as well :
  * Use `joomla versions --refresh` to get the latest tags and branches from the official [Joomla CMS](https://github.com/joomla/joomla-cms) repository.
  * To purge the cache of all Joomla packages, add the `--clear-cache` flag to this command.
 
-Installation instructions
--------------------------
-1. Download or clone this repository.
+## Requirements
 
-1. Make the `joomla` command executable:
+* Composer
+* Joomla version 2.5 and up.
 
-    `$ chmod u+x /path/to/joomla-console/bin/joomla`
+## Contributing
 
-1. Configure your system to recognize where the executable resides. There are 3 options:
-    1. Create a symbolic link in a directory that is already in your PATH, e.g.:
+Fork the project, create a feature branch, and send us a pull request.
 
-        `$ ln -s /path/to/joomla-console/bin/joomla /usr/bin/joomla`
+## Authors
 
-    1. Explicitly add the executable to the PATH variable which is defined in the the shell configuration file called .profile, .bash_profile, .bash_aliases, or .bashrc that is located in your home folder, i.e.:
+See the list of [contributors](https://github.com/joomlatools/joomla-console/contributors).
 
-        `export PATH="$PATH:/path/to/joomla-console/bin:/usr/local/bin"`
+## License
 
-    1. Add an alias for the executable by adding this to you shell configuration file (see list in previous option):
-
-        `$ alias joomla=/path/to/joomla-console/bin/joomla`
-
-    For options 2 and 3 above, you should log out and then back in to apply your changes to your current session.
-
-1. Test that joomla executable is found by your system:
-
-    `$ which joomla`
-
-1. From joomla-console root (/path/to/joomla-console), run Composer to fetch dependencies.
-
-    `$ composer install`
-
+The `joomlatools/joomla-console` plugin is licensed under the MPL v2 license - see the LICENSE file for details.
