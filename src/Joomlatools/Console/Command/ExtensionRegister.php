@@ -56,7 +56,8 @@ class ExtensionRegister extends SiteAbstract
                 'extension',
                 InputArgument::REQUIRED,
                 'The extension name to register'
-            )->addArgument('type',
+            )->addArgument(
+                'type',
                 InputArgument::OPTIONAL,
                 'Type of extension being registered. ')
             ->addOption(
@@ -74,6 +75,11 @@ class ExtensionRegister extends SiteAbstract
                 null,
                 InputOption::VALUE_OPTIONAL,
                 '"0" for Site, "1" for Administrator'
+            )->addOption(
+                'element',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                null
             );
     }
 
@@ -135,6 +141,12 @@ class ExtensionRegister extends SiteAbstract
         $data->element = $this->extension;
         $data->client_id = $input->getOption('client_id');
         $data->enabled = $input->getOption('enabled');
+
+
+        $element = $input->getOption('element');
+        if(strlen($element)){
+            $data->element = $element;
+        }
 
         // special case for plugin, naming and folder.
         if($this->type == 'plugin')

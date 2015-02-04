@@ -151,6 +151,10 @@ In all cases, if the type is not recognized then **component** will be used.
 For a `plugin` type you should use the `--folder` option specify the plugin group that will get registered with the record. Note that the default is 'system'.
 
     joomla extension:register testsite myplugin --folder=content
+    
+For a `language` type you should use the `--element` option to ensure your language files can be loaded correctly. 
+
+	joomla extension:register testsite spanglish --element --element en-GB 
 
 Other options: `--enabled`, `--client_id`
 
