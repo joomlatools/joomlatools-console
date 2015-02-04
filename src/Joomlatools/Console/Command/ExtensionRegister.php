@@ -69,7 +69,8 @@ class ExtensionRegister extends SiteAbstract
                 'enabled',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Enabled or not, default is "1"'
+                'Enabled or not, default is "1"',
+                1
             )->addOption(
                 'client_id',
                 null,
@@ -79,6 +80,13 @@ class ExtensionRegister extends SiteAbstract
                 'element',
                 null,
                 InputOption::VALUE_OPTIONAL,
+                "Provide the element name for languages",
+                null
+            )->addOption(
+                'position',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                "Provide the position the module should appear",
                 null
             );
     }
@@ -141,7 +149,7 @@ class ExtensionRegister extends SiteAbstract
         $data->element = $this->extension;
         $data->client_id = $input->getOption('client_id');
         $data->enabled = $input->getOption('enabled');
-
+        $data->position = $input->getOption('position');
 
         $element = $input->getOption('element');
         if(strlen($element)){
