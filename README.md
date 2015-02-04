@@ -120,6 +120,8 @@ This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz pac
 
 With the `extension:register` command you can insert your extension into the `extensions` table without a manifest file. This is a really quick way to start developing your extensions.
 
+Used in conjunction with symlinks (please see above) you will up and running with your new developments in no time!
+
 Like `extension:install`, you should also use what would be the _element_ name from your manifest.
 
     joomla extension:register testsite com_awesome
@@ -137,7 +139,7 @@ Here are the mappings:
 * `plg_` => plugin (the `plg_` will get stripped from the element field)
 * `lib_` => library
 * `pkg_` => package
-* `tpl_` => template
+* `tpl_` => template (the `tpl_` will get stripped from the name and element field)
 * `lng_` => language
 
 You have the option of adding a `type` argument to the end of the command.

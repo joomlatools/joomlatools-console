@@ -148,6 +148,14 @@ class ExtensionRegister extends SiteAbstract
             }
         }
 
+        if($this->type == 'template')
+        {
+            if(substr($data->name, 0, 4) == 'tpl_') {
+                $data->name = substr($data->name, 4);
+                $data->element = substr($data->element, 4);
+            }
+        }
+
         //need to be sure that a prefix is provided for components and modules
         if(($this->type == "component" || $this->type == "module") && (strpos($data->element, '_') === false))
         {
