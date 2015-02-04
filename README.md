@@ -155,6 +155,10 @@ For a `plugin` type you should use the `--folder` option specify the plugin grou
 For a `language` type you should use the `--element` option to ensure your language files can be loaded correctly. 
 
 	joomla extension:register testsite spanglish --element --element en-GB 
+	
+For a `module` type you should use the `--position` option to ensure your module displays where you would like it to. 
+
+	joomla extension:register testsite mod_awesome --position debug 
 
 Other options: `--enabled`, `--client_id`
 
