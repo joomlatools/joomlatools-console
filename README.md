@@ -128,9 +128,9 @@ Like `extension:install`, you should also use what would be the _element_ name f
 
 The `type` of extension that gets registered is based on the first 4 characters of the extension argument you pass in.
 
-This command registers an extension of the 'module' type:
+This command registers an extension of the 'plugin' type:
 
-    joomla extension:register testsite mod_awesome
+    joomla extension:register testsite plg_awesome
 
 Here are the mappings:
 
@@ -144,17 +144,17 @@ Here are the mappings:
 
 You have the option of adding a `type` argument to the end of the command.
 
-    joomla extension:register testsite mod_awesome package
+    joomla extension:register testsite plg_awesome package
 
 In all cases, if the type is not recognized then **component** will be used.
 
 For a `plugin` type you should use the `--folder` option specify the plugin group that will get registered with the record. Note that the default is 'system'.
 
-    joomla extension:register testsite myplugin --folder=content
+    joomla extension:register testsite myplugin plugin --folder=content
     
 For a `language` type you should use the `--element` option to ensure your language files can be loaded correctly. 
 
-	joomla extension:register testsite spanglish --element --element en-GB 
+	joomla extension:register testsite spanglish language --element en-GB 
 	
 For a `module` type you should use the `--position` option to ensure your module displays where you would like it to. 
 
