@@ -116,23 +116,15 @@ Alternatively, you can install extensions using their installation packages usin
     
 This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz packages.
 
-###Register Extensions
+### Register Extensions
 
-With the `extension:register` command you can insert your extension into the `extensions` table without a manifest file. This is a really quick way to start developing your extensions.
-
-Used in conjunction with symlinks (please see above) you will up and running with your new developments in no time!
+With the `extension:register` command you can insert your extension into the `extensions` table without the need for a complete install package with a manifest file.
 
 Like `extension:install`, you should also use what would be the _element_ name from your manifest.
 
     joomla extension:register testsite com_awesome
 
-The `type` of extension that gets registered is based on the first 4 characters of the extension argument you pass in.
-
-This command registers an extension of the 'plugin' type:
-
-    joomla extension:register testsite plg_awesome
-
-Here are the mappings:
+The `type` of extension that gets registered is, by default, based on the first 4 characters of the extension argument you pass in. Here are the mappings:
 
 * `com_` => component
 * `mod_` => module
@@ -142,25 +134,29 @@ Here are the mappings:
 * `tpl_` => template (the `tpl_` will get stripped from the name and element field)
 * `lng_` => language
 
-You have the option of adding a `type` argument to the end of the command.
+This example registers an extension of the 'plugin' type:
 
-    joomla extension:register testsite plg_awesome package
+    joomla extension:register testsite plg_awesome
 
-In all cases, if the type is not recognized then **component** will be used.
+Alternatively, if you want to use naming without the prefixes you have the option of adding a `type` argument to the end of the command.
 
-For a `plugin` type you should use the `--folder` option specify the plugin group that will get registered with the record. Note that the default is 'system'.
+    joomla extension:register testsite awesome package
+
+In all cases, if the type is not specified or recognized then the default value, **component**, will be used.
+
+When registering `plugin` type you can use the `--folder` option to specify the plugin group that will get registered with the record. Note that the default is 'system'.
 
     joomla extension:register testsite myplugin plugin --folder=content
     
-For a `language` type you should use the `--element` option to ensure your language files can be loaded correctly. 
+For a `language` type extension, you should use the `--element` option to ensure your language files can be loaded correctly. 
 
-	joomla extension:register testsite spanglish language --element en-GB 
+	joomla extension:register testsite spanglish language --element=en-GB 
 	
-For a `module` type you should use the `--position` option to ensure your module displays where you would like it to. 
+Lastly, when registering a `module` type extension, you can use the `--position` option to ensure your module displays where you would like it to. A record gets added to the #_modules table. 
 
-	joomla extension:register testsite mod_awesome --position debug 
+	joomla extension:register testsite mod_awesome --position=debug 
 
-Other options: `--enabled`, `--client_id`
+Other options available for all extension types: `--enabled`, `--client_id`
 
 ## Extra commands
 
