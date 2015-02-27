@@ -51,7 +51,7 @@ class ExtensionRegister extends SiteAbstract
 
         $this
             ->setName('extension:register')
-            ->setDescription('Register an extension with the with the `#__extensions` table.')
+            ->setDescription('Register an extension with the `#__extensions` table.')
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED,
