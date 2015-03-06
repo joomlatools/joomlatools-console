@@ -77,7 +77,29 @@ class Application extends \Symfony\Component\Console\Application
 
         $this->configureIO($this->_input, $this->_output);
 
-        $this->_loadPlugins();
+        $autoloader = $this->_plugin_path . '/vendor/autoload.php';
+
+        if (file_exists($autoloader)) {
+            require_once $autoloader;
+        }
+
+        $name = $this->getCommandName($this->_input);
+
+        if (strpos($name, ':') !== false)
+        {
+            list($group, $command) = explode(':', $name);
+            $className = 'Joomlatools\Console\Command\\'. ucfirst($group) . ucfirst($command);
+        }
+        else $className = 'Joomlatools\Console\Command\\' . $name;
+
+        if (class_exists($className) && !$this->has($name))
+        {
+            $command = new $className();
+
+            if ($command instanceof \Symfony\Component\Console\Command\Command) {
+                $this->add($command);
+            }
+        }
 
         parent::run($this->_input, $this->_output);
     }
@@ -152,49 +174,5 @@ class Application extends \Symfony\Component\Console\Application
         }
 
         return $this->_plugins;
-    }
-
-    /**
-     * Load custom plugins into the application
-     */
-    protected function _loadPlugins()
-    {
-        $autoloader = $this->_plugin_path . '/vendor/autoload.php';
-
-        if (file_exists($autoloader)) {
-            require_once $autoloader;
-        }
-
-        foreach ($this->getPlugins() as $package => $version)
-        {
-            $package_dir = $this->_plugin_path . '/vendor/' . $package . '/Joomlatools/Console/Command/';
-
-            if (file_exists($package_dir))
-            {
-                $iterator = new \DirectoryIterator($package_dir);
-
-                foreach ($iterator as $file)
-                {
-                    if ($file->getExtension() != 'php') {
-                        continue;
-                    }
-
-                    $class_name = 'Joomlatools\Console\Command\\' . $file->getBasename('.php');
-
-                    if (class_exists($class_name))
-                    {
-                        $command = new $class_name();
-
-                        if ($command instanceof \Symfony\Component\Console\Command\Command)
-                        {
-                            if (!$this->has($command->getName())) {
-                                $this->add($command);
-                            }
-                            else $this->_output->writeln('<error>Warning:</error> command "' . $command->getName() . '" in "' . $package . '" already exists, skipping');
-                        }
-                    }
-                }
-            }
-        }
     }
 }
