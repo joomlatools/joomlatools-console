@@ -38,6 +38,11 @@ class Application extends \Symfony\Component\Console\Application
     protected $_input;
 
     /**
+     * List of installed plugins
+     */
+    protected $_plugins;
+
+    /**
      * @inherits
      *
      * @param string $name
@@ -104,6 +109,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\ExtensionSymlink(),
             new Command\ExtensionInstall(),
             new Command\ExtensionInstallFile(),
+            new Command\PluginList(),
             new Command\PluginInstall(),
             new Command\PluginUninstall(),
             new Command\Versions(),
@@ -113,35 +119,53 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
+     * Get the list of installed plugin packages.
+     *
+     * @return array Array of package names as key and their version as value
+     */
+    public function getInstalledPlugins()
+    {
+        if (!$this->_plugins) {
+
+            $manifest = $this->_plugin_path . '/composer.json';
+
+            if (!file_exists($manifest)) {
+                return array();
+            }
+
+            $contents = file_get_contents($manifest);
+
+            if ($contents === false) {
+                return array();
+            }
+
+            $data = json_decode($contents);
+
+            if (!isset($data->require)) {
+                return array();
+            }
+
+            $this->_plugins = array();
+            foreach ($data->require as $package => $version) {
+                $this->_plugins[$package] = $version;
+            }
+        }
+
+        return $this->_plugins;
+    }
+
+    /**
      * Load custom plugins into the application
      */
     protected function _loadPlugins()
     {
-        $manifest = $this->_plugin_path . '/composer.json';
-
-        if (!file_exists($manifest)) {
-            return;
-        }
-
         $autoloader = $this->_plugin_path . '/vendor/autoload.php';
 
         if (file_exists($autoloader)) {
             require_once $autoloader;
         }
 
-        $contents = file_get_contents($manifest);
-
-        if ($contents === false) {
-            return;
-        }
-
-        $data = json_decode($contents);
-
-        if (!isset($data->require)) {
-            return;
-        }
-
-        foreach ($data->require as $package => $version)
+        foreach ($this->getInstalledPlugins() as $package => $version)
         {
             $package_dir = $this->_plugin_path . '/vendor/' . $package . '/Joomlatools/Console/Command/';
 
@@ -151,21 +175,22 @@ class Application extends \Symfony\Component\Console\Application
 
                 foreach ($iterator as $file)
                 {
-                    if ($file->getExtension() == 'php')
+                    if ($file->getExtension() != 'php') {
+                        continue;
+                    }
+
+                    $class_name = 'Joomlatools\Console\Command\\' . $file->getBasename('.php');
+
+                    if (class_exists($class_name))
                     {
-                        $class_name = 'Joomlatools\Console\Command\\' . $file->getBasename('.php');
+                        $command = new $class_name();
 
-                        if (class_exists($class_name))
+                        if ($command instanceof \Symfony\Component\Console\Command\Command)
                         {
-                            $command = new $class_name();
-
-                            if ($command instanceof \Symfony\Component\Console\Command\Command)
-                            {
-                                if (!$this->has($command->getName())) {
-                                    $this->add($command);
-                                }
-                                else $this->_output->writeln('<error>Warning:</error> command "' . $command->getName() . '" in "' . $package . '" already exists, skipping');
+                            if (!$this->has($command->getName())) {
+                                $this->add($command);
                             }
+                            else $this->_output->writeln('<error>Warning:</error> command "' . $command->getName() . '" in "' . $package . '" already exists, skipping');
                         }
                     }
                 }
