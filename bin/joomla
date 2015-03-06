@@ -13,9 +13,6 @@ if(is_file($autoload)) {
    require __DIR__.'/../../../../vendor/autoload.php';
 }
 
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
-
 $application = new Joomlatools\Console\Application();
 
 $application->add(new Joomlatools\Console\Command\Symlink());
@@ -31,7 +28,5 @@ $application->add(new Joomlatools\Console\Command\PluginInstall());
 $application->add(new Joomlatools\Console\Command\PluginUninstall());
 
 $application->add(new Joomlatools\Console\Command\Versions());
-
-$application->loadPlugins();
 
 $application->run();

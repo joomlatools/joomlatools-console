@@ -1,6 +1,9 @@
 <?php
 namespace Joomlatools\Console;
 
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
 class Application extends \Symfony\Component\Console\Application
 {
     /**
@@ -23,7 +26,17 @@ class Application extends \Symfony\Component\Console\Application
      * @var string
      */
     protected $_plugin_path;
-    
+
+    /**
+     * Reference to the ConsoleOutput object
+     */
+    protected $_output;
+
+    /**
+     * Reference to the ArgvInput object
+     */
+    protected $_input;
+
     /**
      * @inherits
      *
@@ -38,14 +51,57 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
-     * Load custom plugins into the application.
+     * Runs the current application.
+     *
+     * @param InputInterface  $input  An Input instance
+     * @param OutputInterface $output An Output instance
+     *
+     * @return int 0 if everything went fine, or an error code
+     *
+     * @throws \Exception When doRun returns Exception
      */
-    function loadPlugins()
+    public function run(InputInterface $input = null, OutputInterface $output = null)
     {
-        $manifest = $this->_plugin_path . 'composer.json';
+        if (null === $input) {
+            $this->_input = new ArgvInput();
+        }
+
+        if (null === $output) {
+            $this->_output = new ConsoleOutput();
+        }
+
+        $this->configureIO($this->_input, $this->_output);
+
+        $this->_loadPlugins();
+
+        parent::run($this->_input, $this->_output);
+    }
+
+    /**
+     * Get the plugin path
+     *
+     * @return string Path to the plugins directory
+     */
+    public function getPluginPath()
+    {
+        return $this->_plugin_path;
+    }
+
+    /**
+     * Load custom plugins into the application
+     */
+    protected function _loadPlugins()
+    {
+        $manifest = $this->_plugin_path . '/composer.json';
 
         if (!file_exists($manifest)) {
             return;
+        }
+
+        $autoloader = $this->_plugin_path . '/vendor/autoload.php';
+
+        if (file_exists($autoloader)) {
+            require_once $autoloader;
         }
 
         $contents = file_get_contents($manifest);
@@ -60,19 +116,13 @@ class Application extends \Symfony\Component\Console\Application
             return;
         }
 
-        $autoloader = $this->_plugin_path . 'vendor/autoload.php';
-
-        if (file_exists($autoloader)) {
-            require_once $autoloader;
-        }
-
         foreach ($data->require as $package => $version)
         {
-            $package_dir = $this->_plugin_path . 'vendor/' . $package . '/Joomlatools/Console/Command/';
+            $package_dir = $this->_plugin_path . '/vendor/' . $package . '/Joomlatools/Console/Command/';
 
             if (file_exists($package_dir))
             {
-                $iterator = new DirectoryIterator($package_dir);
+                $iterator = new \DirectoryIterator($package_dir);
 
                 foreach ($iterator as $file)
                 {
@@ -84,9 +134,12 @@ class Application extends \Symfony\Component\Console\Application
                         {
                             $command = new $class_name();
 
-                            // If a command with the current command name was already added, ignore it.
-                            if ($command instanceof Command && !$this->has($command->getName())) {
-                                $this->add($command);
+                            if ($command instanceof \Symfony\Component\Console\Command\Command)
+                            {
+                                if (!$this->has($command->getName())) {
+                                    $this->add($command);
+                                }
+                                else $this->_output->writeln('<error>Warning:</error> command "' . $command->getName() . '" in "' . $package . '" already exists, skipping');
                             }
                         }
                     }
