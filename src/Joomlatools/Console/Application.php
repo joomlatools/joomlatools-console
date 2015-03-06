@@ -87,6 +87,31 @@ class Application extends \Symfony\Component\Console\Application
         return $this->_plugin_path;
     }
 
+
+    /**
+     * Gets the default commands that should always be available.
+     *
+     * @return Command[] An array of default Command instances
+     */
+    protected function getDefaultCommands()
+    {
+        $commands = parent::getDefaultCommands();
+        $commands = array_merge($commands, array(
+            new Command\Symlink(),
+            new Command\SiteCreate(),
+            new Command\SiteDelete(),
+            new Command\SiteToken(),
+            new Command\ExtensionSymlink(),
+            new Command\ExtensionInstall(),
+            new Command\ExtensionInstallFile(),
+            new Command\PluginInstall(),
+            new Command\PluginUninstall(),
+            new Command\Versions(),
+        ));
+
+        return $commands;
+    }
+
     /**
      * Load custom plugins into the application
      */
