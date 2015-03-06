@@ -10,7 +10,6 @@ namespace Joomlatools\Console\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Helper\TableHelper;
 
 class PluginList extends Command
 {
@@ -22,7 +21,7 @@ class PluginList extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $plugins = $this->getApplication()->getInstalledPlugins();
+        $plugins = $this->getApplication()->getPlugins();
 
         $packages = array_keys($plugins);
         $versions = array_values($plugins);

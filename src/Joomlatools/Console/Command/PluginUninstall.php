@@ -24,74 +24,25 @@ class PluginUninstall extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $plugins = $this->getApplication()->getPlugins();
+        $path    = $this->getApplication()->getPluginPath();
+
         $package = $input->getArgument('package');
 
-        // Strip package version if set.
-        if (strpos($package, ':') !== false) {
-            $package = substr($package, 0, strpos($package, ':'));
-        }
+        $result = `command -v composer >/dev/null 2>&1 || { echo >&2 "false"; }`;
 
-        $plugins_dir = dirname(__FILE__) . '/../../../../plugins/';
-
-        $composer = $plugins_dir . 'composer.json';
-
-        $contents = file_get_contents($composer);
-
-        if ($contents && ($current = json_decode($contents, true)) && isset($current['require']))
+        if ($result == 'false')
         {
-            // TODO: Store error messages for display.
-            $errors = array();
-
-            $new = $current;
-
-            $packages = (array) $current['require'];
-
-            foreach ($packages as $name => $version)
-            {
-                // Delete the package if found in the composer file.
-                if (strpos($name, $package) !== false)
-                {
-                    $parts = explode('/', $package);
-
-                    if (count($parts) == 2)
-                    {
-                        $package_dir = $plugins_dir . "vendor/{$parts[0]}/{$parts[1]}";
-
-                        // Delete the physical package from vendor.
-                        if (file_exists($package_dir)) {
-                            `rm -fr $package_dir`; // TODO: Keep track of failed deletes and add a message in errors.
-                        }
-                    }
-
-                    // Unset the package from the resulting composer file.
-                    unset($new['require'][$name]);
-                }
-            }
-
-            // Update the composer file using the new json data.
-            if (isset($new) && array_diff($current['require'], $new['require']))
-            {
-                // Cleanup json data.
-                if (empty($new['require'])) {
-                    unset($new['require']);
-                }
-
-                if ($contents = json_encode($new, JSON_FORCE_OBJECT)) {
-                    file_put_contents($composer, $contents); // TODO: Keep track of failed deletes and add a message in errors.
-                }
-
-                if ($errors)
-                {
-                    $output->writeln('<error>The package could not be deleted because:</error>');
-
-                    foreach ($errors as $error) {
-                        $output->writeln("<comment>{$error}</comment>");
-                    }
-                }
-                else $output->write('<info>The package was successfully deleted</info>');
-            }
-            else $output->writeln('<comment>The package is not installed. Nothing to delete.</comment>');
+            $output->writeln('<error>Composer was not found. It is either not installed or globally available.</error>');
+            return;
         }
-        else $output->writeln('<comment>There are no plugins installed yet. Nothing to delete.</comment>');
+
+        if (!array_key_exists($package, $plugins))
+        {
+            $output->writeln('<error>Error:</error>The package "' . $package . '" is not installed');
+            return;
+        }
+
+        passthru("composer --working-dir=$path remove $package");
     }
 }

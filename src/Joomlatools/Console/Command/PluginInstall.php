@@ -25,25 +25,25 @@ class PluginInstall extends Command
     {
         $result = `command -v composer >/dev/null 2>&1 || { echo >&2 "false"; }`;
 
-        if ($result != 'false')
+        if ($result == 'false')
         {
-            $plugin_path = $this->getApplication()->getPluginPath();
-
-            if (!file_exists($plugin_path)) {
-                `mkdir $plugin_path`;
-            }
-
-            $package = $input->getArgument('package');
-
-            // Append version if none is set.
-            if (strpos($package, ':') === false) {
-                $package .= ':dev-master';
-            }
-
-            $result = `composer --working-dir=$plugin_path require $package`;
-
-            $output->writeln($result);
+            $output->writeln('<error>Composer was not found. It is either not installed or globally available.</error>');
+            return;
         }
-        else $output->writeln('<error>Composer was not found. It is either not installed or globally available.</error>');
+
+        $plugin_path = $this->getApplication()->getPluginPath();
+
+        if (!file_exists($plugin_path)) {
+            `mkdir $plugin_path`;
+        }
+
+        $package = $input->getArgument('package');
+
+        // Append version if none is set.
+        if (strpos($package, ':') === false) {
+            $package .= ':dev-master';
+        }
+
+        passthru("composer --no-progress --working-dir=$plugin_path require $package");
     }
 }

@@ -123,7 +123,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @return array Array of package names as key and their version as value
      */
-    public function getInstalledPlugins()
+    public function getPlugins()
     {
         if (!$this->_plugins) {
 
@@ -165,7 +165,7 @@ class Application extends \Symfony\Component\Console\Application
             require_once $autoloader;
         }
 
-        foreach ($this->getInstalledPlugins() as $package => $version)
+        foreach ($this->getPlugins() as $package => $version)
         {
             $package_dir = $this->_plugin_path . '/vendor/' . $package . '/Joomlatools/Console/Command/';
 
