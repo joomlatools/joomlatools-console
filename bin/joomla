@@ -16,7 +16,7 @@ if(is_file($autoload)) {
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 
-$application = new Application('Joomla console tools', '1.0');
+$application = new Joomlatools\Console\Application();
 
 $application->add(new Joomlatools\Console\Command\Symlink());
 
