@@ -43,6 +43,6 @@ class PluginUninstall extends Command
             return;
         }
 
-        passthru("composer --working-dir=$path remove $package");
+        passthru("composer --working-dir=$path --update-with-dependencies remove $package");
     }
 }
