@@ -51,7 +51,7 @@ class Application extends \Symfony\Component\Console\Application
     public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN')
     {
         parent::__construct(self::NAME, self::VERSION);
-        
+
         $this->_plugin_path = realpath(dirname(__FILE__) . '/../../../plugins/');
     }
 
