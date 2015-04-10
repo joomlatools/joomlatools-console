@@ -1,8 +1,8 @@
 <?php
 namespace Joomlatools\Console;
 
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Input;
+use Symfony\Component\Console\Output;
 
 class Application extends \Symfony\Component\Console\Application
 {
@@ -28,12 +28,12 @@ class Application extends \Symfony\Component\Console\Application
     protected $_plugin_path;
 
     /**
-     * Reference to the ConsoleOutput object
+     * Reference to the Output\ConsoleOutput object
      */
     protected $_output;
 
     /**
-     * Reference to the ArgvInput object
+     * Reference to the Input\ArgvInput object
      */
     protected $_input;
 
@@ -65,14 +65,14 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @throws \Exception When doRun returns Exception
      */
-    public function run(InputInterface $input = null, OutputInterface $output = null)
+    public function run(Input\InputInterface $input = null, Output\OutputInterface $output = null)
     {
         if (null === $input) {
-            $this->_input = new ArgvInput();
+            $this->_input = new Input\ArgvInput();
         }
 
         if (null === $output) {
-            $this->_output = new ConsoleOutput();
+            $this->_output = new Output\ConsoleOutput();
         }
 
         $this->configureIO($this->_input, $this->_output);
