@@ -77,29 +77,7 @@ class Application extends \Symfony\Component\Console\Application
 
         $this->configureIO($this->_input, $this->_output);
 
-        $autoloader = $this->_plugin_path . '/vendor/autoload.php';
-
-        if (file_exists($autoloader)) {
-            require_once $autoloader;
-        }
-
-        $name = $this->getCommandName($this->_input);
-
-        if (strpos($name, ':') !== false)
-        {
-            list($group, $command) = explode(':', $name);
-            $className = 'Joomlatools\Console\Command\\'. ucfirst($group) . ucfirst($command);
-        }
-        else $className = 'Joomlatools\Console\Command\\' . $name;
-
-        if (class_exists($className) && !$this->has($name))
-        {
-            $command = new $className();
-
-            if ($command instanceof \Symfony\Component\Console\Command\Command) {
-                $this->add($command);
-            }
-        }
+        $this->loadPlugins();
 
         parent::run($this->_input, $this->_output);
     }
@@ -123,6 +101,7 @@ class Application extends \Symfony\Component\Console\Application
     protected function getDefaultCommands()
     {
         $commands = parent::getDefaultCommands();
+
         $commands = array_merge($commands, array(
             new Command\Symlink(),
             new Command\SiteCreate(),
@@ -174,5 +153,47 @@ class Application extends \Symfony\Component\Console\Application
         }
 
         return $this->_plugins;
+    }
+
+    /**
+     * Loads plugins into the application.
+     */
+    function loadPlugins()
+    {
+        $autoloader = $this->_plugin_path . '/vendor/autoload.php';
+
+        if (file_exists($autoloader)) {
+            require_once $autoloader;
+        }
+
+        $plugins = $this->getPlugins();
+
+        foreach ($plugins as $package => $version)
+        {
+            $directory = $this->_plugin_path . '/vendor/' . $package . '/Joomlatools/Console/Command/';
+
+            if (file_exists($directory))
+            {
+                $iterator = new \DirectoryIterator($directory);
+
+                foreach ($iterator as $file)
+                {
+                    if ($file->getExtension() == 'php')
+                    {
+                        $class_name = sprintf('Joomlatools\Console\Command\%s', $file->getBasename('.php'));
+
+                        if (class_exists($class_name))
+                        {
+                            $command = new $class_name();
+
+                            // If a command with the current command name was already added, ignore it.
+                            if ($command instanceof \Symfony\Component\Console\Command\Command && !$this->has($command->getName())) {
+                                $this->add($command);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
