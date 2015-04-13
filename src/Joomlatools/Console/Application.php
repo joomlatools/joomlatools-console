@@ -77,7 +77,7 @@ class Application extends \Symfony\Component\Console\Application
 
         $this->configureIO($this->_input, $this->_output);
 
-        $this->loadPlugins();
+        $this->_loadPlugins();
 
         parent::run($this->_input, $this->_output);
     }
@@ -147,8 +147,18 @@ class Application extends \Symfony\Component\Console\Application
             }
 
             $this->_plugins = array();
-            foreach ($data->require as $package => $version) {
-                $this->_plugins[$package] = $version;
+            foreach ($data->require as $package => $version)
+            {
+                $json     = file_get_contents($this->_plugin_path . '/vendor/' . $package . '/composer.json');
+                $manifest = json_decode($json);
+
+                if (is_null($manifest)) {
+                    continue;
+                }
+
+                if (isset($manifest->type) && $manifest->type == 'joomla-console-plugin') {
+                    $this->_plugins[$package] = $version;
+                }
             }
         }
 
@@ -158,7 +168,7 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Loads plugins into the application.
      */
-    function loadPlugins()
+    protected function _loadPlugins()
     {
         $autoloader = $this->_plugin_path . '/vendor/autoload.php';
 
@@ -186,10 +196,16 @@ class Application extends \Symfony\Component\Console\Application
                         {
                             $command = new $class_name();
 
-                            // If a command with the current command name was already added, ignore it.
-                            if ($command instanceof \Symfony\Component\Console\Command\Command && !$this->has($command->getName())) {
+                            if (!$command instanceof \Symfony\Component\Console\Command\Command) {
+                                continue;
+                            }
+
+                            $name = $command->getName();
+
+                            if(!$this->has($name)) {
                                 $this->add($command);
                             }
+                            else $this->_output->writeln("<fg=yellow;options=bold>Notice:</fg=yellow;options=bold> The '$package' plugin wants to register the '$name' command but it already exists, ignoring.");
                         }
                     }
                 }
