@@ -147,17 +147,23 @@ class Application extends \Symfony\Component\Console\Application
             }
 
             $this->_plugins = array();
+
             foreach ($data->require as $package => $version)
             {
-                $json     = file_get_contents($this->_plugin_path . '/vendor/' . $package . '/composer.json');
-                $manifest = json_decode($json);
+                $file = $this->_plugin_path . '/vendor/' . $package . '/composer.json';
 
-                if (is_null($manifest)) {
-                    continue;
-                }
+                if (file_exists($file))
+                {
+                    $json     = file_get_contents($file);
+                    $manifest = json_decode($json);
 
-                if (isset($manifest->type) && $manifest->type == 'joomla-console-plugin') {
-                    $this->_plugins[$package] = $version;
+                    if (is_null($manifest)) {
+                        continue;
+                    }
+
+                    if (isset($manifest->type) && $manifest->type == 'joomla-console-plugin') {
+                        $this->_plugins[$package] = $version;
+                    }
                 }
             }
         }
