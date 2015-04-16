@@ -27,7 +27,7 @@ class PluginInstall extends Command
 
         if ($result == 'false')
         {
-            $output->writeln('<error>Composer was not found. It is either not installed or globally available.</error>');
+            $output->writeln('<error>Composer was not found. It is either not installed or globally available</error>');
             return;
         }
 
@@ -42,6 +42,40 @@ class PluginInstall extends Command
         // Append version if none is set.
         if (strpos($package, ':') === false) {
             $package .= ':dev-master';
+        }
+
+        list($name, $version) = explode(':', $package);
+
+        exec("composer show $name $version 2>&1", $result, $code);
+
+        if ($code === 1)
+        {
+            $output->writeln("<error>The $package plugin you are attempting to install cannot be found</error>");
+            return;
+        }
+
+        $type = '';
+
+        foreach ($result as $line => $content)
+        {
+            $content = trim($content);
+
+            if (strpos($content, 'type') === 0) {
+                $parts = explode(':', $content);
+
+                if (count($parts) > 1)
+                {
+                    $type = trim($parts[1]);
+                    break;
+                }
+            }
+        }
+
+        if ($type != 'joomla-console-plugin')
+        {
+            $output->writeln("<comment>$package is not a Joomla console plugin</comment>");
+            $output->writeln('<error>Plugin not installed</error>');
+            return;
         }
 
         passthru("composer --no-progress --working-dir=$plugin_path require $package");
