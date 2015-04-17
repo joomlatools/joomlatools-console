@@ -56,11 +56,13 @@ class ExtensionSymlink extends SiteAbstract
 
     public function symlinkProjects(InputInterface $input, OutputInterface $output)
     {
+        // koowa is here for backwards compatibility, can be removed once Nooku Framework 2.2 is out
         static $dependencies = array(
-            'extman'  => array('koowa'),
-            'docman'  => array('extman', 'koowa', 'com_files'),
-            'fileman' => array('extman', 'koowa', 'com_files'),
-            'logman'  => array('extman', 'koowa', 'com_activities')
+            'nooku-framework-joomla' => array('nooku-framework'),
+            'extman'  => array('koowa', 'nooku-framework-joomla', 'nooku-framework'),
+            'docman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
+            'fileman' => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
+            'logman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_activities')
         );
 
         $project_folder = $input->getOption('projects-dir');
@@ -75,7 +77,7 @@ class ExtensionSymlink extends SiteAbstract
         }
 
         // If we are symlinking Koowa, we need to create this structure to allow multiple symlinks in them
-        if (in_array('koowa', $projects))
+        if (in_array('nooku-framework-joomla', $projects) || in_array('koowa', $projects))
         {
             $dirs = array($this->target_dir.'/libraries/koowa/components', $this->target_dir.'/media/koowa');
             foreach ($dirs as $dir)
@@ -94,7 +96,14 @@ class ExtensionSymlink extends SiteAbstract
                 continue;
             }
 
-            if ($this->_isKoowaComponent($root)) {
+            if ($this->_isNookuFramework($root))
+            {
+                $source      = $root.'/code';
+                $destination = $this->target_dir.'/libraries/nooku';
+
+                `ln -sf $source $destination`;
+            }
+            else if ($this->_isKoowaComponent($root)) {
                 $this->_symlinkKoowaComponent($root);
             }
             else
@@ -110,6 +119,11 @@ class ExtensionSymlink extends SiteAbstract
                 }
             }
         }
+    }
+
+    protected function _isNookuFramework($folder)
+    {
+        return is_file($folder.'/code/koowa.php');
     }
 
     protected function _isKoowaComponent($folder)
