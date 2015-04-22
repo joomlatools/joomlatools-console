@@ -98,10 +98,25 @@ class ExtensionSymlink extends SiteAbstract
 
             if ($this->_isNookuFramework($root))
             {
-                $source      = $root.'/code';
-                $destination = $this->target_dir.'/libraries/nooku';
+                $vendor_path = $this->target_dir.'/vendor';
 
-                `ln -sf $source $destination`;
+                if(file_exists($this->target_dir.'/composer.json'))
+                {
+                    $content  = file_get_contents($this->target_dir.'/composer.json');
+                    $composer = json_decode($content);
+
+                    if(isset($composer->config->{'vendor-dir'})) {
+                        $vendor_path = $this->target_dir.'/'.$composer->config->{'vendor-dir'};
+                    }
+                }
+
+                $destination = $vendor_path.'/nooku/nooku-framework';
+
+                $media_source      = $root.'/code/resources/assets';
+                $media_destination = $this->target_dir.'/media/koowa/framework';
+
+                `ln -sf $root $destination`;
+                `ln -sf $media_source $media_destination`;
             }
             else if ($this->_isKoowaComponent($root)) {
                 $this->_symlinkKoowaComponent($root);
