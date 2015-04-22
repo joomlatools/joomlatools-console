@@ -112,6 +112,10 @@ class ExtensionSymlink extends SiteAbstract
 
                 $destination = $vendor_path.'/nooku/nooku-framework';
 
+                if (!is_dir(dirname($destination))) {
+                    mkdir(dirname($destination), 0777, true);
+                }
+
                 $media_source      = $root.'/code/resources/assets';
                 $media_destination = $this->target_dir.'/media/koowa/framework';
 
