@@ -56,11 +56,13 @@ class ExtensionSymlink extends SiteAbstract
 
     public function symlinkProjects(InputInterface $input, OutputInterface $output)
     {
+        // koowa is here for backwards compatibility, can be removed once Nooku Framework 2.2 is out
         static $dependencies = array(
-            'extman'  => array('koowa'),
-            'docman'  => array('extman', 'koowa', 'com_files'),
-            'fileman' => array('extman', 'koowa', 'com_files'),
-            'logman'  => array('extman', 'koowa', 'com_activities')
+            'nooku-framework-joomla' => array('nooku-framework'),
+            'extman'  => array('koowa', 'nooku-framework-joomla', 'nooku-framework'),
+            'docman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
+            'fileman' => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
+            'logman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_activities')
         );
 
         $project_folder = $input->getOption('projects-dir');
@@ -75,7 +77,7 @@ class ExtensionSymlink extends SiteAbstract
         }
 
         // If we are symlinking Koowa, we need to create this structure to allow multiple symlinks in them
-        if (in_array('koowa', $projects))
+        if (in_array('nooku-framework-joomla', $projects) || in_array('koowa', $projects))
         {
             $dirs = array($this->target_dir.'/libraries/koowa/components', $this->target_dir.'/media/koowa');
             foreach ($dirs as $dir)
@@ -94,7 +96,33 @@ class ExtensionSymlink extends SiteAbstract
                 continue;
             }
 
-            if ($this->_isKoowaComponent($root)) {
+            if ($this->_isNookuFramework($root))
+            {
+                $vendor_path = $this->target_dir.'/vendor';
+
+                if(file_exists($this->target_dir.'/composer.json'))
+                {
+                    $content  = file_get_contents($this->target_dir.'/composer.json');
+                    $composer = json_decode($content);
+
+                    if(isset($composer->config->{'vendor-dir'})) {
+                        $vendor_path = $this->target_dir.'/'.$composer->config->{'vendor-dir'};
+                    }
+                }
+
+                $destination = $vendor_path.'/nooku/nooku-framework';
+
+                if (!is_dir(dirname($destination))) {
+                    mkdir(dirname($destination), 0777, true);
+                }
+
+                $media_source      = $root.'/code/resources/assets';
+                $media_destination = $this->target_dir.'/media/koowa/framework';
+
+                `ln -sf $root $destination`;
+                `ln -sf $media_source $media_destination`;
+            }
+            else if ($this->_isKoowaComponent($root)) {
                 $this->_symlinkKoowaComponent($root);
             }
             else
@@ -110,6 +138,11 @@ class ExtensionSymlink extends SiteAbstract
                 }
             }
         }
+    }
+
+    protected function _isNookuFramework($folder)
+    {
+        return is_file($folder.'/code/koowa.php');
     }
 
     protected function _isKoowaComponent($folder)

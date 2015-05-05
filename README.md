@@ -84,11 +84,11 @@ Please note that your source code should resemble the Joomla folder structure fo
 
 Now to create a new site, execute the site:create command and add a symlink option:
 
-	  joomla site:create testsite --symlink=awesome
+	joomla site:create testsite --symlink=awesome
 
 Or to symlink your code into an existing site:
 
-    joomla extension:symlink testsite awesome
+	joomla extension:symlink testsite awesome
 
 This will symlink all the folders from the _awesome_ folder into _testsite.dev_.
 
@@ -96,19 +96,19 @@ Run discover install to make your component available to Joomla and you are good
 
 For more information on the symlinker, run:
 
-	  joomla extension:symlink  --help
+	joomla extension:symlink  --help
 
 ### Install Extensions
 
 You can use discover install on command line to install extensions.
 
-    joomla extension:install testsite com_awesome
+	joomla extension:install testsite com_awesome
 
 You need to use the _element_ name in your extension manifest.
 
 For more information, run:
 
-	  joomla extension:install --help
+	joomla extension:install --help
 	  
 Alternatively, you can install extensions using their installation packages using the `extension:installfile` command. Example:
 
@@ -116,7 +116,49 @@ Alternatively, you can install extensions using their installation packages usin
     
 This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz packages.
 
-### Extra commands
+### Register Extensions
+
+With the `extension:register` command you can insert your extension into the `extensions` table without the need for a complete install package with a manifest file.
+
+Like `extension:install`, you should also use what would be the _element_ name from your manifest.
+
+    joomla extension:register testsite com_awesome
+
+The `type` of extension that gets registered is, by default, based on the first 4 characters of the extension argument you pass in. Here are the mappings:
+
+* `com_` => component
+* `mod_` => module
+* `plg_` => plugin (the `plg_` will get stripped from the element field)
+* `lib_` => library
+* `pkg_` => package
+* `tpl_` => template (the `tpl_` will get stripped from the name and element field)
+* `lng_` => language
+
+This example registers an extension of the 'plugin' type:
+
+    joomla extension:register testsite plg_awesome
+
+Alternatively, if you want to use naming without the prefixes you have the option of adding a `type` argument to the end of the command.
+
+    joomla extension:register testsite awesome package
+
+In all cases, if the type is not specified or recognized then the default value, **component**, will be used.
+
+When registering `plugin` type you can use the `--folder` option to specify the plugin group that will get registered with the record. Note that the default is 'system'.
+
+    joomla extension:register testsite myplugin plugin --folder=content
+    
+For a `language` type extension, you should use the `--element` option to ensure your language files can be loaded correctly. 
+
+	joomla extension:register testsite spanglish language --element=en-GB 
+	
+Lastly, when registering a `module` type extension, you can use the `--position` option to ensure your module displays where you would like it to. A record gets added to the #_modules table. 
+
+	joomla extension:register testsite mod_awesome --position=debug 
+
+Other options available for all extension types: `--enabled`, `--client_id`
+
+## Extra commands
 
 There a few other commands available for you to try out as well :
 
