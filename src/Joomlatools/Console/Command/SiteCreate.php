@@ -115,6 +115,33 @@ class SiteCreate extends SiteAbstract
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
             )
+            ->addOption(
+                'disable-ssl',
+                null,
+                InputOption::VALUE_NONE,
+                'Disable SSL for this site'
+            )
+            ->addOption(
+                'ssl-crt',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The full path to the signed cerfificate file',
+                '/etc/apache2/ssl/server.crt'
+            )
+            ->addOption(
+                'ssl-key',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The full path to the private cerfificate file',
+                '/etc/apache2/ssl/server.key'
+            )
+            ->addOption(
+                'ssl-port',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The port on which the server will listen for SSL requests',
+                '443'
+            )
             ;
     }
 
@@ -346,12 +373,25 @@ class SiteCreate extends SiteAbstract
     {
         if (is_dir('/etc/apache2/sites-available'))
         {
-            $template = file_get_contents(self::$files.'/vhost.conf');
-            $contents = sprintf($template, $this->site);
-
             $tmp = self::$files.'/.vhost.tmp';
 
-            file_put_contents($tmp, $contents);
+            $template = file_get_contents(self::$files.'/vhost.conf');
+
+            file_put_contents($tmp, sprintf($template, $this->site));
+
+            if (!$input->getOption('disable-ssl'))
+            {
+                $ssl_crt = $input->getOption('ssl-crt');
+                $ssl_key = $input->getOption('ssl-key');
+                $ssl_port = $input->getOption('ssl-port');
+
+                if (file_exists($ssl_crt) && file_exists($ssl_key))
+                {
+                    $template = "\n\n" . file_get_contents(self::$files . '/vhost.ssl.conf');
+                    file_put_contents($tmp, sprintf($template, $ssl_port, $this->site, $ssl_crt, $ssl_key), FILE_APPEND);
+                }
+                else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
+            }
 
             `sudo tee /etc/apache2/sites-available/1-$this->site.conf < $tmp`;
             `sudo a2ensite 1-$this->site.conf`;
