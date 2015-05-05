@@ -77,7 +77,7 @@ class ExtensionSymlink extends SiteAbstract
         }
 
         // If we are symlinking Koowa, we need to create this structure to allow multiple symlinks in them
-        if (in_array('nooku-framework-joomla', $projects) || in_array('koowa', $projects))
+        if (array_intersect(array('nooku-framework', 'nooku-framework-joomla', 'koowa'), $projects))
         {
             $dirs = array($this->target_dir.'/libraries/koowa/components', $this->target_dir.'/media/koowa');
             foreach ($dirs as $dir)
@@ -116,11 +116,17 @@ class ExtensionSymlink extends SiteAbstract
                     mkdir(dirname($destination), 0777, true);
                 }
 
+                if (!file_exists($destination)) {
+                    `ln -sf $root $destination`;
+                }
+
                 $media_source      = $root.'/code/resources/assets';
                 $media_destination = $this->target_dir.'/media/koowa/framework';
 
-                `ln -sf $root $destination`;
-                `ln -sf $media_source $media_destination`;
+                if (!file_exists($media_destination)) {
+                    `ln -sf $media_source $media_destination`;
+                }
+
             }
             else if ($this->_isKoowaComponent($root)) {
                 $this->_symlinkKoowaComponent($root);
@@ -159,7 +165,9 @@ class ExtensionSymlink extends SiteAbstract
 
             $destination = $this->target_dir.'/libraries/koowa/components/'.$component;
 
-            `ln -sf $folder $destination`;
+            if (!file_exists($destination)) {
+                `ln -sf $folder $destination`;
+            }
 
             // Special treatment for media files
             $media = $folder.'/resources/assets';
