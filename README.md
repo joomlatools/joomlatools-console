@@ -8,40 +8,23 @@ It is designed to work on Linux and MacOS. Windows users can use it in [Joomlato
 Installation
 ------------
 
-1. Download or clone this repository.
+1. Install using Composer:
 
-1. Make the `joomla` command executable:
+ `$ composer global install joomlatools/joomla-console`
 
-    `$ chmod u+x /path/to/joomla-console/bin/joomla`
+1. Tell your system where to find the executable by adding the composer directory to your PATH. Add the following line to your shell configuration file called either .profile, .bash_profile, .bash_aliases, or .bashrc. This file is located in your home folder.
 
-1. Configure your system to recognize where the executable resides. There are 3 options:
-    1. Create a symbolic link in a directory that is already in your PATH, e.g.:
+ `$ export PATH="$PATH:~/.composer/vendor/bin"`
 
-        `$ ln -s /path/to/joomla-console/bin/joomla /usr/bin/joomla`
+1. Verify the installation
 
-    1. Explicitly add the executable to the PATH variable which is defined in the the shell configuration file called .profile, .bash_profile, .bash_aliases, or .bashrc that is located in your home folder, i.e.:
+ `$ joomla --version`
 
-        `export PATH="$PATH:/path/to/joomla-console/bin:/usr/local/bin"`
+1. For available options, run:
 
-    1. Add an alias for the executable by adding this to you shell configuration file (see list in previous option):
+  `$ joomla --list`
 
-        `$ alias joomla=/path/to/joomla-console/bin/joomla`
-
-    For options 2 and 3 above, you should log out and then back in to apply your changes to your current session.
-
-1. Test that joomla executable is found by your system:
-
-    `$ which joomla`
-
-1. From joomla-console root (/path/to/joomla-console), run Composer to fetch dependencies.
-
-    `$ composer install`
-
-For available options, try running:
-
-    joomla --list
-    
-Usage 
+Usage
 -----
 
 ### Create Sites
@@ -109,11 +92,11 @@ You need to use the _element_ name in your extension manifest.
 For more information, run:
 
 	joomla extension:install --help
-	  
+
 Alternatively, you can install extensions using their installation packages using the `extension:installfile` command. Example:
 
     joomla extension:installfile testsite /home/vagrant/com_component.v1.x.zip /home/vagrant/plg_plugin.v2.x.tar.gz
-    
+
 This will install both the com_component.v1.x.zip and plg_plugin.v2.x.tar.gz packages.
 
 ### Register Extensions
@@ -147,14 +130,14 @@ In all cases, if the type is not specified or recognized then the default value,
 When registering `plugin` type you can use the `--folder` option to specify the plugin group that will get registered with the record. Note that the default is 'system'.
 
     joomla extension:register testsite myplugin plugin --folder=content
-    
-For a `language` type extension, you should use the `--element` option to ensure your language files can be loaded correctly. 
 
-	joomla extension:register testsite spanglish language --element=en-GB 
-	
-Lastly, when registering a `module` type extension, you can use the `--position` option to ensure your module displays where you would like it to. A record gets added to the #_modules table. 
+For a `language` type extension, you should use the `--element` option to ensure your language files can be loaded correctly.
 
-	joomla extension:register testsite mod_awesome --position=debug 
+	joomla extension:register testsite spanglish language --element=en-GB
+
+Lastly, when registering a `module` type extension, you can use the `--position` option to ensure your module displays where you would like it to. A record gets added to the #_modules table.
+
+	joomla extension:register testsite mod_awesome --position=debug
 
 Other options available for all extension types: `--enabled`, `--client_id`
 
@@ -162,8 +145,8 @@ Other options available for all extension types: `--enabled`, `--client_id`
 
 There a few other commands available for you to try out as well :
 
-* `joomla site:token sitename user` : generates an authentication token for the given `user` to automatically login to `sitename` using the ?auth_token query argument. *Note* requires the [Nooku Framework](https://github.com/nooku/nooku-framework) to be installed in your `site`.
-* `joomla versions` : list the available Joomla versions. 
+* `joomla site:token sitename user` : generates an authentication token for the given `user` to automatically login to `sitename` using the ?auth_token query argument. *Note* requires the [Koowa framework](https://github.com/joomlatools/koowa) to be installed in your `site`.
+* `joomla versions` : list the available Joomla versions.
  * Use `joomla versions --refresh` to get the latest tags and branches from the official [Joomla CMS](https://github.com/joomla/joomla-cms) repository.
  * To purge the cache of all Joomla packages, add the `--clear-cache` flag to this command.
 
