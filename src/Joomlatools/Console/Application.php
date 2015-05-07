@@ -110,6 +110,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\ExtensionSymlink(),
             new Command\ExtensionInstall(),
             new Command\ExtensionInstallFile(),
+            new Command\ExtensionRegister(),
             new Command\PluginList(),
             new Command\PluginInstall(),
             new Command\PluginUninstall(),
