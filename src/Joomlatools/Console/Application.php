@@ -187,17 +187,19 @@ class Application extends \Symfony\Component\Console\Application
 
         foreach ($plugins as $package => $version)
         {
-            $directory = $this->_plugin_path . '/vendor/' . $package . '/Joomlatools/Console/Command/';
+            $path        = $this->_plugin_path . '/vendor/' . $package;
+            $directories = glob($path.'/*/Console/Command', GLOB_ONLYDIR);
 
-            if (file_exists($directory))
+            foreach ($directories as $directory)
             {
+                $vendor   = substr($directory, strlen($path) + 1, strlen('/Console/Command') * -1);
                 $iterator = new \DirectoryIterator($directory);
 
                 foreach ($iterator as $file)
                 {
                     if ($file->getExtension() == 'php')
                     {
-                        $class_name = sprintf('Joomlatools\Console\Command\%s', $file->getBasename('.php'));
+                        $class_name = sprintf('%s\Console\Command\%s', $vendor, $file->getBasename('.php'));
 
                         if (class_exists($class_name))
                         {
