@@ -39,12 +39,12 @@ class PluginInstall extends Command
 
         $package = $input->getArgument('package');
 
-        // Append version if none is set.
-        if (strpos($package, ':') === false) {
-            $package .= ':dev-master';
+        if (strpos($package, ':') === false)
+        {
+            $name    = $package;
+            $version = '';
         }
-
-        list($name, $version) = explode(':', $package);
+        else list($name, $version) = explode(':', $package);
 
         exec("composer show $name $version 2>&1", $result, $code);
 

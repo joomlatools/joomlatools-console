@@ -185,37 +185,42 @@ class Application extends \Symfony\Component\Console\Application
 
         $plugins = $this->getPlugins();
 
+        $classes = array();
         foreach ($plugins as $package => $version)
         {
-            $directory = $this->_plugin_path . '/vendor/' . $package . '/Joomlatools/Console/Command/';
+            $path        = $this->_plugin_path . '/vendor/' . $package;
+            $directories = glob($path.'/*/Console/Command', GLOB_ONLYDIR);
 
-            if (file_exists($directory))
+            foreach ($directories as $directory)
             {
+                $vendor   = substr($directory, strlen($path) + 1, strlen('/Console/Command') * -1);
                 $iterator = new \DirectoryIterator($directory);
 
                 foreach ($iterator as $file)
                 {
-                    if ($file->getExtension() == 'php')
-                    {
-                        $class_name = sprintf('Joomlatools\Console\Command\%s', $file->getBasename('.php'));
-
-                        if (class_exists($class_name))
-                        {
-                            $command = new $class_name();
-
-                            if (!$command instanceof \Symfony\Component\Console\Command\Command) {
-                                continue;
-                            }
-
-                            $name = $command->getName();
-
-                            if(!$this->has($name)) {
-                                $this->add($command);
-                            }
-                            else $this->_output->writeln("<fg=yellow;options=bold>Notice:</fg=yellow;options=bold> The '$package' plugin wants to register the '$name' command but it already exists, ignoring.");
-                        }
+                    if ($file->getExtension() == 'php') {
+                        $classes[] = sprintf('%s\Console\Command\%s', $vendor, $file->getBasename('.php'));
                     }
                 }
+            }
+        }
+
+        foreach ($classes as $class)
+        {
+            if (class_exists($class))
+            {
+                $command = new $class();
+
+                if (!$command instanceof \Symfony\Component\Console\Command\Command) {
+                    continue;
+                }
+
+                $name = $command->getName();
+
+                if(!$this->has($name)) {
+                    $this->add($command);
+                }
+                else $this->_output->writeln("<fg=yellow;options=bold>Notice:</fg=yellow;options=bold> The '$class' command wants to register the '$name' command but it already exists, ignoring.");
             }
         }
     }
