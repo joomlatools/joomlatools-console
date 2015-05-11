@@ -20,7 +20,21 @@ Installation
 
  `$ joomla --version`
 
-1. For available options, run:
+1. To create a new site with the latest Joomla version, run:
+
+  ```shell
+     joomla site:create testsite
+  ```
+
+   The newly installed site will be available at /var/www/testsite and testsite.dev after that. The default Super User's name and password is set to: `admin` / `admin`.
+
+   By default, the web server root is set to _/var/www_. You can pass _--www=/my/server/path_ to commands for custom values. You can choose the Joomla version or the sample data to be installed:
+
+   ```shell
+     joomla site:create testsite --joomla=2.5 --sample-data=blog
+   ```
+
+1. For other available options, run:
 
   `$ joomla --list`
 
