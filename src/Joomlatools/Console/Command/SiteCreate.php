@@ -71,18 +71,9 @@ class SiteCreate extends SiteAbstract
     protected $versions;
 
     /**
-     * @var bool
-     */
-    protected $is_download_enabled;
-
-    /**
-     * @var bool
-     */
-    protected $is_install_enabled;
-
-    /**
      *
      */
+
     protected function configure()
     {
         parent::configure();
@@ -126,20 +117,6 @@ class SiteCreate extends SiteAbstract
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
             )
-            ->addOption(
-                'download',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Whether to download fresh code (yes|no). If Joomla is already downloaded, then use "no".',
-                'yes'
-            )
-            ->addOption(
-                'install',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Whether to setup database and config files (yes|no)',
-                'yes'
-            )
             ;
     }
 
@@ -155,9 +132,6 @@ class SiteCreate extends SiteAbstract
 
         $this->setVersion($input->getOption('joomla'));
 
-        $this->is_download_enabled = $input->getOption('download') === 'yes' && !empty($this->version);
-        $this->is_install_enabled = $input->getOption('install') === 'yes';
-
         $this->symlink = $input->getOption('symlink');
         if (is_string($this->symlink)) {
             $this->symlink = explode(',', $this->symlink);
@@ -168,30 +142,13 @@ class SiteCreate extends SiteAbstract
         $this->source_db = $this->target_dir.'/installation/sql/mysql/joomla.sql';
 
         $this->check($input, $output);
-
-        if ($this->is_download_enabled)
-        {
-            $this->createFolder($input, $output);
-        }
-        else
-        {
-            $output->writeln("<info>Skipped download</info>");
-            $this->restoreInstallationFolder();
-        }
-
-        if ($this->is_install_enabled)
-        {
-            $this->createDatabase($input, $output);
-            $this->modifyConfiguration($input, $output);
-            $this->addVirtualHost($input, $output);
-            $this->symlinkProjects($input, $output);
-            $this->installExtensions($input, $output);
-            $this->enableWebInstaller($input, $output);
-        }
-        else
-        {
-            $output->writeln("<info>Skipped installation</info>");
-        }
+        $this->createFolder($input, $output);
+        $this->createDatabase($input, $output);
+        $this->modifyConfiguration($input, $output);
+        $this->addVirtualHost($input, $output);
+        $this->symlinkProjects($input, $output);
+        $this->installExtensions($input, $output);
+        $this->enableWebInstaller($input, $output);
 
         if ($this->version)
         {
@@ -202,33 +159,23 @@ class SiteCreate extends SiteAbstract
 
     public function check(InputInterface $input, OutputInterface $output)
     {
-        if ($this->is_download_enabled && file_exists($this->target_dir)) {
+        if (file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('A site with name %s already exists', $this->site));
         }
 
-        if (!$this->is_download_enabled)
-        {
-            if (!is_dir($this->target_dir . DIRECTORY_SEPARATOR . 'installation') && !is_dir($this->target_dir . DIRECTORY_SEPARATOR . '_installation')) {
-                throw new \RuntimeException(sprintf("Target directory %s is missing or incorrect. (Failed to locate installer.)", $this->target_dir));
-            }
-        }
-
-        if ($this->is_install_enabled)
+        if ($this->version)
         {
             if ($this->checkDatabaseExists($this->target_db) && $this->checkDatabasePopulated($this->target_db, self::DB_PREFIX)) {
                 throw new \RuntimeException(sprintf('A database with name %s is already populated', $this->target_db));
             }
-        }
 
-        if ($this->is_download_enabled)
-        {
             $this->source_tarball = $this->getTarball($this->version, $output);
             if(!file_exists($this->source_tarball)) {
                 throw new \RuntimeException(sprintf('File %s does not exist', $this->source_tarball));
             }
         }
 
-        if ($this->is_install_enabled && $this->sample_data)
+        if ($this->version && $this->sample_data)
         {
             if (!in_array($this->sample_data, array('default', 'blog', 'brochure', 'testing', 'learn'))) {
                 throw new \RuntimeException(sprintf('Unknown sample data "%s"', $this->sample_data));
@@ -249,9 +196,7 @@ class SiteCreate extends SiteAbstract
      */
     public function checkDatabaseExists($db_name)
     {
-        $result = $this->executeMysqlCli(
-            sprintf('SHOW DATABASES LIKE "%s"', $db_name)
-        );
+        $result = $this->executeMysqlCli(sprintf('SHOW DATABASES LIKE "%s"', $db_name));
         return !empty($result);
     }
 
@@ -260,10 +205,8 @@ class SiteCreate extends SiteAbstract
      * @param string $db_prefix
      * @return bool
      */
-    function checkDatabasePopulated($db_name, $db_prefix) {
-        $result = $this->executeMysqlCli(
-            sprintf('CONNECT %s; SHOW TABLES LIKE "%s"', $db_name, $db_prefix . '%')
-        );
+    function checkDatabasePopulated($db_name, $db_prefix = self::DB_PREFIX) {
+        $result = $this->executeMysqlCli(sprintf('CONNECT %s; SHOW TABLES LIKE "%s"', $db_name, $db_prefix . '%'));
         return !empty($result);
     }
 
@@ -278,12 +221,6 @@ class SiteCreate extends SiteAbstract
             if ($this->versions->isBranch($this->version)) {
                 unlink($this->source_tarball);
             }
-        }
-    }
-
-    public function restoreInstallationFolder() {
-        if (is_dir($this->target_dir . DIRECTORY_SEPARATOR . '_installation') && !is_dir($this->target_dir . DIRECTORY_SEPARATOR . 'installation')) {
-            `mv $this->target_dir/_installation $this->target_dir/installation`;
         }
     }
 
