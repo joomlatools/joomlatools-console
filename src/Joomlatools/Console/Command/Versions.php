@@ -8,7 +8,6 @@
 namespace Joomlatools\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -135,7 +134,7 @@ class Versions extends Command
 
         foreach($versions['tags'] as $version)
         {
-            if(!preg_match('/\d\.\d+\.\d+.*/im', $version)) {
+            if(!preg_match('/\d\.\d+\.\d+.*/im', $version) || preg_match('#(?:alpha|beta|rc)#i', $version)) {
                 continue;
             }
 
