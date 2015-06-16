@@ -103,6 +103,7 @@ class Application extends \Symfony\Component\Console\Application
         $commands = parent::getDefaultCommands();
 
         $commands = array_merge($commands, array(
+            new Command\SiteCheckIn(),
             new Command\Symlink(),
             new Command\SiteCreate(),
             new Command\SiteDelete(),
