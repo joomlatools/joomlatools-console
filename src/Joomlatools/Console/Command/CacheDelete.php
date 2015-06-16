@@ -52,7 +52,7 @@ class CacheDelete extends SiteAbstract
         $client = $input->getOption('client');
 
         $options = array(
-            'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : $config->get('cache_path', JPATH_SITE . '/cache')
+            'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
         );
 
         $cache = \JCache::getInstance('', $options);
