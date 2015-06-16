@@ -30,6 +30,19 @@ class CachePurge extends SiteAbstract
     {
         parent::execute($input, $output);
 
+        $this->check($input, $output);
+        $this->purge($input, $output);
+    }
+
+    public function check(InputInterface $input, OutputInterface $output)
+    {
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+        }
+    }
+
+    public function purge(InputInterface $input, OutputInterface $output)
+    {
         Bootstrapper::getApplication($this->target_dir);
 
         $cache = \JCache::getInstance();

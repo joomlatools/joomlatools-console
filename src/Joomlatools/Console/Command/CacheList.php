@@ -37,9 +37,20 @@ class CacheList extends SiteAbstract
     {
         parent::execute($input, $output);
 
-        Bootstrapper::getApplication($this->target_dir);
+        $this->check($input, $output);
+        $this->listCache($input, $output);
+    }
 
-        $config = \JFactory::getConfig();
+    public function check(InputInterface $input, OutputInterface $output)
+    {
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+        }
+    }
+
+    public function listCache(InputInterface $input, OutputInterface $output)
+    {
+        Bootstrapper::getApplication($this->target_dir);
 
         $client = $input->getOption('client');
 
