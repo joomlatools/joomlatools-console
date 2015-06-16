@@ -23,6 +23,13 @@ class CacheDelete extends SiteAbstract
         $this
             ->setName('cache:delete')
             ->setDescription('Delete a Joomla site cache')
+            ->addOption(
+                'group',
+                'g',
+                InputOption::VALUE_OPTIONAL,
+                'Specify a cache group to delete',
+                ''
+            )
             ;
     }
 
@@ -33,11 +40,11 @@ class CacheDelete extends SiteAbstract
         Bootstrapper::getApplication($this->target_dir);
 
         $cache = \JFactory::getCache();
+        $group = $input->getOption('group');
 
-        foreach($cache->getAll() as $item){
-            $cache->clean($item->group);
-        }
+        $cache->clean($group);
 
-        $output->writeln('<info>All front end cache items have been deleted');
+        $cache_string = strlen($group) ? $group . ' cache items' : 'all front end cache items';
+        $output->writeln('<info>' . $cache_string . ' have been deleted');
     }
 }
