@@ -52,7 +52,6 @@ class CacheDelete extends SiteAbstract
         $client = $input->getOption('client');
 
         $options = array(
-            'defaultgroup' => strlen($group) ? $group : '_system',
             'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : $config->get('cache_path', JPATH_SITE . '/cache')
         );
 
