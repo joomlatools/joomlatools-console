@@ -22,7 +22,7 @@ class CachePurge extends SiteAbstract
 
         $this
             ->setName('cache:purge')
-            ->setDescription('delete all expired cache files')
+            ->setDescription('Delete all expired cache files')
             ;
     }
 

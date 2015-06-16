@@ -70,6 +70,6 @@ class CacheDelete extends SiteAbstract
 
         $client_string = $client ? 'administrative ' : 'front end ';
         $group_string = strlen($group) ? $group . ' cache items' : 'cache items';
-        $output->writeln('<info>' . $client_string . $group_string . ' have been deleted');
+        $output->writeln('<info>' . $client_string . $group_string . ' have been deleted</info>');
     }
 }
