@@ -52,11 +52,22 @@ class CacheDelete extends SiteAbstract
         $client = $input->getOption('client');
 
         $options = array(
+            'defaultgroup' => strlen($group) ? $group : '_system',
             'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : $config->get('cache_path', JPATH_SITE . '/cache')
         );
 
         $cache = \JCache::getInstance('', $options);
-        $cache->clean($group);
+        $items = $cache->getAll();
+
+        if($group){
+            $cache->clean($group);
+        }
+        else
+        {
+            foreach($items as $item){
+                $cache->clean($item->group);
+            }
+        }
 
         $client_string = $client ? 'administrative ' : 'front end ';
         $group_string = strlen($group) ? $group . ' cache items' : 'cache items';
