@@ -30,6 +30,13 @@ class CacheDelete extends SiteAbstract
                 'Specify a cache group to delete',
                 ''
             )
+            ->addOption(
+                'client',
+                'c',
+                InputOption::VALUE_OPTIONAL,
+                'Specify the client cache to delete',
+                0
+            )
             ;
     }
 
@@ -39,12 +46,20 @@ class CacheDelete extends SiteAbstract
 
         Bootstrapper::getApplication($this->target_dir);
 
-        $cache = \JFactory::getCache();
-        $group = $input->getOption('group');
+        $config = \JFactory::getConfig();
 
+        $group = $input->getOption('group');
+        $client = $input->getOption('client');
+
+        $options = array(
+            'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : $config->get('cache_path', JPATH_SITE . '/cache')
+        );
+
+        $cache = \JCache::getInstance('', $options);
         $cache->clean($group);
 
-        $cache_string = strlen($group) ? $group . ' cache items' : 'all front end cache items';
-        $output->writeln('<info>' . $cache_string . ' have been deleted');
+        $client_string = $client ? 'administrative ' : 'front end ';
+        $group_string = strlen($group) ? $group . ' cache items' : 'cache items';
+        $output->writeln('<info>' . $client_string . $group_string . ' have been deleted');
     }
 }
