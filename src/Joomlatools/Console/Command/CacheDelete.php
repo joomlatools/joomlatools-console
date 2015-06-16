@@ -26,9 +26,8 @@ class CacheDelete extends SiteAbstract
             ->addOption(
                 'group',
                 'g',
-                InputOption::VALUE_OPTIONAL,
-                'Specify a cache group to delete',
-                ''
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                'Specify a cache group to delete'
             )
             ->addOption(
                 'client',
@@ -67,20 +66,18 @@ class CacheDelete extends SiteAbstract
         );
 
         $cache = \JCache::getInstance('', $options);
-        $items = $cache->getAll();
 
-        if($group){
-            $cache->clean($group);
+        if(!count($group)){
+            $group = $cache->getAll();
         }
-        else
+
+        foreach($group as $item)
         {
-            foreach($items as $item){
-                $cache->clean($item->group);
-            }
+            $cache_item = isset($item->group) ? $item->group : $item;
+            $cache->clean($cache_item);
         }
 
         $client_string = $client ? 'administrative ' : 'front end ';
-        $group_string = strlen($group) ? $group . ' cache items' : 'cache items';
-        $output->writeln('<info>' . $client_string . $group_string . ' have been deleted</info>');
+        $output->writeln('<info>' . $client_string . 'cache items have been deleted</info>');
     }
 }
