@@ -33,8 +33,11 @@ class CachePurge extends SiteAbstract
         Bootstrapper::getApplication($this->target_dir);
 
         $cache = \JCache::getInstance();
-        $cache->gc();
+        $delete = $cache->gc();
 
-        $output->writeln('<info>All expired cache items have been deleted</info>');
+        if($delete === false){
+            $output->writeln('<error>Error purging cached items</error>');
+        }else
+            $output->writeln('<info>All expired cache items have been deleted</info>');
     }
 }
