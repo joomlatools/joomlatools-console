@@ -76,8 +76,9 @@ class SiteCheckIn extends SiteAbstract
 
                 if ($affected == 1) {
                     $message = sprintf($format, "{$affected} row was checked in");
+                } else {
+                    $message = sprintf($format, "{$affected} rows were checked in");
                 }
-                else $message = sprintf($format, "{$affected} rows were checked in");
 
                 $output->writeln("<info>{$message}</info>");
             }
@@ -104,30 +105,29 @@ class SiteCheckIn extends SiteAbstract
         foreach (\JFactory::getDbo()->getTableList() as $table)
         {
             // Only check in tables with a prefix
-            if (stripos($table, $prefix) !== 0) {
-                continue;
+            if (stripos($table, $prefix) === 0)
+            {
+                $columns = $dbo->getTableColumns($table);
+
+                // Make sure that the table has the check in columns
+                if (!isset($columns[$user_column]) || !isset($columns[$date_column])) {
+                    continue;
+                }
+
+                $query = $dbo->getQuery(true)
+                             ->select('COUNT(*)')
+                             ->from($dbo->quoteName($table))
+                             ->where(sprintf('%s > 0', $user_column));
+
+                $dbo->setQuery($query);
+
+                // Only include tables that need to be checked in
+                if (!$dbo->execute() || !$dbo->loadResult()) {
+                    continue;
+                }
+
+                $tables[] = $table;
             }
-
-            $columns = $dbo->getTableColumns($table);
-
-            // Make sure that the table has the check in columns
-            if (!isset($columns[$user_column]) || !isset($columns[$date_column])) {
-                continue;
-            }
-
-            $query = $dbo->getQuery(true)
-                         ->select('COUNT(*)')
-                         ->from($dbo->quoteName($table))
-                         ->where(sprintf('%s > 0', $user_column));
-
-            $dbo->setQuery($query);
-
-            // Only include tables that need to be checked in
-            if (!$dbo->execute() || !$dbo->loadResult()) {
-                continue;
-            }
-
-            $tables[] = $table;
         }
 
         return $tables;
