@@ -115,6 +115,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\PluginInstall(),
             new Command\PluginUninstall(),
             new Command\Versions(),
+            new Command\CacheDelete(),
         ));
 
         return $commands;
