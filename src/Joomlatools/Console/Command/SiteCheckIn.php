@@ -16,25 +16,32 @@ use Joomlatools\Console\Joomla\Bootstrapper;
 
 class SiteCheckIn extends SiteAbstract
 {
+    protected $_user_column;
+
+    protected $_date_column;
+
+    protected $_tables;
+
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('site:checkin')
              ->setDescription('Checks in all of the database tables of a site')
              ->addOption(
                  'user-column',
                  null,
                  InputOption::VALUE_REQUIRED,
-                 'The checkin user column name',
+                 'The check in user column name',
                  'checked_out')
              ->addOption('date-column',
                  null,
                  InputOption::VALUE_REQUIRED,
-                 'The checkin date column name',
+                 'The check in date column name',
                  'checked_out_time')
-             ->addArgument('site',
-                 InputArgument::REQUIRED,
-                 'The name of the site to checkin tables from',
-                 null);
+            ->addArgument('tables',
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                'A list of tables to check in');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -44,13 +51,18 @@ class SiteCheckIn extends SiteAbstract
         // Bootstrap Joomla.
         Bootstrapper::getApplication(sprintf('/var/www/%s', $site));
 
-        $user_column = $input->getOption('user-column');
-        $date_column = $input->getOption('date-column');
+        $this->_user_column = $input->getOption('user-column');
+        $this->_date_column = $input->getOption('date-column');
 
         $dbo      = \JFactory::getDbo();
+        $prefix   = \JFactory::getApplication()->get('dbprefix');
         $nullDate = $dbo->getNullDate();
 
-        $tables = $this->_getTables($user_column, $date_column);
+        $tables = $this->_getTables();
+
+        if ($input_tables = $input->getArgument('tables')) {
+            $tables = array_intersect($tables, $input_tables);
+        }
 
         if (empty($tables)) {
             $output->writeln("<comment>Nothing to check in</comment>");
@@ -58,13 +70,15 @@ class SiteCheckIn extends SiteAbstract
 
         foreach ($tables as $table)
         {
-            $output->writeln("<comment>Checking in {$table} table ...</comment>");
+            $output->writeln("<comment>Checking in the {$table} table ...</comment>");
+
+            $table = $prefix . $table;
 
             $query = $dbo->getQuery(true)
                          ->update($dbo->quoteName($table))
-                         ->set(sprintf('%s = 0', $user_column))
-                         ->set(sprintf('%s = %s', $date_column, $dbo->quote($nullDate)))
-                         ->where(sprintf('%s > 0', $user_column));
+                         ->set(sprintf('%s = 0', $this->_user_column))
+                         ->set(sprintf('%s = %s', $this->_date_column, $dbo->quote($nullDate)))
+                         ->where(sprintf('%s > 0', $this->_user_column));
 
             $dbo->setQuery($query);
 
@@ -91,12 +105,9 @@ class SiteCheckIn extends SiteAbstract
      *
      * Only tables that need to be checked in will be returned.
      *
-     * @param string $user_column The check in user column name.
-     * @param string $date_column The check in date column name.
-     *
      * @return array An array containing the name of the tables to check in.
      */
-    protected function _getTables($user_column, $date_column)
+    protected function _getTables()
     {
         $prefix = \JFactory::getApplication()->get('dbprefix');
         $dbo    = \JFactory::getDbo();
@@ -110,14 +121,19 @@ class SiteCheckIn extends SiteAbstract
                 $columns = $dbo->getTableColumns($table);
 
                 // Make sure that the table has the check in columns
-                if (!isset($columns[$user_column]) || !isset($columns[$date_column])) {
+                if (!isset($columns[$this->_user_column]) || !isset($columns[$this->_date_column])) {
+                    continue;
+                }
+
+                // Check the column's types.
+                if (stripos($columns[$this->_user_column], 'int') !== 0 || stripos($columns[$this->_date_column], 'date') !== 0) {
                     continue;
                 }
 
                 $query = $dbo->getQuery(true)
                              ->select('COUNT(*)')
                              ->from($dbo->quoteName($table))
-                             ->where(sprintf('%s > 0', $user_column));
+                             ->where(sprintf('%s > 0', $this->_user_column));
 
                 $dbo->setQuery($query);
 
@@ -126,7 +142,7 @@ class SiteCheckIn extends SiteAbstract
                     continue;
                 }
 
-                $tables[] = $table;
+                $tables[] = str_replace($prefix, '', $table);
             }
         }
 
