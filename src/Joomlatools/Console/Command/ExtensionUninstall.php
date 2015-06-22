@@ -30,7 +30,7 @@ class ExtensionUninstall extends SiteAbstract
             ->addArgument(
                 'extensions',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of extensions to un-install to the site using discover install'
+                'A array of extensions to un-install from the site... n.b. only unprotected extensions can be uninstalled'
             )->addOption(
                 'type',
                 't',
@@ -61,43 +61,39 @@ class ExtensionUninstall extends SiteAbstract
     {
         $app = Bootstrapper::getApplication($this->target_dir);
 
-        // Output buffer is used as a guard against Joomla including ._ files when searching for adapters
-        // See: http://kadin.sdf-us.org/weblog/technology/software/deleting-dot-underscore-files.html
         ob_start();
 
         $installer = $app->getInstaller();
 
-        $dbo = \JFactory::getDbo();
-        $query = \JFactory::getDbo()->getQuery(true)
-            ->select('*')
-            ->from('#__extensions')
-            ->where('protected = 0');
-
-        if(strlen($this->type)){
-            $query->where($dbo->quoteName('type') . " = " . $dbo->quote($this->type));
-        }
-
-        if(count($this->extensions)){
-            $query->where("(" .$dbo->quoteName('name') ." = " . implode(" OR " .$dbo->quoteName('name') . " = ", $dbo->quote($this->extensions)) . ")");
-        }
-
-        $dbo->setQuery($query);
-        $extensions = $dbo->loadObjectList();
-
-        if(!count($extensions))
+        foreach($this->extensions as $uninstall)
         {
-            $output->writeln('<error>Component Uninstall: Component not found / Or you are trying to uninstall a core component.</error>');
-            return;
-        }
+            $dbo = \JFactory::getDbo();
+            $query = \JFactory::getDbo()->getQuery(true)
+                ->select('*')
+                ->from('#__extensions')
+                ->where('protected = 0');
 
-        foreach ($extensions as $extension)
-        {
+            if(strlen($this->type)){
+                $query->where($dbo->quoteName('type') . " = " . $dbo->quote($this->type), 'OR');
+            }
+
+            $query->where("(" .$dbo->quoteName('name') ." = " . $dbo->quote($uninstall) . ")");
+
+            $dbo->setQuery($query);
+            $extension = $dbo->loadObject();
+
+            if(!count($extension))
+            {
+                throw new \RuntimeException(sprintf('Extension Uninstall: %s extension not found / Or you are trying to uninstall a core extension.',  $uninstall));
+                return;
+            }
+
             $result = $installer->uninstall($extension->type, $extension->extension_id);
 
             if($result){
                 $output->writeln('<info>' . $extension->name . ' extension deleted </info>');
             }else
-                $output->writeln('<error> Problem deleting ' . $extension->name . '</error>');
+                throw new \RuntimeException(sprintf('Extension Uninstall: Problem deleting %s extension', $uninstall));
         }
 
         ob_end_clean();
