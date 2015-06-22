@@ -44,7 +44,7 @@ class CacheDelete extends SiteAbstract
         parent::execute($input, $output);
 
         $this->check($input, $output);
-        $this->delete($input, $output);
+        $this->deleteCache($input, $output);
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -54,7 +54,7 @@ class CacheDelete extends SiteAbstract
         }
     }
 
-    public function delete(InputInterface $input, OutputInterface $output)
+    public function deleteCache(InputInterface $input, OutputInterface $output)
     {
         Bootstrapper::getApplication($this->target_dir);
 
@@ -74,10 +74,12 @@ class CacheDelete extends SiteAbstract
         foreach($group as $item)
         {
             $cache_item = isset($item->group) ? $item->group : $item;
-            $cache->clean($cache_item);
-        }
+            $result = $cache->clean($cache_item);
 
-        $client_string = $client ? 'administrative ' : 'front end ';
-        $output->writeln('<info>' . $client_string . 'cache items have been deleted</info>');
+            if($result){
+                $client_string = $client ? 'administrative ' : 'front end ';
+                $output->writeln('<info>' . $client_string . $cache_item . ' cache items have been deleted</info>');
+            }
+        }
     }
 }

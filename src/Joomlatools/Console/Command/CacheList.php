@@ -27,7 +27,7 @@ class CacheList extends SiteAbstract
                 'client',
                 'c',
                 InputOption::VALUE_OPTIONAL,
-                'Specify the client cache to delete',
+                'Specify the client cache to list',
                 0
             )
             ;
