@@ -61,8 +61,17 @@ class CacheList extends SiteAbstract
         $cache = \JCache::getInstance('', $options);
         $items = $cache->getAll();
 
-        foreach($items as $item){
-            $output->writeln($item->group);
+        if($items)
+        {
+            foreach($items as $item){
+                $output->writeln($item->group);
+            }
+        }
+        else
+        {
+            $client_string = $client ? 'administrative side' : 'front end';
+            //@todo is this really the case or rather configuration is not enabled?
+            $output->writeln('<info>' . "There appears to be no cache items for the $client_string</info>");
         }
     }
 }
