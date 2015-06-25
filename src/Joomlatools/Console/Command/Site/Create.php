@@ -15,20 +15,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Create extends AbstractDatabase
 {
     /**
-     * Path to database export in Joomla tarball
-     *
-     * @var
-     */
-    protected $source_db;
-
-    /**
-     * Sample data to install
-     *
-     * @var string
-     */
-    protected $sample_data;
-
-    /**
      * Clear cache before fetching versions
      * @var bool
      */
@@ -127,15 +113,14 @@ class Create extends AbstractDatabase
             $this->symlink = explode(',', $this->symlink);
         }
 
-        $this->sample_data = $input->getOption('sample-data');
-        $this->source_db   = $this->target_dir.'/installation/sql/mysql/joomla.sql';
+        $this->version     = $input->getOption('joomla');
 
         $this->check($input, $output);
 
         `mkdir -p $this->target_dir`;
 
         $this->download($input, $output);
-        $this->createDatabase($input, $output);
+        $this->importdb($input, $output);
         $this->modifyConfiguration($input, $output);
         $this->addVirtualHost($input, $output);
         $this->symlinkProjects($input, $output);
@@ -154,34 +139,6 @@ class Create extends AbstractDatabase
         if (file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('A site with name %s already exists', $this->site));
         }
-
-        if ($this->version != 'none')
-        {
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf(
-                    "echo 'SHOW DATABASES LIKE \"%s\"' | mysql -u'%s' %s",
-                    $this->target_db, $this->mysql->user, $password
-                )
-            );
-
-            if (!empty($result)) { // Table exists
-                throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
-            }
-        }
-
-        if ($this->version && $this->sample_data)
-        {
-            if (!in_array($this->sample_data, array('default', 'blog', 'brochure', 'testing', 'learn'))) {
-                throw new \RuntimeException(sprintf('Unknown sample data "%s"', $this->sample_data));
-            }
-
-            if(is_numeric(substr($this->version, 0, 1)))
-            {
-                if (in_array($this->sample_data, array('testing', 'learn')) && version_compare($this->version, '3.0.0', '<')) {
-                    throw new \RuntimeException(sprintf('%s does not support sample data %s', $this->version, $this->sample_data));
-                }
-            }
-        }
     }
 
     public function download(InputInterface $input, OutputInterface $output)
@@ -197,54 +154,24 @@ class Create extends AbstractDatabase
         $command->run($command_input, $output);
     }
 
-    public function createDatabase()
+    public function importdb(InputInterface $input, OutputInterface $output)
     {
         if ($this->version == 'none') {
             return;
         }
 
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        $result = exec(
-            sprintf(
-                "echo 'CREATE DATABASE `%s` CHARACTER SET utf8' | mysql -u'%s' %s",
-                $this->target_db, $this->mysql->user, $password
-            )
+        $arguments = array(
+            'site:database:install',
+            'site'          => $this->site
         );
 
-        if (!empty($result)) { // MySQL returned an error
-            throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
+        $sample_data = $input->getOption('sample-data');
+        if (!empty($sample_data)) {
+            $arguments['--sample-data'] = $sample_data;
         }
 
-        $imports = array($this->target_dir.'/installation/sql/mysql/joomla.sql');
-
-        $users = 'joomla3.users.sql';
-        if(is_numeric(substr($this->version, 0, 1)) && version_compare($this->version, '3.0.0', '<')) {
-            $users = 'joomla2.users.sql';
-        }
-
-        $imports[] = self::$files.'/'.$users;
-
-        if ($this->sample_data)
-        {
-            $type = $this->sample_data == 'default' ? 'data' : $this->sample_data;
-            $sample_db = $this->target_dir.'/installation/sql/mysql/sample_' . $type . '.sql';
-
-            $imports[] = $sample_db;
-        }
-
-        foreach($imports as $import)
-        {
-            $contents = file_get_contents($import);
-            $contents = str_replace('#__', 'j_', $contents);
-            file_put_contents($import, $contents);
-
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf("mysql -u'%s' %s %s < %s", $this->mysql->user, $password, $this->target_db, $import));
-
-            if (!empty($result)) { // MySQL returned an error
-                throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
-            }
-        }
+        $command = new DatabaseInstall();
+        $command->run(new ArrayInput($arguments), $output);
     }
 
     public function modifyConfiguration()

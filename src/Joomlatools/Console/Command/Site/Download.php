@@ -83,7 +83,6 @@ class Download extends AbstractSite
                 unlink($tarball);
             }
         }
-
     }
 
     public function check(InputInterface $input, OutputInterface $output)
