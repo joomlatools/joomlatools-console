@@ -113,7 +113,7 @@ class Create extends AbstractDatabase
             $this->symlink = explode(',', $this->symlink);
         }
 
-        $this->version     = $input->getOption('joomla');
+        $this->version = $input->getOption('joomla');
 
         $this->check($input, $output);
 
@@ -121,7 +121,8 @@ class Create extends AbstractDatabase
 
         $this->download($input, $output);
         $this->importdb($input, $output);
-        $this->modifyConfiguration($input, $output);
+        $this->createConfig($input, $output);
+
         $this->addVirtualHost($input, $output);
         $this->symlinkProjects($input, $output);
         $this->installExtensions($input, $output);
@@ -152,6 +153,9 @@ class Create extends AbstractDatabase
 
         $command = new Download();
         $command->run($command_input, $output);
+
+        `mv $this->target_dir/installation $this->target_dir/_installation`;
+        `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
     }
 
     public function importdb(InputInterface $input, OutputInterface $output)
@@ -174,87 +178,19 @@ class Create extends AbstractDatabase
         $command->run(new ArrayInput($arguments), $output);
     }
 
-    public function modifyConfiguration()
+    public function createConfig(InputInterface $input, OutputInterface $output)
     {
         if ($this->version == 'none') {
             return;
         }
 
-        $source   = $this->target_dir.'/installation/configuration.php-dist';
-        $target   = $this->target_dir.'/configuration.php';
+        $command_input = new ArrayInput(array(
+            'site:configure',
+            'site'          => $this->site
+        ));
 
-        $contents = file_get_contents($source);
-        $replace  = function($name, $value, &$contents) {
-            $pattern = sprintf("#%s = '.*?'#", $name);
-            $match   = preg_match($pattern, $contents);
-
-            if(!$match)
-            {
-                $pattern 	 = "/^\s?(\})\s?$/m";
-                $replacement = sprintf("\tpublic \$%s = '%s';\n}", $name, $value);
-            }
-            else $replacement = sprintf("%s = '%s'", $name, $value);
-
-            $contents = preg_replace($pattern, $replacement, $contents);
-        };
-        $remove   = function($name, &$contents) {
-            $pattern  = sprintf("#public \$%s = '.*?'#", $name);
-            $contents = preg_replace($pattern, '', $contents);
-        };
-        $random   = function($length) {
-            $charset ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            $string  = '';
-            $count   = strlen($charset);
-
-            while ($length--) {
-                $string .= $charset[mt_rand(0, $count-1)];
-            }
-
-            return $string;
-        };
-
-        $replacements = array(
-            'db'        => $this->target_db,
-            'user'      => $this->mysql->user,
-            'password'  => $this->mysql->password,
-            'dbprefix'  => 'j_',
-            'dbtype'    => 'mysqli',
-
-            'mailer' => 'smtp',
-            'mailfrom' => 'admin@example.com',
-            'fromname' => $this->site,
-            'sendmail' => '/usr/bin/env catchmail',
-            'smtpauth' => '0',
-            'smtpuser' => '',
-            'smtppass' => '',
-            'smtphost' => 'localhost',
-            'smtpsecure' => 'none',
-            'smtpport' => '1025',
-
-            'sef'       => '1',
-            'sef_rewrite'   => '1',
-            'unicodeslugs'  => '1',
-
-            'debug'     => '1',
-            'lifetime'  => '600',
-            'tmp_path'  => $this->target_dir.'/tmp',
-            'log_path'  => $this->target_dir.'/logs',
-            'sitename'  => $this->site,
-
-            'secret'    => $random(16)
-        );
-
-        foreach($replacements as $key => $value) {
-            $replace($key, $value, $contents);
-        }
-
-        $remove('root_user', $contents);
-
-        file_put_contents($target, $contents);
-        chmod($target, 0644);
-
-        `mv $this->target_dir/installation $this->target_dir/_installation`;
-        `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
+        $command = new Configure();
+        $command->run($command_input, $output);
     }
 
     public function addVirtualHost(InputInterface $input, OutputInterface $output)

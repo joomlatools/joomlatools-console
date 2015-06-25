@@ -154,12 +154,7 @@ class DatabaseInstall extends AbstractDatabase
             return $dumps;
         }
 
-        $path = $this->target_dir.'/installation/sql/mysql/';
-        if (!file_exists($path)) {
-            $path = $this->target_dir.'/_installation/sql/mysql/';
-        }
-
-        $imports = array($path.'joomla.sql');
+        $imports = array($this->target_dir.'/_installation/sql/mysql/joomla.sql');
 
         $version = $this->_getJoomlaVersion();
         if ($version !== false)
@@ -175,7 +170,7 @@ class DatabaseInstall extends AbstractDatabase
         if ($sample_data = $input->getOption('sample-data'))
         {
             $type      = $sample_data == 'default' ? 'data' : $sample_data;
-            $sample_db = $path.'sample_' . $type . '.sql';
+            $sample_db = $this->target_dir.'/_installation/sql/mysql/sample_' . $type . '.sql';
 
             $imports[] = $sample_db;
         }
