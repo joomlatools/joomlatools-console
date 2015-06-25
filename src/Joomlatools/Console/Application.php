@@ -104,9 +104,9 @@ class Application extends \Symfony\Component\Console\Application
 
         $commands = array_merge($commands, array(
             new Command\Symlink(),
-            new Command\SiteCreate(),
-            new Command\SiteDelete(),
-            new Command\SiteToken(),
+            new Command\Site\Create(),
+            new Command\Site\Delete(),
+            new Command\Site\Token(),
             new Command\ExtensionSymlink(),
             new Command\ExtensionInstall(),
             new Command\ExtensionInstallFile(),

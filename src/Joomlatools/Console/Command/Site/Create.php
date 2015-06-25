@@ -1,18 +1,18 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Site;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SiteCreate extends SiteAbstract
+class Create extends SiteAbstract
 {
     /**
      * File cache
@@ -200,6 +200,7 @@ class SiteCreate extends SiteAbstract
             if (!empty($result)) { // Table exists
                 throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
             }
+
 
             $this->source_tarball = $this->getTarball($this->version, $output);
             if(!file_exists($this->source_tarball)) {
