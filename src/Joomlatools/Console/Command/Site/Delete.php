@@ -10,7 +10,7 @@ namespace Joomlatools\Console\Command\Site;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Delete extends SiteAbstract
+class Delete extends AbstractDatabase
 {
     protected function configure()
     {

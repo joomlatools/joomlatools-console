@@ -12,22 +12,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Create extends SiteAbstract
+class Create extends AbstractDatabase
 {
-    /**
-     * File cache
-     *
-     * @var string
-     */
-    protected static $files;
-
-    /**
-     * Downloaded Joomla tarball
-     *
-     * @var
-     */
-    protected $source_tarball;
-
     /**
      * Path to database export in Joomla tarball
      *
@@ -63,22 +49,9 @@ class Create extends SiteAbstract
      */
     protected $symlink = array();
 
-    /**
-     * @var Versions
-     */
-    protected $versions;
-
-    /**
-     *
-     */
-
     protected function configure()
     {
         parent::configure();
-
-        if (!self::$files) {
-            self::$files = realpath(__DIR__.'/../../../../bin/.files');
-        }
 
         $this
             ->setName('site:create')
@@ -149,25 +122,19 @@ class Create extends SiteAbstract
     {
         parent::execute($input, $output);
 
-        $this->versions = new Versions();
-
-        if ($input->getOption('clear-cache')) {
-            $this->versions->refresh();
-        }
-
-        $this->setVersion($input->getOption('joomla'));
-
         $this->symlink = $input->getOption('symlink');
         if (is_string($this->symlink)) {
             $this->symlink = explode(',', $this->symlink);
         }
 
         $this->sample_data = $input->getOption('sample-data');
-
-        $this->source_db = $this->target_dir.'/installation/sql/mysql/joomla.sql';
+        $this->source_db   = $this->target_dir.'/installation/sql/mysql/joomla.sql';
 
         $this->check($input, $output);
-        $this->createFolder($input, $output);
+
+        `mkdir -p $this->target_dir`;
+
+        $this->download($input, $output);
         $this->createDatabase($input, $output);
         $this->modifyConfiguration($input, $output);
         $this->addVirtualHost($input, $output);
@@ -175,7 +142,7 @@ class Create extends SiteAbstract
         $this->installExtensions($input, $output);
         $this->enableWebInstaller($input, $output);
 
-        if ($this->version)
+        if ($this->version != 'none')
         {
             $output->writeln("Your new Joomla site has been created.");
             $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
@@ -188,7 +155,7 @@ class Create extends SiteAbstract
             throw new \RuntimeException(sprintf('A site with name %s already exists', $this->site));
         }
 
-        if ($this->version)
+        if ($this->version != 'none')
         {
             $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
             $result = exec(sprintf(
@@ -199,12 +166,6 @@ class Create extends SiteAbstract
 
             if (!empty($result)) { // Table exists
                 throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
-            }
-
-
-            $this->source_tarball = $this->getTarball($this->version, $output);
-            if(!file_exists($this->source_tarball)) {
-                throw new \RuntimeException(sprintf('File %s does not exist', $this->source_tarball));
             }
         }
 
@@ -223,23 +184,22 @@ class Create extends SiteAbstract
         }
     }
 
-    public function createFolder(InputInterface $input, OutputInterface $output)
+    public function download(InputInterface $input, OutputInterface $output)
     {
-        `mkdir -p $this->target_dir`;
+        $command_input = new ArrayInput(array(
+            'site:download',
+            'site'          => $this->site,
+            '--joomla'      => $input->getOption('joomla'),
+            '--clear-cache' => $input->getOption('clear-cache')
+        ));
 
-        if ($this->version)
-        {
-            `cd $this->target_dir; tar xzf $this->source_tarball --strip 1`;
-
-            if ($this->versions->isBranch($this->version)) {
-                unlink($this->source_tarball);
-            }
-        }
+        $command = new Download();
+        $command->run($command_input, $output);
     }
 
     public function createDatabase()
     {
-        if (!$this->version) {
+        if ($this->version == 'none') {
             return;
         }
 
@@ -289,7 +249,7 @@ class Create extends SiteAbstract
 
     public function modifyConfiguration()
     {
-        if (!$this->version) {
+        if ($this->version == 'none') {
             return;
         }
 
@@ -437,7 +397,7 @@ class Create extends SiteAbstract
 
     public function enableWebInstaller(InputInterface $input, OutputInterface $output)
     {
-        if(!$this->version || version_compare($this->version, '3.2.0', '<')) {
+        if($this->version == 'none' || version_compare($this->version, '3.2.0', '<')) {
             return;
         }
 
@@ -482,55 +442,5 @@ class Create extends SiteAbstract
 
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
         exec(sprintf("mysql -u'%s' %s %s -e %s", $this->mysql->user, $password, $this->target_db, $sql));
-    }
-
-    public function setVersion($version)
-    {
-        $result = $version;
-
-        if (strtolower($version) === 'latest') {
-            $result = $this->versions->getLatestRelease();
-        }
-        else
-        {
-            $length = strlen($version);
-            $format = is_numeric($version) || preg_match('/^\d\.\d+$/im', $version);
-
-            if ( ($length == 1 || $length == 3) && $format)
-            {
-                $result = $this->versions->getLatestRelease($version);
-
-                if($result == '0.0.0') {
-                    $result = $version.($length == 1 ? '.0.0' : '.0');
-                }
-            }
-        }
-
-        $this->version = $result;
-    }
-
-    public function getTarball($version, OutputInterface $output)
-    {
-        $tar   = $this->version.'.tar.gz';
-        $cache = self::$files.'/cache/'.$tar;
-
-        if(file_exists($cache) && !$this->versions->isBranch($this->version)) {
-            return $cache;
-        }
-
-        if ($this->versions->isBranch($version)) {
-            $url = 'http://github.com/joomla/joomla-cms/tarball/'.$version;
-        }
-        else {
-            $url = 'https://github.com/joomla/joomla-cms/archive/'.$version.'.tar.gz';
-        }
-
-        $output->writeln("<info>Downloading Joomla $this->version - this could take a few minutes...</info>");
-        $bytes = file_put_contents($cache, fopen($url, 'r'));
-        if ($bytes === false || $bytes == 0) {
-            throw new \RuntimeException(sprintf('Failed to download %s', $url));
-        }
-
-        return $cache;
     }
 }

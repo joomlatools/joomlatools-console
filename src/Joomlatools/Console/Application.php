@@ -106,6 +106,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Symlink(),
             new Command\Site\Create(),
             new Command\Site\Delete(),
+            new Command\Site\Download(),
             new Command\Site\Token(),
             new Command\ExtensionSymlink(),
             new Command\ExtensionInstall(),

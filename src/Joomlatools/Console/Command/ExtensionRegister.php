@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class ExtensionRegister extends Site\SiteAbstract
+class ExtensionRegister extends Site\AbstractSite
 {
     /**
      * name of extension

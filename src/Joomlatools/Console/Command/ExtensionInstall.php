@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class ExtensionInstall extends Site\SiteAbstract
+class ExtensionInstall extends Site\AbstractSite
 {
     protected $extension = array();
 
