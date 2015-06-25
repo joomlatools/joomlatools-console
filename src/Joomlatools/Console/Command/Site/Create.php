@@ -260,7 +260,13 @@ class Create extends AbstractDatabase
 
     public function enableWebInstaller(InputInterface $input, OutputInterface $output)
     {
-        if($this->version == 'none' || version_compare($this->version, '3.2.0', '<')) {
+        if ($this->version == 'none') {
+            return;
+        }
+
+        $version = $this->_getJoomlaVersion();
+
+        if ($this->version != 'latest' && version_compare($version, '3.2.0', '<')) {
             return;
         }
 
