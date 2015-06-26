@@ -111,6 +111,10 @@ class DatabaseInstall extends AbstractDatabase
 
     public function check(InputInterface $input, OutputInterface $output)
     {
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site %s not found', $this->site));
+        }
+
         if ($this->drop === false && $this->skip_check === false)
         {
             $result = $this->_execute(sprintf("SHOW DATABASES LIKE \"%s\"", $this->target_db));
@@ -154,7 +158,12 @@ class DatabaseInstall extends AbstractDatabase
             return $dumps;
         }
 
-        $imports = array($this->target_dir.'/_installation/sql/mysql/joomla.sql');
+        $path = $this->target_dir.'/_installation/sql/mysql/';
+        if (!file_exists($path)) {
+            $path = $this->target_dir.'/installation/sql/mysql/';
+        }
+
+        $imports = array($path.'joomla.sql');
 
         $version = $this->_getJoomlaVersion();
         if ($version !== false)
@@ -170,7 +179,7 @@ class DatabaseInstall extends AbstractDatabase
         if ($sample_data = $input->getOption('sample-data'))
         {
             $type      = $sample_data == 'default' ? 'data' : $sample_data;
-            $sample_db = $this->target_dir.'/_installation/sql/mysql/sample_' . $type . '.sql';
+            $sample_db = $path . 'sample_' . $type . '.sql';
 
             $imports[] = $sample_db;
         }
@@ -192,5 +201,4 @@ class DatabaseInstall extends AbstractDatabase
 
         return exec($cmd);
     }
-
 }

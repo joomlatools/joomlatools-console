@@ -37,7 +37,11 @@ class Configure extends AbstractDatabase
 
         $this->check($input, $output);
 
-        $source   = $this->target_dir.'/_installation/configuration.php-dist';
+        $source = $this->target_dir.'/_installation/configuration.php-dist';
+        if (!file_exists($source)) {
+            $source = $this->target_dir.'/installation/configuration.php-dist';
+        }
+
         $target   = $this->target_dir.'/configuration.php';
 
         $contents = file_get_contents($source);
@@ -109,10 +113,18 @@ class Configure extends AbstractDatabase
 
         file_put_contents($target, $contents);
         chmod($target, 0644);
+
+        if (file_exists($this->target_dir.'/installation')) {
+            `mv $this->target_dir/installation $this->target_dir/_installation`;
+        }
     }
 
     public function check(InputInterface $input, OutputInterface $output)
     {
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site %s not found', $this->site));
+        }
+
         if (!$input->getOption('overwrite'))
         {
             if (file_exists($this->target_dir . '/configuration.php')) {

@@ -82,6 +82,8 @@ class Download extends AbstractSite
             if ($this->versions->isBranch($this->version)) {
                 unlink($tarball);
             }
+
+            `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
         }
     }
 

@@ -153,9 +153,6 @@ class Create extends AbstractDatabase
 
         $command = new Download();
         $command->run($command_input, $output);
-
-        `mv $this->target_dir/installation $this->target_dir/_installation`;
-        `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
     }
 
     public function importdb(InputInterface $input, OutputInterface $output)
