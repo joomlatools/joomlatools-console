@@ -5,11 +5,13 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command\Site;
+namespace Joomlatools\Console\Command\Database;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use Joomlatools\Console\Command\Site\AbstractSite;
 
 abstract class AbstractDatabase extends AbstractSite
 {
@@ -48,5 +50,13 @@ abstract class AbstractDatabase extends AbstractSite
 
         $credentials = explode(':', $input->getOption('mysql'), 2);
         $this->mysql = (object) array('user' => $credentials[0], 'password' => $credentials[1]);
+    }
+
+    protected function _executeSQL($query)
+    {
+        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
+        $cmd      = sprintf("echo '$query' | mysql -u'%s' %s", $this->mysql->user, $password);
+
+        return exec($cmd);
     }
 }

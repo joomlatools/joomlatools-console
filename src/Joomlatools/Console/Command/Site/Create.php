@@ -12,7 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Create extends AbstractDatabase
+use Joomlatools\Console\Command\Database;
+
+class Create extends Database\AbstractDatabase
 {
     /**
      * Clear cache before fetching versions
@@ -171,7 +173,7 @@ class Create extends AbstractDatabase
             $arguments['--sample-data'] = $sample_data;
         }
 
-        $command = new DatabaseInstall();
+        $command = new Database\Install();
         $command->run(new ArrayInput($arguments), $output);
     }
 

@@ -8,9 +8,13 @@
 namespace Joomlatools\Console\Command\Site;
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Delete extends AbstractDatabase
+use Joomlatools\Console\Command\Database;
+
+class Delete extends Database\AbstractDatabase
 {
     protected function configure()
     {
@@ -18,7 +22,14 @@ class Delete extends AbstractDatabase
 
         $this
             ->setName('site:delete')
-            ->setDescription('Delete a site');
+            ->setDescription('Delete a site')
+            ->addOption(
+                'skip-database',
+                null,
+                InputOption::VALUE_NONE,
+                'Leave the database intact'
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -45,14 +56,17 @@ class Delete extends AbstractDatabase
 
     public function deleteDatabase(InputInterface $input, OutputInterface $output)
     {
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        $command  = sprintf("echo 'DROP DATABASE IF EXISTS `$this->target_db`' | mysql -u'%s' %s", $this->mysql->user, $password);
-
-        $result   = exec($command);
-
-        if (!empty($result)) { // MySQL returned an error
-            throw new \RuntimeException(sprintf('Cannot delete database %s. Error: %s', $this->target_db, $result));
+        if ($input->getOption('skip-database')) {
+            return;
         }
+
+        $command_input = new ArrayInput(array(
+            'database:drop',
+            'site' => $this->site
+        ));
+
+        $command = new Database\Drop();
+        $command->run($command_input, $output);
     }
 
     public function deleteVirtualHost(InputInterface $input, OutputInterface $output)

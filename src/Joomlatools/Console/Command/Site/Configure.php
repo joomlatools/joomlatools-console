@@ -13,6 +13,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Versions;
 
+use Joomlatools\Console\Command\Database\AbstractDatabase;
+
 class Configure extends AbstractDatabase
 {
     protected function configure()

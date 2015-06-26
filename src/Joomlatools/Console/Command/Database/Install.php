@@ -5,13 +5,13 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command\Site;
+namespace Joomlatools\Console\Command\Database;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DatabaseInstall extends AbstractDatabase
+class Install extends AbstractDatabase
 {
     /**
      * Sample data to install
@@ -39,7 +39,7 @@ class DatabaseInstall extends AbstractDatabase
         parent::configure();
 
         $this
-            ->setName('site:database:install')
+            ->setName('database:install')
             ->setDescription('Install the Joomla database')
             ->addOption(
                 'sample-data',
@@ -79,10 +79,10 @@ class DatabaseInstall extends AbstractDatabase
         $this->check($input, $output);
 
         if ($this->drop) {
-            $this->_execute(sprintf("DROP DATABASE IF EXISTS `%s`", $this->target_db));
+            $this->_executeSQL(sprintf("DROP DATABASE IF EXISTS `%s`", $this->target_db));
         }
 
-        $result = $this->_execute(sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8", $this->target_db));
+        $result = $this->_executeSQL(sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8", $this->target_db));
 
         if (!empty($result)) {
             throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
@@ -117,7 +117,7 @@ class DatabaseInstall extends AbstractDatabase
 
         if ($this->drop === false && $this->skip_check === false)
         {
-            $result = $this->_execute(sprintf("SHOW DATABASES LIKE \"%s\"", $this->target_db));
+            $result = $this->_executeSQL(sprintf("SHOW DATABASES LIKE \"%s\"", $this->target_db));
 
             if (!empty($result)) {
                 throw new \RuntimeException(sprintf('A database with name %s already exists', $this->target_db));
@@ -192,13 +192,5 @@ class DatabaseInstall extends AbstractDatabase
         }
 
         return $imports;
-    }
-
-    protected function _execute($query)
-    {
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        $cmd      = sprintf("echo '$query' | mysql -u'%s' %s", $this->mysql->user, $password);
-
-        return exec($cmd);
     }
 }
