@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Database;
+use Joomlatools\Console\Command\Vhost;
 
 class Delete extends Database\AbstractDatabase
 {
@@ -28,6 +29,12 @@ class Delete extends Database\AbstractDatabase
                 null,
                 InputOption::VALUE_NONE,
                 'Leave the database intact'
+            )
+            ->addOption(
+                'skip-vhost',
+                null,
+                InputOption::VALUE_NONE,
+                'Leave the virtual host intact'
             )
         ;
     }
@@ -71,11 +78,16 @@ class Delete extends Database\AbstractDatabase
 
     public function deleteVirtualHost(InputInterface $input, OutputInterface $output)
     {
-        if (is_file('/etc/apache2/sites-available/1-'.$this->site.'.conf'))
-        {
-            `sudo a2dissite 1-$this->site.conf`;
-            `sudo rm -f /etc/apache2/sites-available/1-$this->site.conf`;
-            `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+        if ($input->getOption('skip-vhost')) {
+            return;
         }
+
+        $command_input = new ArrayInput(array(
+            'vhost:remove',
+            'site' => $this->site
+        ));
+
+        $command = new Vhost\Remove();
+        $command->run($command_input, $output);
     }
 }
