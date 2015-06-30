@@ -15,6 +15,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SiteDeploy extends SiteAbstract
 {
+    protected $username = '';
+
+    protected $password = '';
+
+    protected $server = '';
+
     protected function configure()
     {
         parent::configure();
@@ -45,10 +51,17 @@ class SiteDeploy extends SiteAbstract
 
         parent::execute($input, $output);
 
-        $user = $input->getArgument('user');
-        $password = $input->getArgument('password');
-        $server = $input->getArgument('server');
+        $this->user = $input->getArgument('user');
+        $this->password = $input->getArgument('password');
+        $this->server = $input->getArgument('server');
 
+        $this->checkGit($input, $output);
+        $this->checkGitFTP($input, $output);
+        $this->deploy($input, $output);
+    }
+
+    public function checkGit(InputInterface $input, OutputInterface $output)
+    {
         `cd $this->target_dir`;
 
         if(!file_exists($this->target_dir . '/.git'))
@@ -59,39 +72,35 @@ class SiteDeploy extends SiteAbstract
             `touch .gitignore`;
             `echo ".git-ftp" > .gitignore`;
 
-            `git add *`;
-
-            $result = exec('git commit -m "inital commit"');
-            $output->writeln($result);
-
-            $output->writeln('<info>New git repository added, and initial commit created</info>');
+            $output->writeln('<info>New git repository added please make your first commit</info>');
+            exit();
         }
+    }
 
+    public function checkGitFTP(InputInterface $input, OutputInterface $output)
+    {
         if(!file_exists($this->target_dir . '/.git-ftp'))
         {
-            $result = exec('git ftp init --user ' . $user . ' --passwd ' . $password . ' ' . $server);
+            $result = exec('git ftp init --user ' . $this->user . ' --passwd ' . $this->password . ' ' . $this->server);
             $output->write($result);
 
             if (strpos($result, "Last deployment") !== false)
             {
                 `touch .git-ftp`;
+                `echo "used for local deployment purposes, do not delete" > .git-ftp`;
 
-                $contents = file_get_contents($this->target_dir . '/.gitignore');
-                if(!strpos($contents, '.git-ftp'))
-                {
-                    $ignore = PHP_EOL . ".git-ftp" . PHP_EOL;
-                    file_put_contents($this->target_dir . '/.gitignore', $ignore, FILE_APPEND);
-
-                    `git add * `;
-
-                    `git commit -m "amending gitignore to not version control .git-ftp"`;
-                }
+                $output->writeln('file created');
             }
-
-            return;
         }
 
-        $result = exec('git ftp push --user ' . $user . ' --passwd ' . $password . ' ' .$server);
-        $output->writeln($result);
+        return true;
+    }
+
+    public function deploy(InputInterface $input, OutputInterface $output)
+    {
+        $output->writeln("<info>about to deploy</info>");
+
+        $result = exec('git ftp push -f --user ' . $this->user . ' --passwd ' . $this->password . ' ' .$this->server);
+        $output->writeln("<info>$result</info>");
     }
 }
