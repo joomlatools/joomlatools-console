@@ -22,7 +22,7 @@ class CachePurge extends SiteAbstract
 
         $this
             ->setName('cache:purge')
-            ->setDescription('Delete all expired cache files')
+            ->setDescription('Purge all expired cache files')
             ;
     }
 
@@ -31,7 +31,7 @@ class CachePurge extends SiteAbstract
         parent::execute($input, $output);
 
         $this->check($input, $output);
-        $this->purge($input, $output);
+        $this->purgeCache($input, $output);
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -41,7 +41,7 @@ class CachePurge extends SiteAbstract
         }
     }
 
-    public function purge(InputInterface $input, OutputInterface $output)
+    public function purgeCache(InputInterface $input, OutputInterface $output)
     {
         Bootstrapper::getApplication($this->target_dir);
 

@@ -53,6 +53,7 @@ class CacheList extends SiteAbstract
         Bootstrapper::getApplication($this->target_dir);
 
         $client = $input->getOption('client');
+        $client_string = $client ? 'administrative side' : 'front end';
 
         $options = array(
             'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
@@ -61,17 +62,22 @@ class CacheList extends SiteAbstract
         $cache = \JCache::getInstance('', $options);
         $items = $cache->getAll();
 
-        if($items)
+
+        if($items === false)
+        {
+            $output->writeln("<info>It appears that your cache is not enabled via the configuration</info>");
+            return;
+        }
+        elseif(!count($items))
+        {
+            $output->writeln("<info>There appears to be no cache items for the $client_string</info>");
+            return;
+        }
+        else
         {
             foreach($items as $item){
                 $output->writeln($item->group);
             }
-        }
-        else
-        {
-            $client_string = $client ? 'administrative side' : 'front end';
-            //@todo is this really the case or rather configuration is not enabled?
-            $output->writeln('<info>' . "There appears to be no cache items for the $client_string</info>");
         }
     }
 }

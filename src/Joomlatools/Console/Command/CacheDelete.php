@@ -60,6 +60,7 @@ class CacheDelete extends SiteAbstract
 
         $group = $input->getOption('group');
         $client = $input->getOption('client');
+        $client_string = $client ? 'administrative ' : 'front end ';
 
         $options = array(
             'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
@@ -71,14 +72,26 @@ class CacheDelete extends SiteAbstract
             $group = $cache->getAll();
         }
 
-        foreach($group as $item)
+        if($group === false)
         {
-            $cache_item = isset($item->group) ? $item->group : $item;
-            $result = $cache->clean($cache_item);
+            $output->writeln("<info>It appears that your cache is not enabled via the configuration</info>");
+            return;
+        }
+        elseif(!count($group))
+        {
+            $output->writeln("<info>There appears to be no cache items for the $client_string</info>");
+            return;
+        }
+        else
+        {
+            foreach($group as $item)
+            {
+                $cache_item = isset($item->group) ? $item->group : $item;
+                $result = $cache->clean($cache_item);
 
-            if($result){
-                $client_string = $client ? 'administrative ' : 'front end ';
-                $output->writeln('<info>' . $client_string . $cache_item . ' cache items have been deleted</info>');
+                if($result){
+                    $output->writeln('<info>' . $client_string . $cache_item . ' cache items have been deleted</info>');
+                }
             }
         }
     }
