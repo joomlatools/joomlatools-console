@@ -44,7 +44,7 @@ class Create extends Database\AbstractDatabase
 
         $this
             ->setName('site:create')
-            ->setDescription('Create a Joomla site')
+            ->setDescription('Create a new Joomla site from scratch')
             ->addOption(
                 'joomla',
                 null,
