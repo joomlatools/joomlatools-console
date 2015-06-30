@@ -18,8 +18,6 @@ class ExtensionUninstall extends SiteAbstract
 {
     protected $extensions = array();
 
-    protected $type = '';
-
     protected function configure()
     {
         parent::configure();
@@ -31,11 +29,6 @@ class ExtensionUninstall extends SiteAbstract
                 'extensions',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
                 'A array of extensions to un-install from the site... n.b. only unprotected extensions can be uninstalled'
-            )->addOption(
-                'type',
-                't',
-                InputOption::VALUE_OPTIONAL,
-                'Specify the type of extension to remove'
             );
     }
 
@@ -44,10 +37,9 @@ class ExtensionUninstall extends SiteAbstract
         parent::execute($input, $output);
 
         $this->extensions = $input->getArgument('extensions');
-        $this->type = $input->getOption('type');
 
         $this->check($input, $output);
-        $this->install($input, $output);
+        $this->unInstall($input, $output);
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -57,7 +49,7 @@ class ExtensionUninstall extends SiteAbstract
         }
     }
 
-    public function install(InputInterface $input, OutputInterface $output)
+    public function unInstall(InputInterface $input, OutputInterface $output)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
 
@@ -71,13 +63,9 @@ class ExtensionUninstall extends SiteAbstract
             $query = \JFactory::getDbo()->getQuery(true)
                 ->select('*')
                 ->from('#__extensions')
-                ->where('protected = 0');
+                ->where($dbo->quoteName('protected') .' = ' . $dbo->quote(0));
 
-            if(strlen($this->type)){
-                $query->where($dbo->quoteName('type') . " = " . $dbo->quote($this->type), 'OR');
-            }
-
-            $query->where("(" .$dbo->quoteName('name') ." = " . $dbo->quote($uninstall) . ")");
+            $query->where($dbo->quoteName('name') ." = " . $dbo->quote($uninstall));
 
             $dbo->setQuery($query);
             $extension = $dbo->loadObject();
