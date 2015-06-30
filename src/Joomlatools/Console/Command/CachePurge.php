@@ -43,12 +43,14 @@ class CachePurge extends SiteAbstract
 
     public function purgeCache(InputInterface $input, OutputInterface $output)
     {
-        Bootstrapper::getApplication($this->target_dir);
+        $app = Bootstrapper::getApplication($this->target_dir);
 
-        $cache = \JCache::getInstance();
-        $delete = $cache->gc();
+        require_once $app->getPath() . '/administrator/components/com_cache/models/cache.php';
+        $model = new \CacheModelCache();
 
-        if($delete === false){
+        $result = $model->purge();
+
+        if($result === false){
             $output->writeln('<error>Error purging cached items</error>');
         }else
             $output->writeln('<info>All expired cache items have been deleted</info>');

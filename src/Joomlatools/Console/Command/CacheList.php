@@ -62,7 +62,6 @@ class CacheList extends SiteAbstract
         $cache = \JCache::getInstance('', $options);
         $items = $cache->getAll();
 
-
         if($items === false)
         {
             $output->writeln("<info>It appears that your cache is not enabled via the configuration</info>");
