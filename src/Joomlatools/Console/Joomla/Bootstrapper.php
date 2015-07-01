@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
@@ -19,7 +19,7 @@ class Bootstrapper
     {
         $_SERVER['SERVER_PORT'] = 80;
 
-        if (!defined('_JEXEC'))
+        if (!class_exists('\\JApplicationCli'))
         {
             $_SERVER['HTTP_HOST'] = 'localhost';
             $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/1.0.0';

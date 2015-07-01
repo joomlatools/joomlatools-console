@@ -1,24 +1,20 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Database;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class SiteAbstract extends Command
-{
-    protected $site;
-    protected $www;
+use Joomlatools\Console\Command\Site\AbstractSite;
 
-    protected $target_dir;
+abstract class AbstractDatabase extends AbstractSite
+{
     protected $target_db;
     protected $target_db_prefix = 'sites_';
 
@@ -26,18 +22,9 @@ abstract class SiteAbstract extends Command
 
     protected function configure()
     {
-        $this->addArgument(
-            'site',
-            InputArgument::REQUIRED,
-            'Alphanumeric site name. Also used in the site URL with .dev domain'
-        )->addOption(
-            'www',
-            null,
-            InputOption::VALUE_REQUIRED,
-            "Web server root",
-            '/var/www'
-        )
-        ->addOption(
+        parent::configure();
+
+        $this->addOption(
             'mysql',
             null,
             InputOption::VALUE_REQUIRED,
@@ -49,21 +36,27 @@ abstract class SiteAbstract extends Command
             null,
             InputOption::VALUE_OPTIONAL,
             "MySQL database prefix (default: sites_)",
-            'sites_'
+            $this->target_db_prefix
         )
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->site       = $input->getArgument('site');
-        $this->www        = $input->getOption('www');
-        $this->target_db_prefix = $input->getOption('mysql_db_prefix');
+        parent::execute($input, $output);
 
-        $this->target_db  = $this->target_db_prefix.$this->site;
-        $this->target_dir = $this->www.'/'.$this->site;
+        $this->target_db_prefix = $input->getOption('mysql_db_prefix');
+        $this->target_db        = $this->target_db_prefix.$this->site;
 
         $credentials = explode(':', $input->getOption('mysql'), 2);
         $this->mysql = (object) array('user' => $credentials[0], 'password' => $credentials[1]);
+    }
+
+    protected function _executeSQL($query)
+    {
+        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
+        $cmd      = sprintf("echo '$query' | mysql -u'%s' %s", $this->mysql->user, $password);
+
+        return exec($cmd);
     }
 }
