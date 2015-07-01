@@ -56,11 +56,11 @@ abstract class AbstractSite extends Command
         if (file_exists($code))
         {
             if (!defined('JPATH_PLATFORM')) {
-                define('JPATH_PLATFORM', true);
+                define('JPATH_PLATFORM', $this->target_dir.'/libraries');
             }
 
             if (!defined('_JEXEC')) {
-                define('_JEXEC', true);
+                define('_JEXEC', 1);
             }
 
             $identifier = uniqid();

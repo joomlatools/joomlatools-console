@@ -19,11 +19,10 @@ class Create extends Database\AbstractDatabase
 {
     /**
      * Clear cache before fetching versions
+     *
      * @var bool
      */
     protected $clear_cache = false;
-
-    protected $template;
 
     /**
      * Joomla version to install
@@ -31,12 +30,6 @@ class Create extends Database\AbstractDatabase
      * @var string
      */
     protected $version;
-
-    /**
-     * Projects to symlink
-     * @var array
-     */
-    protected $symlink = array();
 
     protected function configure()
     {
@@ -103,18 +96,12 @@ class Create extends Database\AbstractDatabase
                 InputOption::VALUE_OPTIONAL,
                 'The port on which the server will listen for SSL requests',
                 '443'
-            )
-            ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
-
-        $this->symlink = $input->getOption('symlink');
-        if (is_string($this->symlink)) {
-            $this->symlink = explode(',', $this->symlink);
-        }
 
         $this->version = $input->getOption('joomla');
 
@@ -123,18 +110,26 @@ class Create extends Database\AbstractDatabase
         `mkdir -p $this->target_dir`;
 
         $this->download($input, $output);
-        $this->importdb($input, $output);
-        $this->createConfig($input, $output);
-
         $this->addVirtualHost($input, $output);
-        $this->symlinkProjects($input, $output);
-        $this->installExtensions($input, $output);
-        $this->enableWebInstaller($input, $output);
 
         if ($this->version != 'none')
         {
-            $output->writeln("Your new Joomla site has been created.");
-            $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
+            $arguments = array(
+                'site:install',
+                'site'           => $this->site
+            );
+
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir');
+            foreach ($optionalArgs as $optionalArg)
+            {
+                $value = $input->getOption($optionalArg);
+                if (!empty($value)) {
+                    $arguments['--' . $optionalArg] = $value;
+                }
+            }
+
+            $command = new Install();
+            $command->run(new ArrayInput($arguments), $output);
         }
     }
 
@@ -158,41 +153,6 @@ class Create extends Database\AbstractDatabase
         $command->run($command_input, $output);
     }
 
-    public function importdb(InputInterface $input, OutputInterface $output)
-    {
-        if ($this->version == 'none') {
-            return;
-        }
-
-        $arguments = array(
-            'site:database:install',
-            'site'          => $this->site
-        );
-
-        $sample_data = $input->getOption('sample-data');
-        if (!empty($sample_data)) {
-            $arguments['--sample-data'] = $sample_data;
-        }
-
-        $command = new Database\Install();
-        $command->run(new ArrayInput($arguments), $output);
-    }
-
-    public function createConfig(InputInterface $input, OutputInterface $output)
-    {
-        if ($this->version == 'none') {
-            return;
-        }
-
-        $command_input = new ArrayInput(array(
-            'site:configure',
-            'site'          => $this->site
-        ));
-
-        $command = new Configure();
-        $command->run($command_input, $output);
-    }
-
     public function addVirtualHost(InputInterface $input, OutputInterface $output)
     {
         $command_input = new ArrayInput(array(
@@ -206,93 +166,5 @@ class Create extends Database\AbstractDatabase
 
         $command = new Vhost\Create();
         $command->run($command_input, $output);
-    }
-
-    public function symlinkProjects(InputInterface $input, OutputInterface $output)
-    {
-        if ($this->symlink)
-        {
-            $symlink_input = new ArrayInput(array(
-                'site:symlink',
-                'site'    => $input->getArgument('site'),
-                'symlink' => $this->symlink,
-                '--www'   => $this->www,
-                '--projects-dir' => $input->getOption('projects-dir')
-            ));
-            $symlink = new ExtensionSymlink();
-
-            $symlink->run($symlink_input, $output);
-        }
-    }
-
-    public function installExtensions(InputInterface $input, OutputInterface $output)
-    {
-        if ($this->symlink)
-        {
-            $extension_input = new ArrayInput(array(
-                'extension:install',
-                'site'      => $input->getArgument('site'),
-                'extension' => $this->symlink,
-                '--www'     => $this->www
-            ));
-            $installer = new ExtensionInstall();
-
-            $installer->run($extension_input, $output);
-        }
-    }
-
-    public function enableWebInstaller(InputInterface $input, OutputInterface $output)
-    {
-        if ($this->version == 'none') {
-            return;
-        }
-
-        $version = $this->_getJoomlaVersion();
-
-        if ($this->version != 'latest' && version_compare($version, '3.2.0', '<')) {
-            return;
-        }
-
-        $xml = simplexml_load_file('http://appscdn.joomla.org/webapps/jedapps/webinstaller.xml');
-
-        if(!$xml)
-        {
-            $output->writeln('<warning>Failed to install web installer</warning>');
-
-            return;
-        }
-
-        $url = '';
-        foreach($xml->update->downloads->children() as $download)
-        {
-            $attributes = $download->attributes();
-            if($attributes->type == 'full' && $attributes->format == 'zip')
-            {
-                $url = (string) $download;
-                break;
-            }
-        }
-
-        if(empty($url)) {
-            return;
-        }
-
-        $filename = self::$files.'/cache/'.basename($url);
-        if(!file_exists($filename))
-        {
-            $bytes = file_put_contents($filename, fopen($url, 'r'));
-            if($bytes === false || $bytes == 0) {
-                return;
-            }
-        }
-
-        `mkdir -p $this->target_dir/plugins/installer`;
-        `cd $this->target_dir/plugins/installer/ && unzip -o $filename`;
-
-        $sql = "INSERT INTO `j_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
-        $sql = escapeshellarg($sql);
-
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        exec(sprintf("mysql -u'%s' %s %s -e %s", $this->mysql->user, $password, $this->target_db, $sql));
     }
 }

@@ -19,7 +19,7 @@ class Bootstrapper
     {
         $_SERVER['SERVER_PORT'] = 80;
 
-        if (!defined('_JEXEC'))
+        if (!class_exists('\\JApplicationCli'))
         {
             $_SERVER['HTTP_HOST'] = 'localhost';
             $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/1.0.0';

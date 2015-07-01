@@ -54,6 +54,10 @@ class Delete extends Database\AbstractDatabase
         if ((strpos(getcwd(), $this->target_dir) === 0) && (getcwd() !== $this->www)) {
             throw new \RuntimeException('You are currently in the directory you are trying to delete. Aborting');
         }
+
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('The site %s does not exist!', $this->site));
+        }
     }
 
     public function deleteFolder(InputInterface $input, OutputInterface $output)
