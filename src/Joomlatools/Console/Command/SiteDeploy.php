@@ -82,25 +82,20 @@ class SiteDeploy extends SiteAbstract
         if(!file_exists($this->target_dir . '/.git-ftp'))
         {
             $result = exec('git ftp init --user ' . $this->user . ' --passwd ' . $this->password . ' ' . $this->server);
-            $output->write($result);
+            $output->writeln($result);
 
-            if (strpos($result, "Last deployment") !== false)
-            {
-                `touch .git-ftp`;
-                `echo "used for local deployment purposes, do not delete" > .git-ftp`;
+            `touch .git-ftp`;
+            `echo "used for local deployment purposes, do not delete" > .git-ftp`;
 
-                $output->writeln('file created');
-            }
+            exit();
         }
-
-        return true;
     }
 
     public function deploy(InputInterface $input, OutputInterface $output)
     {
         $output->writeln("<info>about to deploy</info>");
 
-        $result = exec('git ftp push -f --user ' . $this->user . ' --passwd ' . $this->password . ' ' .$this->server);
+        $result = exec('git ftp push --user ' . $this->user . ' --passwd ' . $this->password . ' ' .$this->server);
         $output->writeln("<info>$result</info>");
     }
 }
