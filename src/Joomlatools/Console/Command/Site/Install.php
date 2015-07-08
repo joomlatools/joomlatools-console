@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Joomlatools\Console\Command;
 use Joomlatools\Console\Command\Database;
 use Joomlatools\Console\Command\Vhost;
+use Joomlatools\Console\Joomla\Util;
 
 class Install extends Database\AbstractDatabase
 {
@@ -163,7 +164,11 @@ class Install extends Database\AbstractDatabase
 
     public function enableWebInstaller(InputInterface $input, OutputInterface $output)
     {
-        $version = $this->_getJoomlaVersion();
+        if (Util::isPlatform($this->target_dir)) {
+            return;
+        }
+
+        $version = Util::getJoomlaVersion($this->target_dir);
 
         if (version_compare($version, '3.2.0', '<')) {
             return;

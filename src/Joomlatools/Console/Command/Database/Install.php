@@ -11,6 +11,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Util;
+
 class Install extends AbstractDatabase
 {
     /**
@@ -88,7 +90,7 @@ class Install extends AbstractDatabase
             throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
         }
 
-        $imports = $this->_getDumpFiles($input, $output);
+        $imports = $this->_getSQLFiles($input, $output);
 
         foreach($imports as $import)
         {
@@ -131,7 +133,7 @@ class Install extends AbstractDatabase
                 throw new \RuntimeException(sprintf('Unknown sample data "%s"', $this->sample_data));
             }
 
-            $version = $this->_getJoomlaVersion();
+            $version = Util::getJoomlaVersion($this->target_dir);
 
             if($version)
             {
@@ -142,7 +144,7 @@ class Install extends AbstractDatabase
         }
     }
 
-    protected function _getDumpFiles(InputInterface $input, OutputInterface $output)
+    protected function _getSQLFiles(InputInterface $input, OutputInterface $output)
     {
         $dumps = $input->getOption('sql-dumps');
 
@@ -158,14 +160,9 @@ class Install extends AbstractDatabase
             return $dumps;
         }
 
-        $path = $this->target_dir.'/_installation/sql/mysql/';
-        if (!file_exists($path)) {
-            $path = $this->target_dir.'/installation/sql/mysql/';
-        }
+        $version = Util::getJoomlaVersion($this->target_dir);
+        $imports = $this->_getInstallFiles($input->getOption('sample-data'));
 
-        $imports = array($path.'joomla.sql');
-
-        $version = $this->_getJoomlaVersion();
         if ($version !== false)
         {
             $users = 'joomla3.users.sql';
@@ -176,14 +173,6 @@ class Install extends AbstractDatabase
             $imports[] = self::$files.'/'.$users;
         }
 
-        if ($sample_data = $input->getOption('sample-data'))
-        {
-            $type      = $sample_data == 'default' ? 'data' : $sample_data;
-            $sample_db = $path . 'sample_' . $type . '.sql';
-
-            $imports[] = $sample_db;
-        }
-
         foreach ($imports as $import)
         {
             if (!file_exists($import)) {
@@ -192,5 +181,38 @@ class Install extends AbstractDatabase
         }
 
         return $imports;
+    }
+
+    protected function _getInstallFiles($sample_data = false)
+    {
+        $files = array();
+
+        if (Util::isPlatform($this->target_dir))
+        {
+            $path = $this->target_dir .'/install/mysql/';
+
+            $files[] = $path . 'schema.sql';
+            $files[] = $path . 'data.sql';
+        }
+        else
+        {
+            $path = $this->target_dir.'/_installation/sql/mysql/';
+
+            if (!file_exists($path)) {
+                $path = $this->target_dir.'/installation/sql/mysql/';
+            }
+
+            $files[] = $path.'joomla.sql';
+
+            if ($sample_data)
+            {
+                $type      = $sample_data == 'default' ? 'data' : $sample_data;
+                $sample_db = $path . 'sample_' . $type . '.sql';
+
+                $files[] = $sample_db;
+            }
+        }
+
+        return $files;
     }
 }
