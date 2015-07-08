@@ -58,11 +58,11 @@ class ExtensionSymlink extends Site\AbstractSite
     {
         // koowa is here for backwards compatibility, can be removed once Nooku Framework 2.2 is out
         static $dependencies = array(
-            'nooku-framework-joomla' => array('nooku-framework'),
-            'extman'  => array('koowa', 'nooku-framework-joomla', 'nooku-framework'),
-            'docman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
-            'fileman' => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
-            'logman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_activities')
+            'joomlatools-framework' => array('nooku-framework'),
+            'extman'  => array('koowa', 'joomlatools-framework', 'nooku-framework'),
+            'docman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files'),
+            'fileman' => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files'),
+            'logman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_activities')
         );
 
         $project_folder = $input->getOption('projects-dir');
@@ -77,7 +77,7 @@ class ExtensionSymlink extends Site\AbstractSite
         }
 
         // If we are symlinking Koowa, we need to create this structure to allow multiple symlinks in them
-        if (array_intersect(array('nooku-framework', 'nooku-framework-joomla', 'koowa'), $projects))
+        if (array_intersect(array('nooku-framework', 'joomlatools-framework', 'koowa'), $projects))
         {
             $dirs = array($this->target_dir.'/libraries/koowa/components', $this->target_dir.'/media/koowa');
             foreach ($dirs as $dir)
