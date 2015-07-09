@@ -9,7 +9,7 @@ namespace Joomlatools\Console\Joomla;
 
 class Util
 {
-    protected static $_versions = array();
+    protected static $_versions  = array();
 
     /**
      * Retrieve the Joomla version.
