@@ -49,6 +49,12 @@ class Download extends AbstractSite
                 InputOption::VALUE_NONE,
                 'Update the list of available tags and branches from the Joomla repository'
             )
+            ->addOption(
+                'git-repository',
+                'g',
+                InputOption::VALUE_OPTIONAL,
+                'Alternative Git repository to clone'
+            )
         ;
     }
 
@@ -60,6 +66,10 @@ class Download extends AbstractSite
 
         $this->versions = new Versions();
 
+        if ($input->getOption('git-repository')) {
+            $this->versions->setRepository($input->getOption('git-repository'));
+        }
+
         if ($input->getOption('clear-cache')) {
             $this->versions->refresh();
         }
@@ -68,7 +78,7 @@ class Download extends AbstractSite
 
         if ($this->version != 'none')
         {
-            $tarball = $this->getTarball($output);
+            $tarball = $this->_getTarball($output);
             if(!file_exists($tarball)) {
                 throw new \RuntimeException(sprintf('File %s does not exist', $tarball));
             }
@@ -119,7 +129,7 @@ class Download extends AbstractSite
         $this->version = $result;
     }
 
-    public function getTarball(OutputInterface $output)
+    protected function _getTarball(OutputInterface $output)
     {
         $tar   = $this->version.'.tar.gz';
         $cache = self::$files.'/cache/'.$tar;
