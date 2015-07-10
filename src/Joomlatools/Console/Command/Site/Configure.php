@@ -137,7 +137,7 @@ class Configure extends AbstractDatabase
         $fp = fopen($this->target_dir.'/.env', 'w');
 
         foreach ($config as $key => $val) {
-            fwrite($fp, $key . '=' . $val);
+            fwrite($fp, $key . '=' . $val . PHP_EOL);
         }
 
         fclose($fp);

@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Versions;
+use Joomlatools\Console\Joomla\Util;
 
 class Download extends AbstractSite
 {
@@ -44,14 +45,20 @@ class Download extends AbstractSite
                 'latest'
             )
             ->addOption(
-                'clear-cache',
+                'refresh',
                 null,
                 InputOption::VALUE_NONE,
                 'Update the list of available tags and branches from the Joomla repository'
             )
             ->addOption(
-                'git-repository',
-                'g',
+                'clear-cache',
+                null,
+                InputOption::VALUE_NONE,
+                'Clear the downloaded files cache'
+            )
+            ->addOption(
+                'repo',
+                null,
                 InputOption::VALUE_OPTIONAL,
                 'Alternative Git repository to clone'
             )
@@ -66,12 +73,16 @@ class Download extends AbstractSite
 
         $this->versions = new Versions();
 
-        if ($input->getOption('git-repository')) {
-            $this->versions->setRepository($input->getOption('git-repository'));
+        if ($input->getOption('repo')) {
+            $this->versions->setRepository($input->getOption('repo'));
+        }
+
+        if ($input->getOption('refresh')) {
+            $this->versions->refresh();
         }
 
         if ($input->getOption('clear-cache')) {
-            $this->versions->refresh();
+            $this->versions->clearcache($output);
         }
 
         $this->setVersion($input->getOption('joomla'));
@@ -93,7 +104,13 @@ class Download extends AbstractSite
                 unlink($tarball);
             }
 
-            `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
+            if (file_exists($this->target_dir.'/htaccess.txt')) {
+                `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
+            }
+
+            if (Util::isPlatform($this->target_dir)) {
+                `cd $this->target_dir; composer install -q`;
+            }
         }
     }
 
@@ -132,12 +149,52 @@ class Download extends AbstractSite
     protected function _getTarball(OutputInterface $output)
     {
         $tar   = $this->version.'.tar.gz';
-        $cache = self::$files.'/cache/'.$tar;
+        $cache = $this->versions->getCacheDirectory().'/'.$tar;
 
         if(file_exists($cache) && !$this->versions->isBranch($this->version)) {
             return $cache;
         }
 
+        $repository = $this->versions->getRepository();
+
+        // We can be certain that the joomla-cms repository is a public GitHub repository
+        // so we can download the files straight over HTTP.
+        // We have no clue about anything else, so we clone those locally and fall back on git-archive
+        if ($repository == 'https://github.com/joomla/joomla-cms.git')
+        {
+            $output->writeln("<info>Downloading Joomla $this->version - this could take a few minutes...</info>");
+
+            $result = $this->_downloadJoomlaCMS($cache);
+
+            if (!$result) {
+                throw new \RuntimeException(sprintf('Failed to download Joomla %s', $this->version));
+            }
+        }
+        else
+        {
+            $clone = $this->versions->getCacheDirectory() . '/source';
+            if (!file_exists($clone)) {
+                `git clone --bare --mirror "$repository" "$clone"`;
+            }
+
+            if ($this->versions->isBranch($this->version)) {
+                `git --git-dir "$clone" --bare fetch`;
+            }
+
+            `git --git-dir "$clone" archive --prefix=base/ $this->version | gzip >"$cache"`;
+        }
+
+        return $cache;
+    }
+
+    /**
+     * Downloads joomla-cms codebase from github
+     *
+     * @param $target
+     * @return bool
+     */
+    protected function _downloadJoomlaCMS($target)
+    {
         if ($this->versions->isBranch($this->version)) {
             $url = 'http://github.com/joomla/joomla-cms/tarball/'.$this->version;
         }
@@ -145,12 +202,12 @@ class Download extends AbstractSite
             $url = 'https://github.com/joomla/joomla-cms/archive/'.$this->version.'.tar.gz';
         }
 
-        $output->writeln("<info>Downloading Joomla $this->version - this could take a few minutes...</info>");
-        $bytes = file_put_contents($cache, fopen($url, 'r'));
+
+        $bytes = file_put_contents($target, fopen($url, 'r'));
         if ($bytes === false || $bytes == 0) {
-            throw new \RuntimeException(sprintf('Failed to download %s', $url));
+            return false;
         }
 
-        return $cache;
+        return true;
     }
 }

@@ -52,8 +52,8 @@ class Versions extends Command
                 'Clear the downloaded files cache'
             )
             ->addOption(
-                'git-repository',
-                'g',
+                'repo',
+                null,
                 InputOption::VALUE_OPTIONAL,
                 'Alternative Git repository to clone',
                 $this->repository
@@ -62,7 +62,7 @@ class Versions extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->setRepository($input->getOption('git-repository'));
+        $this->setRepository($input->getOption('repo'));
 
         if ($input->getOption('refresh')) {
             $this->refresh();
@@ -94,14 +94,31 @@ class Versions extends Command
         self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/.versions-'.md5($repository);
     }
 
-    public function clearcache(OutputInterface $output)
+    public function getRepository()
+    {
+        return $this->repository;
+    }
+
+    public function getCacheDirectory()
     {
         $cachedir = dirname(self::$file) . '/' . md5($this->repository);
+
+        if (!file_exists($cachedir)) {
+            mkdir($cachedir, 0755, true);
+        }
+
+        return $cachedir;
+    }
+
+    public function clearcache(OutputInterface $output)
+    {
+        $cachedir = $this->getCacheDirectory();
 
         if(!empty($cachedir) && file_exists($cachedir))
         {
             `rm -rf $cachedir/*.tar.gz`;
-            $output->writeln("<info>Downloaded version cache has been cleared.</info>\n");
+
+            $output->writeln("<info>Downloaded version cache has been cleared.</info>");
         }
     }
 
@@ -151,9 +168,12 @@ class Versions extends Command
 
     public function getLatestRelease($prefix = null)
     {
-        // Find the latest tag
-        $latest = '0.0.0';
+        $latest   = '0.0.0';
         $versions = $this->_getVersions();
+
+        if (!isset($versions['tags'])) {
+            return 'master';
+        }
 
         foreach($versions['tags'] as $version)
         {
@@ -168,6 +188,10 @@ class Versions extends Command
             if(version_compare($latest, strtolower($version), '<')) {
                 $latest = $version;
             }
+        }
+
+        if ($latest == '0.0.0') {
+            $latest = 'master';
         }
 
         return $latest;

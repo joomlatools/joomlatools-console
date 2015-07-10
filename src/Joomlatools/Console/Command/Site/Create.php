@@ -58,6 +58,12 @@ class Create extends Database\AbstractDatabase
                 'A comma separated list of folders to symlink from projects folder'
             )
             ->addOption(
+                'repo',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Alternative Git repository to clone'
+            )
+            ->addOption(
                 'clear-cache',
                 null,
                 InputOption::VALUE_NONE,
@@ -142,15 +148,20 @@ class Create extends Database\AbstractDatabase
 
     public function download(InputInterface $input, OutputInterface $output)
     {
-        $command_input = new ArrayInput(array(
+        $arguments = array(
             'site:download',
             'site'          => $this->site,
             '--joomla'      => $input->getOption('joomla'),
             '--clear-cache' => $input->getOption('clear-cache')
-        ));
+        );
+
+        $repo = $input->getOption('repo');
+        if (!empty($repo)) {
+            $arguments['--repo'] = $repo;
+        }
 
         $command = new Download();
-        $command->run($command_input, $output);
+        $command->run(new ArrayInput($arguments), $output);
     }
 
     public function addVirtualHost(InputInterface $input, OutputInterface $output)
