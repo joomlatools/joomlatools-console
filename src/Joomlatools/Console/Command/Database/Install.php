@@ -101,7 +101,7 @@ class Install extends AbstractDatabase
             file_put_contents($tmp, $contents);
 
             $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf("mysql -u'%s' %s %s < %s", $this->mysql->user, $password, $this->target_db, $tmp));
+            $result = exec(sprintf("mysql --host=%s --port=%s --user='%s' %s %s < %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $tmp));
 
             unlink($tmp);
 

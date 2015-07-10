@@ -64,6 +64,12 @@ class Install extends Database\AbstractDatabase
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
             )
+            ->addOption(
+                'interactive',
+                null,
+                InputOption::VALUE_NONE,
+                'Prompt for configuration details'
+            )
             ;
     }
 
@@ -87,7 +93,7 @@ class Install extends Database\AbstractDatabase
             $this->installExtensions($input, $output);
         }
 
-        $this->enableWebInstaller($input, $output);
+        $this->_enableWebInstaller($input, $output);
 
         $output->writeln("Your new Joomla site has been configured.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
@@ -107,13 +113,13 @@ class Install extends Database\AbstractDatabase
             'site'          => $this->site
         );
 
-        $sample_data = $input->getOption('sample-data');
-        if (!empty($sample_data)) {
-            $arguments['--sample-data'] = $sample_data;
-        }
-
-        if ($input->getOption('drop')) {
-            $arguments['--drop'] = true;
+        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port');
+        foreach ($optionalArgs as $optionalArg)
+        {
+            $value = $input->getOption($optionalArg);
+            if (!empty($value)) {
+                $arguments['--' . $optionalArg] = $value;
+            }
         }
 
         $command = new Database\Install();
@@ -162,7 +168,7 @@ class Install extends Database\AbstractDatabase
         $installer->run($extension_input, $output);
     }
 
-    public function enableWebInstaller(InputInterface $input, OutputInterface $output)
+    protected function _enableWebInstaller(InputInterface $input, OutputInterface $output)
     {
         if (Util::isPlatform($this->target_dir)) {
             return;
@@ -214,6 +220,6 @@ class Install extends Database\AbstractDatabase
         $sql = escapeshellarg($sql);
 
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        exec(sprintf("mysql -u'%s' %s %s -e %s", $this->mysql->user, $password, $this->target_db, $sql));
+        exec(sprintf("mysql --host=%s --port=%s -u'%s' %s %s -e %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $sql));
     }
 }

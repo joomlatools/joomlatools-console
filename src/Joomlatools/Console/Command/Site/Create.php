@@ -102,6 +102,12 @@ class Create extends Database\AbstractDatabase
                 InputOption::VALUE_OPTIONAL,
                 'The port on which the server will listen for SSL requests',
                 '443'
+            )
+            ->addOption(
+                'interactive',
+                null,
+                InputOption::VALUE_NONE,
+                'Prompt for configuration details'
             );
     }
 
@@ -125,7 +131,7 @@ class Create extends Database\AbstractDatabase
                 'site'           => $this->site
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);
