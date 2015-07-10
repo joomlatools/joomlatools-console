@@ -96,6 +96,6 @@ class SiteDeploy extends SiteAbstract
         $output->writeln("<info>about to deploy</info>");
 
         $result = exec('git ftp push --user ' . $this->user . ' --passwd ' . $this->password . ' ' .$this->server);
-        $output->writeln("<info>$result</info>");
+        $output->writeln("$result");
     }
 }
