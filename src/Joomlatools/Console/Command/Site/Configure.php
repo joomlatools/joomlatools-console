@@ -77,6 +77,7 @@ class Configure extends AbstractDatabase
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
+            'host'      => $this->mysql->host,
             'dbprefix'  => 'j_',
             'dbtype'    => 'mysqli',
 
@@ -124,7 +125,7 @@ class Configure extends AbstractDatabase
             'JOOMLA_DB_NAME' => $this->target_db,
             'JOOMLA_DB_USER' => $this->mysql->user,
             'JOOMLA_DB_PASS' => $this->mysql->password,
-            'JOOMLA_DB_HOST' => 'localhost',
+            'JOOMLA_DB_HOST' => $this->mysql->host,
             'JOOMLA_DB_TYPE' => 'mysqli',
 
             'JOOMLA_LOG_PATH' => $this->target_dir.'/logs',

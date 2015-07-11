@@ -34,16 +34,9 @@ abstract class AbstractDatabase extends AbstractSite
         ->addOption(
             'mysql-host',
             'H',
-            InputOption::VALUE_OPTIONAL,
+            InputOption::VALUE_REQUIRED,
             "MySQL host",
             'localhost'
-        )
-        ->addOption(
-            'mysql-port',
-            'P',
-            InputOption::VALUE_OPTIONAL,
-            "MySQL port",
-            3306
         )
         ->addOption(
             'mysql_db_prefix',
@@ -52,6 +45,12 @@ abstract class AbstractDatabase extends AbstractSite
             "MySQL database prefix (default: sites_)",
             $this->target_db_prefix
         )
+        ->addOption(
+            'mysql-database',
+            'db',
+            InputOption::VALUE_REQUIRED,
+            "MySQL database name. If set, the --mysql_db_prefix option will be ignored."
+        )
         ;
     }
 
@@ -59,16 +58,24 @@ abstract class AbstractDatabase extends AbstractSite
     {
         parent::execute($input, $output);
 
-        $this->target_db_prefix = $input->getOption('mysql_db_prefix');
-        $this->target_db        = $this->target_db_prefix.$this->site;
+        $db_name = $input->getOption('mysql-database');
+        if (empty($db_name))
+        {
+            $this->target_db_prefix = $input->getOption('mysql_db_prefix');
+            $this->target_db        = $this->target_db_prefix.$this->site;
+        }
+        else
+        {
+            $this->target_db_prefix = '';
+            $this->target_db        = $db_name;
+        }
 
         $credentials = explode(':', $input->getOption('mysql-login'), 2);
 
         $this->mysql = (object) array(
-            'user' => $credentials[0],
+            'user'     => $credentials[0],
             'password' => $credentials[1],
-            'host' => $input->getOption('mysql-host'),
-            'port' => $input->getOption('mysql-port')
+            'host'     => $input->getOption('mysql-host')
         );
     }
 

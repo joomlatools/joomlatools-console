@@ -77,6 +77,10 @@ class Install extends Database\AbstractDatabase
     {
         parent::execute($input, $output);
 
+        if ($input->getOption('interactive')) {
+            $this->_promptDetails($input, $output);
+        }
+
         $this->symlink = $input->getOption('symlink');
         if (is_string($this->symlink)) {
             $this->symlink = explode(',', $this->symlink);
@@ -113,7 +117,7 @@ class Install extends Database\AbstractDatabase
             'site'          => $this->site
         );
 
-        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port');
+        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
@@ -133,8 +137,13 @@ class Install extends Database\AbstractDatabase
             'site'          => $this->site
         );
 
-        if ($input->getOption('overwrite')) {
-            $arguments['--overwrite'] = true;
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
+        foreach ($optionalArgs as $optionalArg)
+        {
+            $value = $input->getOption($optionalArg);
+            if (!empty($value)) {
+                $arguments['--' . $optionalArg] = $value;
+            }
         }
 
         $command = new Configure();
@@ -166,6 +175,18 @@ class Install extends Database\AbstractDatabase
         $installer = new Command\ExtensionInstall();
 
         $installer->run($extension_input, $output);
+    }
+
+    protected function _promptDetails(InputInterface $input, OutputInterface $output)
+    {
+        $this->target_db       = $this->_ask($input, $output, 'MySQL database name', $this->target_db, true);
+        $this->mysql->user     = $this->_ask($input, $output, 'MySQL user', $this->mysql->user, true);
+        $this->mysql->password = $this->_ask($input, $output, 'MySQL password', $this->mysql->password, true, true);
+        $this->mysql->host     = $this->_ask($input, $output, 'MySQL host', $this->mysql->host, true);
+
+        $input->setOption('mysql-login', $this->mysql->user . ':' . $this->mysql->password);
+        $input->setOption('mysql-host', $this->mysql->host);
+        $input->setOption('mysql-database', $this->target_db);
     }
 
     protected function _enableWebInstaller(InputInterface $input, OutputInterface $output)

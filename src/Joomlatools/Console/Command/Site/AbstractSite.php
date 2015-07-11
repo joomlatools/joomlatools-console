@@ -13,6 +13,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Symfony\Component\Console\Question;
+
 abstract class AbstractSite extends Command
 {
     protected $site;
@@ -47,5 +49,55 @@ abstract class AbstractSite extends Command
         $this->site       = $input->getArgument('site');
         $this->www        = $input->getOption('www');
         $this->target_dir = $this->www.'/'.$this->site;
+    }
+
+    /**
+     * Prompt user to fill in a value
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param $label    string          The description of the value
+     * @param $default  string|array    The default value. If array given, question will be multiple-choice and the first item will be default. Can also be empty.
+     * @param bool $required
+     * @param bool $hidden  Hide user input (useful for passwords)
+     *
+     * @return string   Answer
+     */
+    protected function _ask(InputInterface $input, OutputInterface $output, $label, $default, $required = false, $hidden = false)
+    {
+        $helper  = $this->getHelper('question');
+        $text    = $label;
+
+        if (!isset($default)) {
+            $default = '';
+        }
+
+        if (is_array($default)) {
+            $default = $default[0];
+        }
+        else $default = $default;
+
+        if (!empty($default)) {
+            $text .= ' [default: <info>' . $default . '</info>]';
+        }
+
+        $text .= ': ';
+
+        if (is_array($default)) {
+            $question = new Question\ChoiceQuestion($text, $default, 0);
+        }
+        else $question = new Question\Question($text, $default);
+
+        if ($hidden === true) {
+            $question->setHidden(true);
+        }
+
+        $answer = $helper->ask($input, $output, $question);
+
+        if ($required && empty($answer)) {
+            return $this->_ask($input, $output, $label, $default, $hidden);
+        }
+
+        return $answer;
     }
 }

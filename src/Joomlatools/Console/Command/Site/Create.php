@@ -131,7 +131,7 @@ class Create extends Database\AbstractDatabase
                 'site'           => $this->site
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);
@@ -141,6 +141,7 @@ class Create extends Database\AbstractDatabase
             }
 
             $command = new Install();
+            $command->setApplication($this->getApplication());
             $command->run(new ArrayInput($arguments), $output);
         }
     }
