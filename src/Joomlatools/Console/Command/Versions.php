@@ -33,7 +33,7 @@ class Versions extends Command
     protected function configure()
     {
         if (!self::$file) {
-            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/.versions-'.md5($this->repository);
+            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
         }
 
         $this
@@ -95,7 +95,7 @@ class Versions extends Command
 
         $this->repository = $repository;
 
-        self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/.versions-'.md5($repository);
+        self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
     }
 
     public function getRepository()
@@ -105,7 +105,7 @@ class Versions extends Command
 
     public function getCacheDirectory()
     {
-        $cachedir = dirname(self::$file) . '/' . md5($this->repository);
+        $cachedir = dirname(self::$file);
 
         if (!file_exists($cachedir)) {
             mkdir($cachedir, 0755, true);
@@ -153,6 +153,10 @@ class Versions extends Command
                 $type[] = $matches[2];
                 $versions[$matches[1]] = $type;
             }
+        }
+
+        if (!file_exists(dirname(self::$file))) {
+            mkdir(dirname(self::$file), 0755, true);
         }
 
         file_put_contents(self::$file, json_encode($versions));
