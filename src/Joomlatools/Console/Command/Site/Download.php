@@ -60,7 +60,7 @@ class Download extends AbstractSite
                 'repo',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Alternative Git repository to clone'
+                'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.'
             )
         ;
     }
@@ -173,11 +173,17 @@ class Download extends AbstractSite
         else
         {
             $clone = $this->versions->getCacheDirectory() . '/source';
-            if (!file_exists($clone)) {
+            if (!file_exists($clone))
+            {
+                $output->writeln("<info>Cloning $repository - this could take a few minutes...</info>");
+
                 `git clone --bare --mirror "$repository" "$clone"`;
             }
 
-            if ($this->versions->isBranch($this->version)) {
+            if ($this->versions->isBranch($this->version))
+            {
+                $output->writeln("<info>Fetching latest changes from $repository - this could take a few minutes...</info>");
+
                 `git --git-dir "$clone" --bare fetch`;
             }
 

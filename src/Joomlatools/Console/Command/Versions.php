@@ -55,7 +55,7 @@ class Versions extends Command
                 'repo',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Alternative Git repository to clone',
+                'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.',
                 $this->repository
             );
     }
@@ -89,6 +89,10 @@ class Versions extends Command
 
     public function setRepository($repository)
     {
+        if ($repository == 'platform') {
+            $repository = 'git@github.com:joomlatools/joomla-platform.git';
+        }
+
         $this->repository = $repository;
 
         self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/.versions-'.md5($repository);

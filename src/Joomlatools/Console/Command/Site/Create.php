@@ -61,7 +61,7 @@ class Create extends Database\AbstractDatabase
                 'repo',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Alternative Git repository to clone'
+                'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.'
             )
             ->addOption(
                 'clear-cache',
