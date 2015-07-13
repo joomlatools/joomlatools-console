@@ -79,7 +79,7 @@ class Configure extends AbstractDatabase
             'password'  => $this->mysql->password,
             'host'      => $this->mysql->host,
             'dbprefix'  => 'j_',
-            'dbtype'    => 'mysqli',
+            'dbtype'    => $this->mysql->driver,
 
             'mailer'   => 'smtp',
             'mailfrom' => 'admin@example.com',
@@ -126,7 +126,7 @@ class Configure extends AbstractDatabase
             'JOOMLA_DB_USER' => $this->mysql->user,
             'JOOMLA_DB_PASS' => $this->mysql->password,
             'JOOMLA_DB_HOST' => $this->mysql->host,
-            'JOOMLA_DB_TYPE' => 'mysqli',
+            'JOOMLA_DB_TYPE' => $this->mysql->driver,
 
             'JOOMLA_LOG_PATH' => $this->target_dir.'/logs',
             'JOOMLA_TMP_PATH' => $this->target_dir.'/tmp',

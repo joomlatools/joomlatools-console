@@ -137,7 +137,7 @@ class Install extends Database\AbstractDatabase
             'site'          => $this->site
         );
 
-        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database', 'mysql-driver');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
@@ -183,10 +183,12 @@ class Install extends Database\AbstractDatabase
         $this->mysql->user     = $this->_ask($input, $output, 'MySQL user', $this->mysql->user, true);
         $this->mysql->password = $this->_ask($input, $output, 'MySQL password', $this->mysql->password, true, true);
         $this->mysql->host     = $this->_ask($input, $output, 'MySQL host', $this->mysql->host, true);
+        $this->mysql->driver   = $this->_ask($input, $output, 'MySQL driver', array('mysqli', 'mysql'), true);
 
         $input->setOption('mysql-login', $this->mysql->user . ':' . $this->mysql->password);
         $input->setOption('mysql-host', $this->mysql->host);
         $input->setOption('mysql-database', $this->target_db);
+        $input->setOption('mysql-driver', $this->mysql->driver);
     }
 
     protected function _enableWebInstaller(InputInterface $input, OutputInterface $output)

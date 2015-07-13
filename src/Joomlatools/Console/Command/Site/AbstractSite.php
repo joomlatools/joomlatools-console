@@ -63,22 +63,18 @@ abstract class AbstractSite extends Command
      *
      * @return string   Answer
      */
-    protected function _ask(InputInterface $input, OutputInterface $output, $label, $default, $required = false, $hidden = false)
+    protected function _ask(InputInterface $input, OutputInterface $output, $label, $default = '', $required = false, $hidden = false)
     {
         $helper  = $this->getHelper('question');
         $text    = $label;
 
-        if (!isset($default)) {
-            $default = '';
-        }
-
         if (is_array($default)) {
-            $default = $default[0];
+            $defaultValue = $default[0];
         }
-        else $default = $default;
+        else $defaultValue = $default;
 
-        if (!empty($default)) {
-            $text .= ' [default: <info>' . $default . '</info>]';
+        if (!empty($defaultValue)) {
+            $text .= ' [default: <info>' . $defaultValue . '</info>]';
         }
 
         $text .= ': ';

@@ -42,7 +42,7 @@ abstract class AbstractDatabase extends AbstractSite
             'mysql_db_prefix',
             null,
             InputOption::VALUE_OPTIONAL,
-            "MySQL database prefix (default: sites_)",
+            "MySQL database prefix",
             $this->target_db_prefix
         )
         ->addOption(
@@ -50,6 +50,13 @@ abstract class AbstractDatabase extends AbstractSite
             'db',
             InputOption::VALUE_REQUIRED,
             "MySQL database name. If set, the --mysql_db_prefix option will be ignored."
+        )
+        ->addOption(
+            'mysql-driver',
+            null,
+            InputOption::VALUE_REQUIRED,
+            "MySQL driver",
+            'mysqli'
         )
         ;
     }
@@ -75,8 +82,13 @@ abstract class AbstractDatabase extends AbstractSite
         $this->mysql = (object) array(
             'user'     => $credentials[0],
             'password' => $credentials[1],
-            'host'     => $input->getOption('mysql-host')
+            'host'     => $input->getOption('mysql-host'),
+            'driver'   => strtolower($input->getOption('mysql-driver'))
         );
+
+        if (!in_array($this->mysql->driver, array('mysql', 'mysqli'))) {
+            throw new \RuntimeException(sprintf('Invalid MySQL driver %s', $this->mysql->driver));
+        }
     }
 
     protected function _executeSQL($query)
