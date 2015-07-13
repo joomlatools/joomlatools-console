@@ -58,6 +58,12 @@ class Create extends Database\AbstractDatabase
                 'A comma separated list of folders to symlink from projects folder'
             )
             ->addOption(
+                'repo',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.'
+            )
+            ->addOption(
                 'clear-cache',
                 null,
                 InputOption::VALUE_NONE,
@@ -96,6 +102,12 @@ class Create extends Database\AbstractDatabase
                 InputOption::VALUE_OPTIONAL,
                 'The port on which the server will listen for SSL requests',
                 '443'
+            )
+            ->addOption(
+                'interactive',
+                null,
+                InputOption::VALUE_NONE,
+                'Prompt for configuration details'
             );
     }
 
@@ -119,7 +131,7 @@ class Create extends Database\AbstractDatabase
                 'site'           => $this->site
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);
@@ -129,6 +141,7 @@ class Create extends Database\AbstractDatabase
             }
 
             $command = new Install();
+            $command->setApplication($this->getApplication());
             $command->run(new ArrayInput($arguments), $output);
         }
     }
@@ -142,15 +155,20 @@ class Create extends Database\AbstractDatabase
 
     public function download(InputInterface $input, OutputInterface $output)
     {
-        $command_input = new ArrayInput(array(
+        $arguments = array(
             'site:download',
             'site'          => $this->site,
             '--joomla'      => $input->getOption('joomla'),
             '--clear-cache' => $input->getOption('clear-cache')
-        ));
+        );
+
+        $repo = $input->getOption('repo');
+        if (!empty($repo)) {
+            $arguments['--repo'] = $repo;
+        }
 
         $command = new Download();
-        $command->run($command_input, $output);
+        $command->run(new ArrayInput($arguments), $output);
     }
 
     public function addVirtualHost(InputInterface $input, OutputInterface $output)

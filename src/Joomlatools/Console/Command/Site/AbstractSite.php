@@ -13,6 +13,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Symfony\Component\Console\Question;
+
 abstract class AbstractSite extends Command
 {
     protected $site;
@@ -49,34 +51,53 @@ abstract class AbstractSite extends Command
         $this->target_dir = $this->www.'/'.$this->site;
     }
 
-    protected function _getJoomlaVersion()
+    /**
+     * Prompt user to fill in a value
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param $label    string          The description of the value
+     * @param $default  string|array    The default value. If array given, question will be multiple-choice and the first item will be default. Can also be empty.
+     * @param bool $required
+     * @param bool $hidden  Hide user input (useful for passwords)
+     *
+     * @return string   Answer
+     */
+    protected function _ask(InputInterface $input, OutputInterface $output, $label, $default, $required = false, $hidden = false)
     {
-        $code = $this->target_dir . '/libraries/cms/version/version.php';
+        $helper  = $this->getHelper('question');
+        $text    = $label;
 
-        if (file_exists($code))
-        {
-            if (!defined('JPATH_PLATFORM')) {
-                define('JPATH_PLATFORM', $this->target_dir.'/libraries');
-            }
-
-            if (!defined('_JEXEC')) {
-                define('_JEXEC', 1);
-            }
-
-            $identifier = uniqid();
-
-            $source = file_get_contents($code);
-            $source = preg_replace('/<\?php/', '', $source, 1);
-            $source = preg_replace('/class JVersion/i', 'class JVersion' . $identifier, $source);
-
-            eval($source);
-
-            $class   = 'JVersion'.$identifier;
-            $version = new $class();
-
-            return $version->RELEASE.'.'.$version->DEV_LEVEL;
+        if (!isset($default)) {
+            $default = '';
         }
 
-        return false;
+        if (is_array($default)) {
+            $default = $default[0];
+        }
+        else $default = $default;
+
+        if (!empty($default)) {
+            $text .= ' [default: <info>' . $default . '</info>]';
+        }
+
+        $text .= ': ';
+
+        if (is_array($default)) {
+            $question = new Question\ChoiceQuestion($text, $default, 0);
+        }
+        else $question = new Question\Question($text, $default);
+
+        if ($hidden === true) {
+            $question->setHidden(true);
+        }
+
+        $answer = $helper->ask($input, $output, $question);
+
+        if ($required && empty($answer)) {
+            return $this->_ask($input, $output, $label, $default, $hidden);
+        }
+
+        return $answer;
     }
 }

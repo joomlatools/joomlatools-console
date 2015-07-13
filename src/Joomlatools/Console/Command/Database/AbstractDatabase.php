@@ -25,11 +25,18 @@ abstract class AbstractDatabase extends AbstractSite
         parent::configure();
 
         $this->addOption(
-            'mysql',
-            null,
+            'mysql-login',
+            'L',
             InputOption::VALUE_REQUIRED,
             "MySQL credentials in the form of user:password",
             'root:root'
+        )
+        ->addOption(
+            'mysql-host',
+            'H',
+            InputOption::VALUE_REQUIRED,
+            "MySQL host",
+            'localhost'
         )
         ->addOption(
             'mysql_db_prefix',
@@ -38,6 +45,12 @@ abstract class AbstractDatabase extends AbstractSite
             "MySQL database prefix (default: sites_)",
             $this->target_db_prefix
         )
+        ->addOption(
+            'mysql-database',
+            'db',
+            InputOption::VALUE_REQUIRED,
+            "MySQL database name. If set, the --mysql_db_prefix option will be ignored."
+        )
         ;
     }
 
@@ -45,17 +58,31 @@ abstract class AbstractDatabase extends AbstractSite
     {
         parent::execute($input, $output);
 
-        $this->target_db_prefix = $input->getOption('mysql_db_prefix');
-        $this->target_db        = $this->target_db_prefix.$this->site;
+        $db_name = $input->getOption('mysql-database');
+        if (empty($db_name))
+        {
+            $this->target_db_prefix = $input->getOption('mysql_db_prefix');
+            $this->target_db        = $this->target_db_prefix.$this->site;
+        }
+        else
+        {
+            $this->target_db_prefix = '';
+            $this->target_db        = $db_name;
+        }
 
-        $credentials = explode(':', $input->getOption('mysql'), 2);
-        $this->mysql = (object) array('user' => $credentials[0], 'password' => $credentials[1]);
+        $credentials = explode(':', $input->getOption('mysql-login'), 2);
+
+        $this->mysql = (object) array(
+            'user'     => $credentials[0],
+            'password' => $credentials[1],
+            'host'     => $input->getOption('mysql-host')
+        );
     }
 
     protected function _executeSQL($query)
     {
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        $cmd      = sprintf("echo '$query' | mysql -u'%s' %s", $this->mysql->user, $password);
+        $password = empty($this->mysql->password) ? '' : sprintf("--password='%s'", $this->mysql->password);
+        $cmd      = sprintf("echo '$query' | mysql --host=%s --port=%s --user='%s' %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password);
 
         return exec($cmd);
     }

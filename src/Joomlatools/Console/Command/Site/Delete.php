@@ -71,13 +71,22 @@ class Delete extends Database\AbstractDatabase
             return;
         }
 
-        $command_input = new ArrayInput(array(
+        $arguments = array(
             'database:drop',
             'site' => $this->site
-        ));
+        );
+
+        $optionalArgs = array('mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
+        foreach ($optionalArgs as $optionalArg)
+        {
+            $value = $input->getOption($optionalArg);
+            if (!empty($value)) {
+                $arguments['--' . $optionalArg] = $value;
+            }
+        }
 
         $command = new Database\Drop();
-        $command->run($command_input, $output);
+        $command->run(new ArrayInput($arguments), $output);
     }
 
     public function deleteVirtualHost(InputInterface $input, OutputInterface $output)

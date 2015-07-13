@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Joomlatools\Console\Command;
 use Joomlatools\Console\Command\Database;
 use Joomlatools\Console\Command\Vhost;
+use Joomlatools\Console\Joomla\Util;
 
 class Install extends Database\AbstractDatabase
 {
@@ -63,12 +64,22 @@ class Install extends Database\AbstractDatabase
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
             )
+            ->addOption(
+                'interactive',
+                null,
+                InputOption::VALUE_NONE,
+                'Prompt for configuration details'
+            )
             ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
+
+        if ($input->getOption('interactive')) {
+            $this->_promptDetails($input, $output);
+        }
 
         $this->symlink = $input->getOption('symlink');
         if (is_string($this->symlink)) {
@@ -86,7 +97,7 @@ class Install extends Database\AbstractDatabase
             $this->installExtensions($input, $output);
         }
 
-        $this->enableWebInstaller($input, $output);
+        $this->_enableWebInstaller($input, $output);
 
         $output->writeln("Your new Joomla site has been configured.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
@@ -106,13 +117,13 @@ class Install extends Database\AbstractDatabase
             'site'          => $this->site
         );
 
-        $sample_data = $input->getOption('sample-data');
-        if (!empty($sample_data)) {
-            $arguments['--sample-data'] = $sample_data;
-        }
-
-        if ($input->getOption('drop')) {
-            $arguments['--drop'] = true;
+        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
+        foreach ($optionalArgs as $optionalArg)
+        {
+            $value = $input->getOption($optionalArg);
+            if (!empty($value)) {
+                $arguments['--' . $optionalArg] = $value;
+            }
         }
 
         $command = new Database\Install();
@@ -126,8 +137,13 @@ class Install extends Database\AbstractDatabase
             'site'          => $this->site
         );
 
-        if ($input->getOption('overwrite')) {
-            $arguments['--overwrite'] = true;
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
+        foreach ($optionalArgs as $optionalArg)
+        {
+            $value = $input->getOption($optionalArg);
+            if (!empty($value)) {
+                $arguments['--' . $optionalArg] = $value;
+            }
         }
 
         $command = new Configure();
@@ -161,9 +177,25 @@ class Install extends Database\AbstractDatabase
         $installer->run($extension_input, $output);
     }
 
-    public function enableWebInstaller(InputInterface $input, OutputInterface $output)
+    protected function _promptDetails(InputInterface $input, OutputInterface $output)
     {
-        $version = $this->_getJoomlaVersion();
+        $this->target_db       = $this->_ask($input, $output, 'MySQL database name', $this->target_db, true);
+        $this->mysql->user     = $this->_ask($input, $output, 'MySQL user', $this->mysql->user, true);
+        $this->mysql->password = $this->_ask($input, $output, 'MySQL password', $this->mysql->password, true, true);
+        $this->mysql->host     = $this->_ask($input, $output, 'MySQL host', $this->mysql->host, true);
+
+        $input->setOption('mysql-login', $this->mysql->user . ':' . $this->mysql->password);
+        $input->setOption('mysql-host', $this->mysql->host);
+        $input->setOption('mysql-database', $this->target_db);
+    }
+
+    protected function _enableWebInstaller(InputInterface $input, OutputInterface $output)
+    {
+        if (Util::isPlatform($this->target_dir)) {
+            return;
+        }
+
+        $version = Util::getJoomlaVersion($this->target_dir);
 
         if (version_compare($version, '3.2.0', '<')) {
             return;
@@ -209,6 +241,6 @@ class Install extends Database\AbstractDatabase
         $sql = escapeshellarg($sql);
 
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        exec(sprintf("mysql -u'%s' %s %s -e %s", $this->mysql->user, $password, $this->target_db, $sql));
+        exec(sprintf("mysql --host=%s --port=%s -u'%s' %s %s -e %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $sql));
     }
 }

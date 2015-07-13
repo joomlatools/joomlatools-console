@@ -23,10 +23,17 @@ class Versions extends Command
      */
     protected static $file;
 
+    /**
+     * Git repository to use
+     *
+     * @var string
+     */
+    protected $repository = 'https://github.com/joomla/joomla-cms.git';
+
     protected function configure()
     {
         if (!self::$file) {
-            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/.versions';
+            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
         }
 
         $this
@@ -43,11 +50,20 @@ class Versions extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Clear the downloaded files cache'
+            )
+            ->addOption(
+                'repo',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.',
+                $this->repository
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->setRepository($input->getOption('repo'));
+
         if ($input->getOption('refresh')) {
             $this->refresh();
         }
@@ -56,7 +72,7 @@ class Versions extends Command
             $this->clearcache($output);
         }
 
-        $list = $this->getVersions();
+        $list = $this->_getVersions();
 
         foreach($list as $ref => $versions)
         {
@@ -71,14 +87,42 @@ class Versions extends Command
         }
     }
 
-    public function clearcache(OutputInterface $output)
+    public function setRepository($repository)
+    {
+        if ($repository == 'platform') {
+            $repository = 'git@github.com:joomlatools/joomla-platform.git';
+        }
+
+        $this->repository = $repository;
+
+        self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
+    }
+
+    public function getRepository()
+    {
+        return $this->repository;
+    }
+
+    public function getCacheDirectory()
     {
         $cachedir = dirname(self::$file);
+
+        if (!file_exists($cachedir)) {
+            mkdir($cachedir, 0755, true);
+        }
+
+        return $cachedir;
+    }
+
+    public function clearcache(OutputInterface $output)
+    {
+        $cachedir = $this->getCacheDirectory();
 
         if(!empty($cachedir) && file_exists($cachedir))
         {
             `rm -rf $cachedir/*.tar.gz`;
-            $output->writeln("<info>Downloaded version cache has been cleared.</info>\n");
+
+            $output->writeln("<info>Downloaded version cache has been cleared.</info>");
         }
     }
 
@@ -88,11 +132,11 @@ class Versions extends Command
             unlink(self::$file);
         }
 
-        $result = `git ls-remote https://github.com/joomla/joomla-cms.git | grep -E 'refs/(tags|heads)' | grep -v '{}'`;
+        $result = `git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'`;
         $refs   = explode(PHP_EOL, $result);
 
         $versions = array();
-        $pattern  = '/^[a-z0-9]+\s+refs\/(heads|tags)\/([a-z0-9\.\-_]+)$/im';
+        $pattern  = '/^[a-z0-9]+\s+refs\/(heads|tags)\/([a-z0-9\.\-_\/]+)$/im';
         foreach($refs as $ref)
         {
             if(preg_match($pattern, $ref, $matches))
@@ -111,10 +155,14 @@ class Versions extends Command
             }
         }
 
+        if (!file_exists(dirname(self::$file))) {
+            mkdir(dirname(self::$file), 0755, true);
+        }
+
         file_put_contents(self::$file, json_encode($versions));
     }
 
-    public function getVersions()
+    protected function _getVersions()
     {
         if(!file_exists(self::$file)) {
             $this->refresh();
@@ -128,9 +176,12 @@ class Versions extends Command
 
     public function getLatestRelease($prefix = null)
     {
-        // Find the latest tag
-        $latest = '0.0.0';
-        $versions = $this->getVersions();
+        $latest   = '0.0.0';
+        $versions = $this->_getVersions();
+
+        if (!isset($versions['tags'])) {
+            return 'master';
+        }
 
         foreach($versions['tags'] as $version)
         {
@@ -147,12 +198,16 @@ class Versions extends Command
             }
         }
 
+        if ($latest == '0.0.0') {
+            $latest = 'master';
+        }
+
         return $latest;
     }
 
     public function isBranch($version)
     {
-        $versions = $this->getVersions();
+        $versions = $this->_getVersions();
 
         return in_array($version, $versions['heads']);
     }

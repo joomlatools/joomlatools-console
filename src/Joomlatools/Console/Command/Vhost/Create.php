@@ -13,7 +13,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Create extends Command
+use Joomlatools\Console\Command\Site\AbstractSite;
+use Joomlatools\Console\Joomla\Util;
+
+class Create extends AbstractSite
 {
     protected function configure()
     {
@@ -22,11 +25,6 @@ class Create extends Command
         $this
             ->setName('vhost:create')
             ->setDescription('Creates a new Apache2 virtual host')
-            ->addArgument(
-                'site',
-                InputArgument::REQUIRED,
-                'Alphanumeric site name, used in the site URL with .dev domain'
-            )
             ->addOption(
                 'disable-ssl',
                 null,
@@ -59,15 +57,18 @@ class Create extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        parent::execute($input, $output);
+
         if (is_dir('/etc/apache2/sites-available'))
         {
             $site = $input->getArgument('site');
             $path = realpath(__DIR__.'/../../../../../bin/.files/');
             $tmp  = '/tmp/vhost.tmp';
 
-            $template = file_get_contents($path.'/vhost.conf');
+            $template     = file_get_contents($path.'/vhost.conf');
+            $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
-            file_put_contents($tmp, sprintf($template, $site));
+            file_put_contents($tmp, sprintf($template, $site, $documentroot));
 
             if (!$input->getOption('disable-ssl'))
             {
@@ -78,7 +79,7 @@ class Create extends Command
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
                     $template = "\n\n" . file_get_contents($path.'/vhost.ssl.conf');
-                    file_put_contents($tmp, sprintf($template, $ssl_port, $site, $ssl_crt, $ssl_key), FILE_APPEND);
+                    file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
                 else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
             }

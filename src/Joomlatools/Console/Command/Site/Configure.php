@@ -11,8 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Joomlatools\Console\Command\Versions;
-
+use Joomlatools\Console\Joomla\Util;
 use Joomlatools\Console\Command\Database\AbstractDatabase;
 
 class Configure extends AbstractDatabase
@@ -39,6 +38,15 @@ class Configure extends AbstractDatabase
 
         $this->check($input, $output);
 
+        if (Util::isPlatform($this->target_dir)) {
+            $this->_configureJoomlaPlatform();
+        } else {
+            $this->_configureJoomlaCMS();
+        }
+    }
+
+    protected function _configureJoomlaCMS()
+    {
         $source = $this->target_dir.'/_installation/configuration.php-dist';
         if (!file_exists($source)) {
             $source = $this->target_dir.'/installation/configuration.php-dist';
@@ -64,22 +72,12 @@ class Configure extends AbstractDatabase
             $pattern  = sprintf("#public \$%s = '.*?'#", $name);
             $contents = preg_replace($pattern, '', $contents);
         };
-        $random   = function($length) {
-            $charset ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            $string  = '';
-            $count   = strlen($charset);
-
-            while ($length--) {
-                $string .= $charset[mt_rand(0, $count-1)];
-            }
-
-            return $string;
-        };
 
         $replacements = array(
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
+            'host'      => $this->mysql->host,
             'dbprefix'  => 'j_',
             'dbtype'    => 'mysqli',
 
@@ -104,7 +102,7 @@ class Configure extends AbstractDatabase
             'log_path'  => $this->target_dir.'/logs',
             'sitename'  => $this->site,
 
-            'secret'    => $random(16)
+            'secret'    => $this->generateKey(16)
         );
 
         foreach($replacements as $key => $value) {
@@ -121,6 +119,44 @@ class Configure extends AbstractDatabase
         }
     }
 
+    protected function _configureJoomlaPlatform()
+    {
+        $config = array(
+            'JOOMLA_DB_NAME' => $this->target_db,
+            'JOOMLA_DB_USER' => $this->mysql->user,
+            'JOOMLA_DB_PASS' => $this->mysql->password,
+            'JOOMLA_DB_HOST' => $this->mysql->host,
+            'JOOMLA_DB_TYPE' => 'mysqli',
+
+            'JOOMLA_LOG_PATH' => $this->target_dir.'/logs',
+            'JOOMLA_TMP_PATH' => $this->target_dir.'/tmp',
+
+            'JOOMLA_KEY' => $this->generateKey(16),
+            'JOOMLA_ENV' => 'development'
+        );
+
+        $fp = fopen($this->target_dir.'/.env', 'w');
+
+        foreach ($config as $key => $val) {
+            fwrite($fp, $key . '=' . $val . PHP_EOL);
+        }
+
+        fclose($fp);
+    }
+
+    public function generateKey($length)
+    {
+        $charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $string = '';
+        $count = strlen($charset);
+
+        while ($length--) {
+            $string .= $charset[mt_rand(0, $count - 1)];
+        }
+
+        return $string;
+    }
+
     public function check(InputInterface $input, OutputInterface $output)
     {
         if (!file_exists($this->target_dir)) {
@@ -129,7 +165,9 @@ class Configure extends AbstractDatabase
 
         if (!$input->getOption('overwrite'))
         {
-            if (file_exists($this->target_dir . '/configuration.php')) {
+            $file = Util::isPlatform($this->target_dir) ? '.env' : 'configuration.php';
+
+            if (file_exists($this->target_dir . '/' . $file)) {
                 throw new \RuntimeException(sprintf('Site %s is already configured', $this->site));
             }
         }
