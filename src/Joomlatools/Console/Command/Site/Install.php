@@ -115,7 +115,8 @@ class Install extends Database\AbstractDatabase
     {
         $arguments = array(
             'site:database:install',
-            'site'          => $this->site
+            'site'   => $this->site,
+            '--www'  => $this->www
         );
 
         $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
@@ -135,7 +136,8 @@ class Install extends Database\AbstractDatabase
     {
         $arguments = array(
             'site:configure',
-            'site'          => $this->site
+            'site'   => $this->site,
+            '--www'  => $this->www
         );
 
         $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database', 'mysql-driver');

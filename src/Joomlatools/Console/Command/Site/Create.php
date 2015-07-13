@@ -128,7 +128,8 @@ class Create extends Database\AbstractDatabase
         {
             $arguments = array(
                 'site:install',
-                'site'           => $this->site
+                'site'   => $this->site,
+                '--www'  => $this->www
             );
 
             $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database');
@@ -159,7 +160,8 @@ class Create extends Database\AbstractDatabase
             'site:download',
             'site'          => $this->site,
             '--joomla'      => $input->getOption('joomla'),
-            '--clear-cache' => $input->getOption('clear-cache')
+            '--clear-cache' => $input->getOption('clear-cache'),
+            '--www'         => $this->www
         );
 
         $repo = $input->getOption('repo');
