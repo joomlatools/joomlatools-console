@@ -68,12 +68,15 @@ class Application extends \Symfony\Component\Console\Application
     public function run(Input\InputInterface $input = null, Output\OutputInterface $output = null)
     {
         if (null === $input) {
-            $this->_input = new Input\ArgvInput();
+            $input = new Input\ArgvInput();
         }
 
         if (null === $output) {
-            $this->_output = new Output\ConsoleOutput();
+            $output = new Output\ConsoleOutput();
         }
+
+        $this->_input  = $input;
+        $this->_output = $output;
 
         $this->configureIO($this->_input, $this->_output);
 
