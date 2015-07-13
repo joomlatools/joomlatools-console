@@ -246,6 +246,6 @@ class Install extends Database\AbstractDatabase
         $sql = escapeshellarg($sql);
 
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        exec(sprintf("mysql --host=%s --port=%s -u'%s' %s %s -e %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $sql));
+        exec(sprintf("mysql --host=%s -u'%s' %s %s -e %s", $this->mysql->host, $this->mysql->user, $password, $this->target_db, $sql));
     }
 }

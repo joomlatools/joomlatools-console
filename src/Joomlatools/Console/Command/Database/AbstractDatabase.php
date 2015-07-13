@@ -94,7 +94,7 @@ abstract class AbstractDatabase extends AbstractSite
     protected function _executeSQL($query)
     {
         $password = empty($this->mysql->password) ? '' : sprintf("--password='%s'", $this->mysql->password);
-        $cmd      = sprintf("echo '$query' | mysql --host=%s --port=%s --user='%s' %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password);
+        $cmd      = sprintf("echo '$query' | mysql --host=%s --user='%s' %s", $this->mysql->host, $this->mysql->user, $password);
 
         return exec($cmd);
     }
