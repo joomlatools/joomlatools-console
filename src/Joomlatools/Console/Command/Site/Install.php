@@ -70,6 +70,12 @@ class Install extends Database\AbstractDatabase
                 InputOption::VALUE_NONE,
                 'Prompt for configuration details'
             )
+            ->addOption(
+                'skip-exists-check',
+                'e',
+                InputOption::VALUE_NONE,
+                'Do not check if database already exists or not.'
+            )
             ;
     }
 
@@ -78,7 +84,7 @@ class Install extends Database\AbstractDatabase
         parent::execute($input, $output);
 
         if ($input->getOption('interactive')) {
-            $this->_promptDetails($input, $output);
+            $this->_promptDatabaseDetails($input, $output);
         }
 
         $this->symlink = $input->getOption('symlink');
@@ -128,6 +134,10 @@ class Install extends Database\AbstractDatabase
             }
         }
 
+        if ($input->getOption('interactive')) {
+            $arguments['--skip-exists-check'] = true;
+        }
+
         $command = new Database\Install();
         $command->run(new ArrayInput($arguments), $output);
     }
@@ -140,7 +150,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database', 'mysql-driver');
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-database', 'mysql-driver', 'interactive');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
@@ -150,6 +160,8 @@ class Install extends Database\AbstractDatabase
         }
 
         $command = new Configure();
+        $command->setApplication($this->getApplication());
+        $command->skipDatabasePrompt();
         $command->run(new ArrayInput($arguments), $output);
     }
 
@@ -178,20 +190,6 @@ class Install extends Database\AbstractDatabase
         $installer = new Command\ExtensionInstall();
 
         $installer->run($extension_input, $output);
-    }
-
-    protected function _promptDetails(InputInterface $input, OutputInterface $output)
-    {
-        $this->target_db       = $this->_ask($input, $output, 'MySQL database name', $this->target_db, true);
-        $this->mysql->user     = $this->_ask($input, $output, 'MySQL user', $this->mysql->user, true);
-        $this->mysql->password = $this->_ask($input, $output, 'MySQL password', $this->mysql->password, true, true);
-        $this->mysql->host     = $this->_ask($input, $output, 'MySQL host', $this->mysql->host, true);
-        $this->mysql->driver   = $this->_ask($input, $output, 'MySQL driver', array('mysqli', 'mysql'), true);
-
-        $input->setOption('mysql-login', $this->mysql->user . ':' . $this->mysql->password);
-        $input->setOption('mysql-host', $this->mysql->host);
-        $input->setOption('mysql-database', $this->target_db);
-        $input->setOption('mysql-driver', $this->mysql->driver);
     }
 
     protected function _enableWebInstaller(InputInterface $input, OutputInterface $output)

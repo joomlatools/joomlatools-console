@@ -98,4 +98,20 @@ abstract class AbstractDatabase extends AbstractSite
 
         return exec($cmd);
     }
+
+    protected function _promptDatabaseDetails(InputInterface $input, OutputInterface $output)
+    {
+        $this->mysql->user     = $this->_ask($input, $output, 'MySQL user', $this->mysql->user, true);
+        $this->mysql->password = $this->_ask($input, $output, 'MySQL password', $this->mysql->password, true, true);
+        $this->mysql->host     = $this->_ask($input, $output, 'MySQL host', $this->mysql->host, true);
+        $this->mysql->driver   = $this->_ask($input, $output, 'MySQL driver', array('mysqli', 'mysql'), true);
+
+        $output->writeln('Choose the database name. We will attempt to create it if it does not exist.');
+        $this->target_db       = $this->_ask($input, $output, 'MySQL database', $this->target_db, true);
+
+        $input->setOption('mysql-login', $this->mysql->user . ':' . $this->mysql->password);
+        $input->setOption('mysql-host', $this->mysql->host);
+        $input->setOption('mysql-database', $this->target_db);
+        $input->setOption('mysql-driver', $this->mysql->driver);
+    }
 }

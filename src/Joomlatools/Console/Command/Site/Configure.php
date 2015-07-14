@@ -16,6 +16,21 @@ use Joomlatools\Console\Command\Database\AbstractDatabase;
 
 class Configure extends AbstractDatabase
 {
+    /**
+     * Flag to keep track of whether we still need to
+     * prompt the database settings in interactive mode
+     *
+     * @var bool
+     */
+    protected $_skip_database_prompt = false;
+
+    /**
+     * List of default values
+     *
+     * @var array
+     */
+    protected $_default_values = array();
+
     protected function configure()
     {
         parent::configure();
@@ -29,12 +44,42 @@ class Configure extends AbstractDatabase
                 InputOption::VALUE_NONE,
                 'Overwrite configuration.php if it already exists'
             )
+            ->addOption(
+                'interactive',
+                null,
+                InputOption::VALUE_NONE,
+                'Prompt for configuration details'
+            )
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
+
+        $random = function($length) {
+            $charset ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            $string  = '';
+            $count   = strlen($charset);
+
+            while ($length--) {
+                $string .= $charset[mt_rand(0, $count-1)];
+            }
+
+            return $string;
+        };
+
+        $this->_default_values = array(
+            'log_path' => $this->target_dir . '/logs/',
+            'tmp_path' => $this->target_dir . '/tmp/',
+            'sitename' => $this->site,
+            'key'      => $random(16),
+            'env'      => 'development'
+        );
+
+        if ($input->getOption('interactive')) {
+            $this->_promptDetails($input, $output);
+        }
 
         $this->check($input, $output);
 
@@ -98,11 +143,11 @@ class Configure extends AbstractDatabase
 
             'debug'     => '1',
             'lifetime'  => '600',
-            'tmp_path'  => $this->target_dir.'/tmp',
-            'log_path'  => $this->target_dir.'/logs',
-            'sitename'  => $this->site,
+            'tmp_path'  => $this->_default_values['tmp_path'],
+            'log_path'  => $this->_default_values['log_path'],
+            'sitename'  => $this->_default_values['sitename'],
 
-            'secret'    => $this->generateKey(16)
+            'secret'    => $this->_default_values['key']
         );
 
         foreach($replacements as $key => $value) {
@@ -128,11 +173,11 @@ class Configure extends AbstractDatabase
             'JOOMLA_DB_HOST' => $this->mysql->host,
             'JOOMLA_DB_TYPE' => $this->mysql->driver,
 
-            'JOOMLA_LOG_PATH' => $this->target_dir.'/logs',
-            'JOOMLA_TMP_PATH' => $this->target_dir.'/tmp',
+            'JOOMLA_LOG_PATH' => $this->_default_values['log_path'],
+            'JOOMLA_TMP_PATH' => $this->_default_values['tmp_path'],
 
-            'JOOMLA_KEY' => $this->generateKey(16),
-            'JOOMLA_ENV' => 'development'
+            'JOOMLA_KEY' => $this->_default_values['key'],
+            'JOOMLA_ENV' => $this->_default_values['env']
         );
 
         $fp = fopen($this->target_dir.'/.env', 'w');
@@ -142,19 +187,6 @@ class Configure extends AbstractDatabase
         }
 
         fclose($fp);
-    }
-
-    public function generateKey($length)
-    {
-        $charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        $string = '';
-        $count = strlen($charset);
-
-        while ($length--) {
-            $string .= $charset[mt_rand(0, $count - 1)];
-        }
-
-        return $string;
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -171,5 +203,34 @@ class Configure extends AbstractDatabase
                 throw new \RuntimeException(sprintf('Site %s is already configured', $this->site));
             }
         }
+    }
+
+    /**
+     * Tell the object to skip the database prompts
+     * in interactive mode or not.
+     *
+     * @param $value bool
+     */
+    public function skipDatabasePrompt($value = true)
+    {
+        $this->_skip_database_prompt = $value;
+    }
+
+    protected function _promptDetails(InputInterface $input, OutputInterface $output)
+    {
+        if (!$this->_skip_database_prompt) {
+            $this->_promptDatabaseDetails($input, $output);
+        }
+
+        if (Util::isPlatform($this->target_dir)) {
+            $this->_default_values['env'] = $this->_ask($input, $output, 'Environment', array('development', 'staging', 'production'), true);
+        }
+        else {
+            $this->_default_values['sitename'] = $this->_ask($input, $output, 'Site Name', $this->_default_values['sitename'], true);
+        }
+
+        $this->_default_values['tmp_path'] = $this->_ask($input, $output, 'Temporary path', $this->_default_values['tmp_path'], true);
+        $this->_default_values['log_path'] = $this->_ask($input, $output, 'Log path', $this->_default_values['log_path'], true);
+        $this->_default_values['key']      = $this->_ask($input, $output, 'Secret Key', $this->_default_values['key'], true);
     }
 }
