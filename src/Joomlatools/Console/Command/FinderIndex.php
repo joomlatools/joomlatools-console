@@ -26,6 +26,10 @@ class FinderIndex extends SiteAbstract
 
     private $app = '';
 
+    private $time = null;
+
+    private $qtime = null;
+
     protected function configure()
     {
         parent::configure();
@@ -175,6 +179,9 @@ class FinderIndex extends SiteAbstract
 
         // Trigger the onStartIndex event.
         \JEventDispatcher::getInstance()->trigger('onStartIndex');
+
+        // Initialize the time value.
+        $this->time = microtime(true);
 
         // Remove the script time limit.
         @set_time_limit(0);
