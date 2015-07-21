@@ -11,6 +11,7 @@ use \JApplicationCli as JApplicationCli;
 use \JDispatcher as JDispatcher;
 use \JFactory as JFactory;
 use \JInstaller as JInstaller;
+use \JMenu as JMenu;
 use \JPluginHelper as JPluginHelper;
 use \JSession as JSession;
 
@@ -455,5 +456,33 @@ class Application extends JApplicationCli
 		 */
     	throw new \RuntimeException(sprintf('Application tried to redirect to %s', $url));
     }
-    
+
+    /**
+     * Returns the application JMenu object.
+     *
+     * @param   string  $name     The name of the application/client.
+     * @param   array   $options  An optional associative array of configuration settings.
+     *
+     * @return  JMenu
+     */
+    public function getMenu($name = null, $options = array())
+    {
+        if (!isset($name)) {
+            $name = 'site';
+        }
+
+        try
+        {
+            if (!class_exists('JMenu' . ucfirst($name))) {
+                jimport('cms.menu.'.strtolower($name));
+            }
+
+            $menu = JMenu::getInstance($name, $options);
+        }
+        catch (Exception $e) {
+            return null;
+        }
+
+        return $menu;
+    }
 }
