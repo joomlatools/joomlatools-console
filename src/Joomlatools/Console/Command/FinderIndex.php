@@ -60,7 +60,10 @@ class FinderIndex extends SiteAbstract
         if($purge)
         {
             $this->getFilters($input, $output);
-            $this->purge($input, $output);
+
+            $purge = new FinderPurge();
+            $purge->purgeFinder($input, $output);
+
             $this->createIndexes($input, $output);
             $this->putFilters($input, $output);
         }
@@ -122,38 +125,21 @@ class FinderIndex extends SiteAbstract
         return \JText::sprintf('FINDER_CLI_SAVE_FILTER_COMPLETED', count($filters));
     }
 
-    //@todo duplication of code need to instatiate finderpurge::purge from here
-    public function purge(InputInterface $input, OutputInterface $output)
-    {
-        $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE'));
-
-        require_once $this->app->getPath() . '/administrator/components/com_finder/models/index.php';
-        $model = new \FinderModelIndex();
-
-        // Attempt to purge the index.
-        $return = $model->purge();
-
-        // If unsuccessful then abort.
-        if (!$return)
-        {
-            $message = \JText::_('FINDER_CLI_INDEX_PURGE_FAILED', $model->getError());
-
-            throw new \RuntimeException($message);
-        }
-
-        $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE_SUCCESS'));
-    }
-
     public function createIndexes(InputInterface $input, OutputInterface $output)
     {
         $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE'));
 
+        require_once $this->app->getPath() . '/administrator/components/com_finder/helpers/indexer/indexer.php';
+
+        // Initialize the time value.
+        $this->time = microtime(true);
+
+        // Remove the script time limit.
+        @set_time_limit(0);
+
         // Fool the system into thinking we are running as JSite with Smart Search as the active component.
         $_SERVER['HTTP_HOST'] = 'domain.com';
         \JFactory::getApplication('site');
-
-        require_once $this->app->getPath() . '/administrator/components/com_finder/helpers/indexer/indexer.php';
-        require_once $this->app->getPath() . '/administrator/components/com_finder/helpers/indexer/adapter.php';
 
         // Disable caching.
         $config = \JFactory::getConfig();
@@ -163,18 +149,14 @@ class FinderIndex extends SiteAbstract
         // Reset the indexer state.
         \FinderIndexer::resetState();
 
-
         // Import the finder plugins.
         \JPluginHelper::importPlugin('finder');
 
         // Starting Indexer.
-        $output->writeln(\JText::_('FINDER_CLI_STARTING_INDEXER'), true);
+        $output->writeln(\JText::_('FINDER_CLI_STARTING_INDEXER'));
 
         // Trigger the onStartIndex event.
         \JEventDispatcher::getInstance()->trigger('onStartIndex');
-
-        // Initialize the time value.
-        $this->time = microtime(true);
 
         // Remove the script time limit.
         @set_time_limit(0);
@@ -183,7 +165,7 @@ class FinderIndex extends SiteAbstract
         $state = \FinderIndexer::getState();
 
         // Setting up plugins.
-        $output->writeln(\JText::_('FINDER_CLI_SETTING_UP_PLUGINS'), true);
+        $output->writeln(\JText::_('FINDER_CLI_SETTING_UP_PLUGINS'));
 
         // Trigger the onBeforeIndex event.
         \JEventDispatcher::getInstance()->trigger('onBeforeIndex');
@@ -209,7 +191,6 @@ class FinderIndex extends SiteAbstract
 
                 // Trigger the onBuildIndex event.
                 \JEventDispatcher::getInstance()->trigger('onBuildIndex');
-
 
                 // Batch reporting.
                 $output->writeln(\JText::sprintf('FINDER_CLI_BATCH_COMPLETE', ($i + 1), round(microtime(true) - $this->qtime, 3)), true);

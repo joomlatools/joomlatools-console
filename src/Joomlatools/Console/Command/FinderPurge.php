@@ -67,10 +67,11 @@ class FinderPurge extends SiteAbstract
         if (!$return)
         {
             $message = \JText::_('FINDER_CLI_INDEX_PURGE_FAILED', $model->getError());
-            $output->writeln($message);
-            exit();
+
+            throw new \RuntimeException($message);
         }
 
         $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE_SUCCESS'));
     }
+
 }
