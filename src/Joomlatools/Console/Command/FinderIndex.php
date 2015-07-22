@@ -16,12 +16,6 @@ use Joomlatools\Console\Joomla\Bootstrapper;
 
 class FinderIndex extends SiteAbstract
 {
-    /**
-     * Static filters information.
-     *
-     * @var    array
-     * @since  3.3
-     */
     private $filters = array();
 
     private $app = '';
@@ -143,8 +137,8 @@ class FinderIndex extends SiteAbstract
         if (!$return)
         {
             $message = \JText::_('FINDER_CLI_INDEX_PURGE_FAILED', $model->getError());
-            $output->writeln($message);
-            exit();
+
+            throw new \RuntimeException($message);
         }
 
         $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE_SUCCESS'));
@@ -172,7 +166,6 @@ class FinderIndex extends SiteAbstract
 
         // Import the finder plugins.
         \JPluginHelper::importPlugin('finder');
-
 
         // Starting Indexer.
         $output->writeln(\JText::_('FINDER_CLI_STARTING_INDEXER'), true);
@@ -214,8 +207,6 @@ class FinderIndex extends SiteAbstract
                 // Reset the batch offset.
                 $state->batchOffset = 0;
 
-
-                //@todo this is causing errors
                 // Trigger the onBuildIndex event.
                 \JEventDispatcher::getInstance()->trigger('onBuildIndex');
 
@@ -226,18 +217,10 @@ class FinderIndex extends SiteAbstract
         }
         catch (Exception $e)
         {
-            // Display the error
-            $output->writeln($e->getMessage(), true);
-
             // Reset the indexer state.
             \FinderIndexer::resetState();
 
-
-            //@todo need a big dirty die here
-
-
-
-            exit();
+            throw new \RuntimeException($e->getMessage());
         }
 
         // Reset the indexer state.
