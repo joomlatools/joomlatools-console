@@ -71,7 +71,7 @@ class FinderPurge extends SiteAbstract
             throw new \RuntimeException($message);
         }
 
-        $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE_SUCCESS'));
+        $output->writeln("<info>" . \JText::_('FINDER_CLI_INDEX_PURGE_SUCCESS'). "</info>");
     }
 
 }

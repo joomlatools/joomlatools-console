@@ -193,7 +193,7 @@ class FinderIndex extends SiteAbstract
                 \JEventDispatcher::getInstance()->trigger('onBuildIndex');
 
                 // Batch reporting.
-                $output->writeln(\JText::sprintf('FINDER_CLI_BATCH_COMPLETE', ($i + 1), round(microtime(true) - $this->qtime, 3)), true);
+                $output->writeln("<info>" . \JText::sprintf('FINDER_CLI_BATCH_COMPLETE', ($i + 1), round(microtime(true) - $this->qtime, 3)) . "</info>");
             }
         }
         catch (Exception $e)
