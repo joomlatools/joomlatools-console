@@ -17,6 +17,46 @@ use Joomlatools\Console\Joomla\Bootstrapper;
 
 abstract class ExtensionAbstract extends Command
 {
+    /**
+     * Extension name
+     *
+     * @var string
+     */
+    protected $extension;
+
+    protected $typeMap = array(
+        'com_' => 'component',
+        'mod_' => 'module',
+        'plg_' => 'plugin',
+        'pkg_' => 'package',
+        'lib_' => 'library',
+        'tpl_' => 'template',
+        'lng_' => 'language'
+    );
+
+    protected $exceptions = array(
+        'module' => array(
+            'require' => array(
+                'model' => '/administrator/components/com_modules/models/module.php'
+            ),
+            'model' => '\\ModulesModelModule',
+            'table' => array(
+                'type' => 'module',
+                'prefix' => 'JTable'
+            ),
+        ),
+        'template' => array(
+            'require' => array(
+                'model' => '/administrator/components/com_templates/models/style.php',
+                'table' => '/administrator/components/com_templates/tables/style.php'
+            ),
+            'model' => 'TemplatesModelStyle',
+            'table' => array(
+                'type' => 'Style',
+                'prefix' => 'TemplatesTable'
+            ),
+        ));
+
     protected function configure()
     {
         $this->addArgument(
@@ -44,14 +84,14 @@ abstract class ExtensionAbstract extends Command
         $this->extension = $input->getArgument('extension');
     }
 
-    public function check(InputInterface $input, OutputInterface $output)
+    protected function check(InputInterface $input, OutputInterface $output)
     {
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
     }
 
-    public function toggleEnable(InputInterface $input, OutputInterface $output)
+    protected function toggleEnable(InputInterface $input, OutputInterface $output)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
 

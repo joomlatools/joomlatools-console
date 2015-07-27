@@ -16,13 +16,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ExtensionEnable extends ExtensionAbstract
 {
     /**
-     * Extension name
-     *
-     * @var string
-     */
-    protected $extension;
-
-    /**
      * Int for enable state
      *
      * @var int
