@@ -64,31 +64,30 @@ class ExtensionEnable extends SiteAbstract
         $query = \JFactory::getDbo()->getQuery(true)
             ->select('extension_id')
             ->from('#__extensions')
-            ->where($dbo->quoteName('protected') .' = ' . $dbo->quote(0))
             ->where($dbo->quoteName('name') ." = " . $dbo->quote($this->extension));
 
         $dbo->setQuery($query);
         $extension = $dbo->loadResult('extension_id');
 
-        if(!count($extension))
-        {
-            throw new \RuntimeException(sprintf('Extension Uninstall: %s extension not found / Or you are trying to uninstall a core extension.',  $this->extension));
-            return;
-        }
-
         require_once $app->getPath().'/administrator/components/com_installer/models/manage.php';
 
         $manage = new \InstallerModelManage();
 
-        $result = $manage->publish($extension, 0);
+        $manage->publish($extension, 0);
 
-        if($result){
-            $output->writeln(sprintf("<info>Extension %s was successfully enabled</info>", $this->extension));
-        }
-        else
+        $app = \JFactory::getApplication();
+        $messages = $app->getMessageQueue();
+
+        if (is_array($messages) && count($messages))
         {
-            throw new \RuntimeException(sprintf("Enabling extension %s was unsuccessful", $this->extension));
-            return;
-        }
+            foreach ($messages as $msg)
+            {
+                if (isset($msg['type']) && isset($msg['message']))
+                {
+                    throw new \RuntimeException(sprintf('Extension Enable: %s', $msg['message']));
+                }
+            }
+        }else
+            $output->writeln(sprintf("<info>Extension %s was successfully enabled</info>", $this->extension));
     }
 }
