@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionEnable extends ExtensionAbstract
+class ExtensionDisable extends ExtensionAbstract
 {
     /**
      * Extension name
@@ -27,15 +27,15 @@ class ExtensionEnable extends ExtensionAbstract
      *
      * @var int
      */
-    protected $toggle = 1;
-
+    protected $toggle = 0;
+    
 
     protected function configure()
     {
         parent::configure();
 
-        $this->setName('extension:enable')
-             ->setDescription('Enable a joomla extension');
+        $this->setName('extension:disable')
+             ->setDescription('Disable a joomla extension');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

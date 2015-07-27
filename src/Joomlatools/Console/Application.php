@@ -112,6 +112,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\ExtensionInstallFile(),
             new Command\ExtensionRegister(),
             new Command\ExtensionEnable(),
+            new Command\ExtensionDisable(),
             new Command\PluginList(),
             new Command\PluginInstall(),
             new Command\PluginUninstall(),
