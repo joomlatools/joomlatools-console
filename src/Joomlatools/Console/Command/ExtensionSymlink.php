@@ -60,9 +60,9 @@ class ExtensionSymlink extends SiteAbstract
         static $dependencies = array(
             'joomlatools-framework' => array('nooku-framework'),
             'extman'  => array('koowa', 'joomlatools-framework', 'nooku-framework'),
-            'docman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files'),
-            'fileman' => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files'),
-            'logman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_activities')
+            'docman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files', 'nooku-files'),
+            'fileman' => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files', 'nooku-files'),
+            'logman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_activities', 'nooku-activities')
         );
 
         $project_folder = $input->getOption('projects-dir');
