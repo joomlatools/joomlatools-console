@@ -27,7 +27,7 @@ class ExtensionInstall extends Site\AbstractSite
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of extensions to install to the site using discover install. Use * to install all discovered extensions.'
+                'A list of extensions to install to the site using discover install. Use \'all\' to install all discovered extensions.'
             );
     }
 
@@ -75,7 +75,7 @@ class ExtensionInstall extends Site\AbstractSite
                 array_unshift($install, $result->extension_id);
             }
 
-            if ($this->extension == '*' || in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension)) {
+            if ($this->extension == 'all' || in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension)) {
                 $install[$result->element] = $result->extension_id;
             }
 
