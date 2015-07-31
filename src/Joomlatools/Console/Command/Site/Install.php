@@ -55,7 +55,7 @@ class Install extends Database\AbstractDatabase
                 'symlink',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'A comma separated list of folders to symlink from projects folder'
+                'A comma separated list of folders to symlink from projects folder. Use \'all\' to symlink every folder.'
             )
             ->addOption(
                 'projects-dir',
@@ -184,7 +184,7 @@ class Install extends Database\AbstractDatabase
         $extension_input = new ArrayInput(array(
             'extension:install',
             'site'      => $input->getArgument('site'),
-            'extension' => $this->symlink,
+            'extension' => 'all',
             '--www'     => $this->www
         ));
         $installer = new Command\ExtensionInstall();

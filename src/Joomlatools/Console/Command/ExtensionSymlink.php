@@ -26,7 +26,7 @@ class ExtensionSymlink extends Site\AbstractSite
             ->addArgument(
                 'symlink',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of folders to symlink from projects folder'
+                'A list of folders to symlink from projects folder. Use \'all\' to symlink every folder.'
             )
             ->addOption(
                 'projects-dir',
@@ -42,6 +42,16 @@ class ExtensionSymlink extends Site\AbstractSite
         parent::execute($input, $output);
 
         $this->symlink = $input->getArgument('symlink');
+
+        if (count($this->symlink) == 1 && $this->symlink[0] == 'all')
+        {
+            $this->symlink = array();
+            $source = $input->getOption('projects-dir') . '/*';
+
+            foreach(glob($source, GLOB_ONLYDIR) as $folder) {
+                $this->symlink[] = basename($folder);
+            }
+        }
 
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
