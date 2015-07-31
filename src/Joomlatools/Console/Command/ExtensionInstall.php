@@ -51,6 +51,7 @@ class ExtensionInstall extends Site\AbstractSite
     public function install(InputInterface $input, OutputInterface $output)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
+        $db  = \JFactory::getDbo();
 
         // Output buffer is used as a guard against Joomla including ._ files when searching for adapters
         // See: http://kadin.sdf-us.org/weblog/technology/software/deleting-dot-underscore-files.html
@@ -75,22 +76,55 @@ class ExtensionInstall extends Site\AbstractSite
             }
 
             if ($this->extension == '*' || in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension)) {
-                $install[] = $result->extension_id;
+                $install[$result->element] = $result->extension_id;
+            }
+
+            if (in_array($result->extension_id, $install) && $result->type == 'plugin') {
+                $plugins[$result->element] = $result->extension_id;
             }
         }
 
         ob_end_clean();
 
-        if(class_exists('Koowa') && !class_exists('ComExtmanDatabaseRowExtension')) {
-            \KObjectManager::getInstance()->getObject('com://admin/extman.database.row.extension');
-        }
-
         $install = array_unique($install);
 
-        foreach ($install as $extension_id)
+        foreach ($install as $element => $extension_id)
         {
-            try {
+            try
+            {
                 $installer->discover_install($extension_id);
+
+                if (in_array($extension_id, $plugins))
+                {
+                    $sql = "UPDATE `#__extensions` SET `enabled` = 1 WHERE `extension_id` = '$extension_id'";
+
+                    $db->setQuery($sql);
+                    $db->execute();
+
+                    switch ($element)
+                    {
+                        case 'com_extman':
+                            if(class_exists('Koowa') && !class_exists('ComExtmanDatabaseRowExtension')) {
+                                \KObjectManager::getInstance()->getObject('com://admin/extman.database.row.extension');
+                            }
+                            break;
+                        case 'koowa':
+                            $path = JPATH_PLUGINS . '/system/koowa/koowa.php';
+
+                            if (!file_exists($path)) {
+                                return;
+                            }
+
+                            require_once $path;
+
+                            if (class_exists('\PlgSystemKoowa'))
+                            {
+                                $dispatcher = \JEventDispatcher::getInstance();
+                                new \PlgSystemKoowa($dispatcher, (array)\JPLuginHelper::getPLugin('system', 'koowa'));
+                            }
+                            break;
+                    }
+                }
             }
             catch (\Exception $e) {
                 $output->writeln("<info>Caught exception during install: " . $e->getMessage() . "</info>\n");
