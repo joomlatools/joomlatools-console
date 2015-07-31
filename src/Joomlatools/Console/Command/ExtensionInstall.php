@@ -15,7 +15,7 @@ use Joomlatools\Console\Joomla\Bootstrapper;
 
 class ExtensionInstall extends Site\AbstractSite
 {
-    protected $extension = array();
+    protected $extensions = array();
 
     protected function configure()
     {
@@ -35,7 +35,7 @@ class ExtensionInstall extends Site\AbstractSite
     {
         parent::execute($input, $output);
 
-        $this->extension = $input->getArgument('extension');
+        $this->extensions = $input->getArgument('extension');
 
         $this->check($input, $output);
         $this->install($input, $output);
@@ -67,67 +67,74 @@ class ExtensionInstall extends Site\AbstractSite
 
         $results = $model->getItems();
 
-        $install = array();
-
-        foreach ($results as $result)
-        {
-            if ($this->extension == $result->element && in_array($result->element, array('com_extman', 'koowa'))) {
-                array_unshift($install, $result->extension_id);
-            }
-
-            if ($this->extension == 'all' || in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension)) {
-                $install[$result->element] = $result->extension_id;
-            }
-
-            if (in_array($result->extension_id, $install) && $result->type == 'plugin') {
-                $plugins[$result->element] = $result->extension_id;
-            }
-        }
-
         ob_end_clean();
 
-        $install = array_unique($install);
+        $install = array();
+        $plugins = array();
 
-        foreach ($install as $element => $extension_id)
+        foreach ($this->extensions as $extension)
         {
-            try
+            foreach ($results as $result)
             {
-                $installer->discover_install($extension_id);
+                $included = false;
 
-                if (in_array($extension_id, $plugins))
+                if (in_array($result->element, array('com_extman', 'koowa')) && ($extension == 'all' || $extension == $result->element))
                 {
-                    $sql = "UPDATE `#__extensions` SET `enabled` = 1 WHERE `extension_id` = '$extension_id'";
+                    array_unshift($install, $result);
+                    $included = true;
+                }
+                elseif ($extension == 'all' || in_array(substr($result->element, 4), $extension) || in_array($result->element, $extension))
+                {
+                    $install[] = $result;
+                    $included  = true;
+                }
 
-                    $db->setQuery($sql);
-                    $db->execute();
-
-                    switch ($element)
-                    {
-                        case 'com_extman':
-                            if(class_exists('Koowa') && !class_exists('ComExtmanDatabaseRowExtension')) {
-                                \KObjectManager::getInstance()->getObject('com://admin/extman.database.row.extension');
-                            }
-                            break;
-                        case 'koowa':
-                            $path = JPATH_PLUGINS . '/system/koowa/koowa.php';
-
-                            if (!file_exists($path)) {
-                                return;
-                            }
-
-                            require_once $path;
-
-                            if (class_exists('\PlgSystemKoowa'))
-                            {
-                                $dispatcher = \JEventDispatcher::getInstance();
-                                new \PlgSystemKoowa($dispatcher, (array)\JPLuginHelper::getPLugin('system', 'koowa'));
-                            }
-                            break;
-                    }
+                if ($result->type == 'plugin' && $included) {
+                    $plugins[] = $result->extension_id;
                 }
             }
+
+        }
+
+        foreach ($install as $extension)
+        {
+            try {
+                $installer->discover_install($extension->extension_id);
+            }
             catch (\Exception $e) {
-                $output->writeln("<info>Caught exception during install: " . $e->getMessage() . "</info>\n");
+                $output->writeln("<info>Caught exception whilst installing $extension->type $extension->element: " . $e->getMessage() . "</info>\n");
+            }
+
+            if (in_array($extension->extension_id, $plugins))
+            {
+                $sql = "UPDATE `#__extensions` SET `enabled` = 1 WHERE `extension_id` = '$extension->extension_id'";
+
+                $db->setQuery($sql);
+                $db->execute();
+
+                switch ($extension->element)
+                {
+                    case 'com_extman':
+                        if(class_exists('Koowa') && !class_exists('ComExtmanDatabaseRowExtension')) {
+                            \KObjectManager::getInstance()->getObject('com://admin/extman.database.row.extension');
+                        }
+                        break;
+                    case 'koowa':
+                        $path = JPATH_PLUGINS . '/system/koowa/koowa.php';
+
+                        if (!file_exists($path)) {
+                            return;
+                        }
+
+                        require_once $path;
+
+                        if (class_exists('\PlgSystemKoowa'))
+                        {
+                            $dispatcher = \JEventDispatcher::getInstance();
+                            new \PlgSystemKoowa($dispatcher, (array)\JPLuginHelper::getPLugin('system', 'koowa'));
+                        }
+                        break;
+                }
             }
         }
     }
