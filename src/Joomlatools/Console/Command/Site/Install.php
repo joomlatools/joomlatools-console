@@ -184,7 +184,7 @@ class Install extends Database\AbstractDatabase
         $extension_input = new ArrayInput(array(
             'extension:install',
             'site'      => $input->getArgument('site'),
-            'extension' => $this->symlink,
+            'extension' => '*',
             '--www'     => $this->www
         ));
         $installer = new Command\ExtensionInstall();

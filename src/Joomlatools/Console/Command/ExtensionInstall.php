@@ -27,7 +27,7 @@ class ExtensionInstall extends Site\AbstractSite
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of extensions to install to the site using discover install'
+                'A list of extensions to install to the site using discover install. Use * to install all discovered extensions.'
             );
     }
 
@@ -67,14 +67,14 @@ class ExtensionInstall extends Site\AbstractSite
         $results = $model->getItems();
 
         $install = array();
+
         foreach ($results as $result)
         {
-            if ($result->element === 'com_extman') {
+            if ($this->extension == $result->element && in_array($result->element, array('com_extman', 'koowa'))) {
                 array_unshift($install, $result->extension_id);
             }
 
-            if ($result->type === 'component'
-                && (in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension))) {
+            if ($this->extension == '*' || in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension)) {
                 $install[] = $result->extension_id;
             }
         }
