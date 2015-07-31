@@ -35,7 +35,7 @@ class ExtensionInstall extends Site\AbstractSite
     {
         parent::execute($input, $output);
 
-        $this->extensions = $input->getArgument('extension');
+        $this->extensions = (array) $input->getArgument('extension');
 
         $this->check($input, $output);
         $this->install($input, $output);
