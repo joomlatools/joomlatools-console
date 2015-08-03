@@ -40,22 +40,13 @@ class ListObjects extends AbstractCache
         $items = $this->listCache($input, $output);
         $client_string = $input->getOption('client') == 1 ? 'administrative side' : 'front end';
 
-        if($items === false)
-        {
-            $output->writeln("<info>It appears that your cache is not enabled via the configuration</info>");
-            return;
-        }
-        elseif(!count($items))
-        {
-            $output->writeln("<info>There appears to be no cache items for the $client_string</info>");
-            return;
-        }
-        else
+        if(count($items))
         {
             foreach ($items as $item) {
                 $output->writeln($item->group);
             }
         }
+        else $output->writeln("<info>There appears to be no cache items for the $client_string</info>");
     }
 
     public function check(InputInterface $input, OutputInterface $output)

@@ -51,6 +51,10 @@ class Clear extends AbstractCache
         foreach ($deleted as $item) {
             $output->writeln('<info>' . $client_string . $item . ' cache items have been deleted</info>');
         }
+
+        if (!count($deleted)) {
+            $output->writeln("<info>There are no $client_string cache items to delete</info>");
+        }
     }
 
     public function deleteCache($client, $group = array())

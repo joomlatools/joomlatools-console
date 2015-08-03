@@ -1,4 +1,10 @@
 <?php
+/**
+ * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @license		Mozilla Public License, version 2.0
+ * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
+ */
+
 namespace Joomlatools\Console\Command\Cache;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -50,6 +56,10 @@ abstract class AbstractCache extends AbstractSite
     {
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+        }
+
+        if (!$this->_isCachingEnabled()) {
+            throw new \RuntimeException(sprintf('Caching is disabled on site %s', $this->site));
         }
     }
 
@@ -112,6 +122,13 @@ abstract class AbstractCache extends AbstractSite
         $target = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web' : $this->target_dir;
 
         return unlink($target.'/console-cache.php');
+    }
+
+    protected function _isCachingEnabled()
+    {
+        $config = \JFactory::getConfig();
+
+        return ($config->get('caching') == 1);
     }
 
     protected function _isAPCEnabled()
