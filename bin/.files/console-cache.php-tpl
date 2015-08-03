@@ -1,4 +1,8 @@
 <?php
+if ($_POST['hash'] != '%6$s') {
+    exit('Unauthorized');
+}
+
 $autoloader = '%1$s';
 $target_dir = '%2$s';
 

@@ -65,13 +65,29 @@ abstract class AbstractCache extends AbstractSite
 
     protected function _doHTTP($task, $client = 0, array $group = array())
     {
-        $this->_createTemporaryScript($task, $client, $group);
+        $random = function($length) {
+            $charset ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            $string  = '';
+            $count   = strlen($charset);
+
+            while ($length--) {
+                $string .= $charset[mt_rand(0, $count-1)];
+            }
+
+            return $string;
+        };
+
+        $hash = $random(32);
+
+        $this->_createTemporaryScript($task, $hash, $client, $group);
 
         try
         {
             $ch = curl_init($this->url . 'console-cache.php');
 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, array('hash' => $hash));
 
             $result = curl_exec($ch);
 
@@ -96,13 +112,13 @@ abstract class AbstractCache extends AbstractSite
         return $response;
     }
 
-    protected function _createTemporaryScript($task, $client = 0, array $group = array())
+    protected function _createTemporaryScript($task, $hash, $client = 0, array $group = array())
     {
         $template   = realpath(__DIR__.'/../../../../../bin/.files/console-cache.php-tpl');
         $autoloader = realpath(__DIR__.'/../../../../../vendor/autoload.php');
 
         $contents = file_get_contents($template);
-        $contents = sprintf($contents, $autoloader, $this->target_dir, $task, $client, implode(',', $group));
+        $contents = sprintf($contents, $autoloader, $this->target_dir, $task, $client, implode(',', $group), $hash);
 
         $target = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web' : $this->target_dir;
         file_put_contents($target.'/console-cache.php', $contents);
