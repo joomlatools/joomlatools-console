@@ -28,7 +28,7 @@ class ExtensionUninstall extends SiteAbstract
             ->addArgument(
                 'extensions',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A array of extensions to un-install from the site... n.b. only unprotected extensions can be uninstalled'
+                'The 3rd party extensions to uninstall from the site'
             );
     }
 
@@ -57,31 +57,30 @@ class ExtensionUninstall extends SiteAbstract
 
         $installer = $app->getInstaller();
 
-        foreach($this->extensions as $uninstall)
+        foreach($this->extensions as $extension)
         {
             $dbo = \JFactory::getDbo();
             $query = \JFactory::getDbo()->getQuery(true)
                 ->select('*')
                 ->from('#__extensions')
-                ->where($dbo->quoteName('protected') .' = ' . $dbo->quote(0));
-
-            $query->where($dbo->quoteName('name') ." = " . $dbo->quote($uninstall));
+                ->where($dbo->quoteName('protected') .' = 0')
+                ->where($dbo->quoteName('element') . ' = ' . $dbo->quote($extension));
 
             $dbo->setQuery($query);
-            $extension = $dbo->loadObject();
+            $row = $dbo->loadObject();
 
-            if(!count($extension))
+            if(!$row || !$row->extension_id)
             {
-                throw new \RuntimeException(sprintf('Extension Uninstall: %s extension not found / Or you are trying to uninstall a core extension.',  $uninstall));
+                throw new \RuntimeException(sprintf('Extension Uninstall: %s extension not found',  $extension));
                 return;
             }
+var_dump($result);
+            $result = $installer->uninstall($row->type, $row->extension_id);
 
-            $result = $installer->uninstall($extension->type, $extension->extension_id);
-
-            if($result){
-                $output->writeln('<info>' . $extension->name . ' extension deleted </info>');
-            }else
-                throw new \RuntimeException(sprintf('Extension Uninstall: Problem deleting %s extension', $uninstall));
+            if ($result) {
+                $output->writeln('<info>' . $row->name . ' extension deleted </info>');
+            }
+            else throw new \RuntimeException(sprintf('Extension Uninstall: failed to delete %s extension', $extension));
         }
 
         ob_end_clean();
