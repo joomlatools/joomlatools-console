@@ -65,23 +65,16 @@ abstract class AbstractCache extends AbstractSite
 
     protected function _doHTTP($task, $client = 0, array $group = array())
     {
-        $this->_createTemporaryScript();
+        $this->_createTemporaryScript($task, $client, $group);
 
         try
         {
-            $data = array(
-                'task'   => $task,
-                'client' => $client,
-                'group'  => implode(',', $group)
-            );
-
             $ch = curl_init($this->url . 'console-cache.php');
 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 
             $result = curl_exec($ch);
+
             curl_close($ch);
 
             if ($result === false) {
@@ -103,13 +96,13 @@ abstract class AbstractCache extends AbstractSite
         return $response;
     }
 
-    protected function _createTemporaryScript()
+    protected function _createTemporaryScript($task, $client = 0, array $group = array())
     {
         $template   = realpath(__DIR__.'/../../../../../bin/.files/console-cache.php-tpl');
         $autoloader = realpath(__DIR__.'/../../../../../vendor/autoload.php');
 
         $contents = file_get_contents($template);
-        $contents = sprintf($contents, $autoloader, $this->target_dir);
+        $contents = sprintf($contents, $autoloader, $this->target_dir, $task, $client, implode(',', $group));
 
         $target = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web' : $this->target_dir;
         file_put_contents($target.'/console-cache.php', $contents);
@@ -128,7 +121,7 @@ abstract class AbstractCache extends AbstractSite
     {
         $config = \JFactory::getConfig();
 
-        return ($config->get('caching') == 1);
+        return ((int) $config->get('caching') > 0);
     }
 
     protected function _isAPCEnabled()

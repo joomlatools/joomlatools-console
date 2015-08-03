@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Joomlatools\Console\Joomla\Bootstrapper;
+use Joomlatools\Console\Joomla\Cache;
 
 class Clear extends AbstractCache
 {
@@ -59,31 +59,7 @@ class Clear extends AbstractCache
 
     public function deleteCache($client, $group = array())
     {
-        $deleted = array();
-
-        if (!$this->_isAPCEnabled())
-        {
-            $options = array(
-                'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
-            );
-
-            $cache = \JCache::getInstance('', $options);
-
-            if(!count($group)){
-                $group = $cache->getAll();
-            }
-
-            foreach($group as $item)
-            {
-                $cache_item = isset($item->group) ? $item->group : $item;
-                $result = $cache->clean($cache_item);
-
-                if($result){
-                    $deleted[] = $cache_item;
-                }
-            }
-        }
-        else
+        if ($this->_isAPCEnabled())
         {
             $deleted = $this->_doHTTP('clear', $client, $group);
 
@@ -91,6 +67,7 @@ class Clear extends AbstractCache
                 throw new \Exception('Could not query '.$this->url.'console-cache.php');
             }
         }
+        else $deleted = Cache::clear($client, $group);
 
         return $deleted;
     }

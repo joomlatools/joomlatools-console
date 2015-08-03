@@ -12,6 +12,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Cache;
+
 class Purge extends AbstractCache
 {
     protected function configure()
@@ -36,7 +38,7 @@ class Purge extends AbstractCache
         if ($this->_isAPCEnabled()) {
             $result = $this->_doHTTP('purge');
         }
-        else $result = \JFactory::getCache()->gc();
+        else $result = Cache::purge();
 
         if ($result === false) {
             $output->writeln('<error>Error purging cached items</error>');

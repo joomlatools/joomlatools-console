@@ -12,6 +12,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Cache;
+
 class ListObjects extends AbstractCache
 {
     protected function configure()
@@ -60,15 +62,7 @@ class ListObjects extends AbstractCache
     {
         $client = $input->getOption('client');
 
-        if (!$this->_isAPCEnabled())
-        {
-            $options = array(
-                'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
-            );
-
-            $items = \JCache::getInstance('', $options)->getAll();
-        }
-        else
+        if ($this->_isAPCEnabled())
         {
             $items = $this->_doHTTP('list', $client);
 
@@ -76,6 +70,7 @@ class ListObjects extends AbstractCache
                 throw new \Exception('Could not query '.$this->url.'console-cache.php');
             }
         }
+        else $items = Cache::getGroups($client);
 
         return $items;
     }
