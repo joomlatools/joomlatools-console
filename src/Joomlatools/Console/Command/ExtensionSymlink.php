@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionSymlink extends SiteAbstract
+class ExtensionSymlink extends Site\AbstractSite
 {
     protected $symlink = array();
 
@@ -26,7 +26,7 @@ class ExtensionSymlink extends SiteAbstract
             ->addArgument(
                 'symlink',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of folders to symlink from projects folder'
+                'A list of folders to symlink from projects folder. Use \'all\' to symlink every folder.'
             )
             ->addOption(
                 'projects-dir',
@@ -43,6 +43,16 @@ class ExtensionSymlink extends SiteAbstract
 
         $this->symlink = $input->getArgument('symlink');
 
+        if (count($this->symlink) == 1 && $this->symlink[0] == 'all')
+        {
+            $this->symlink = array();
+            $source = $input->getOption('projects-dir') . '/*';
+
+            foreach(glob($source, GLOB_ONLYDIR) as $folder) {
+                $this->symlink[] = basename($folder);
+            }
+        }
+
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
     }
@@ -58,11 +68,11 @@ class ExtensionSymlink extends SiteAbstract
     {
         // koowa is here for backwards compatibility, can be removed once Nooku Framework 2.2 is out
         static $dependencies = array(
-            'nooku-framework-joomla' => array('nooku-framework'),
-            'extman'  => array('koowa', 'nooku-framework-joomla', 'nooku-framework'),
-            'docman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
-            'fileman' => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
-            'logman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_activities')
+            'joomlatools-framework' => array('nooku-framework'),
+            'extman'  => array('koowa', 'joomlatools-framework', 'nooku-framework'),
+            'docman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files'),
+            'fileman' => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_files'),
+            'logman'  => array('extman', 'koowa', 'joomlatools-framework', 'nooku-framework', 'com_activities')
         );
 
         $project_folder = $input->getOption('projects-dir');
@@ -77,7 +87,7 @@ class ExtensionSymlink extends SiteAbstract
         }
 
         // If we are symlinking Koowa, we need to create this structure to allow multiple symlinks in them
-        if (array_intersect(array('nooku-framework', 'nooku-framework-joomla', 'koowa'), $projects))
+        if (array_intersect(array('nooku-framework', 'joomlatools-framework', 'koowa'), $projects))
         {
             $dirs = array($this->target_dir.'/libraries/koowa/components', $this->target_dir.'/media/koowa');
             foreach ($dirs as $dir)

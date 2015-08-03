@@ -68,12 +68,15 @@ class Application extends \Symfony\Component\Console\Application
     public function run(Input\InputInterface $input = null, Output\OutputInterface $output = null)
     {
         if (null === $input) {
-            $this->_input = new Input\ArgvInput();
+            $input = new Input\ArgvInput();
         }
 
         if (null === $output) {
-            $this->_output = new Output\ConsoleOutput();
+            $output = new Output\ConsoleOutput();
         }
+
+        $this->_input  = $input;
+        $this->_output = $output;
 
         $this->configureIO($this->_input, $this->_output);
 
@@ -103,17 +106,29 @@ class Application extends \Symfony\Component\Console\Application
         $commands = parent::getDefaultCommands();
 
         $commands = array_merge($commands, array(
-            new Command\Symlink(),
-            new Command\SiteCreate(),
-            new Command\SiteDelete(),
-            new Command\SiteToken(),
+            new Command\Database\Install(),
+            new Command\Database\Drop(),
+
+            new Command\Site\Configure(),
+            new Command\Site\Create(),
+            new Command\Site\Delete(),
+            new Command\Site\Download(),
+            new Command\Site\Install(),
+            new Command\Site\Token(),
+
             new Command\ExtensionSymlink(),
             new Command\ExtensionInstall(),
             new Command\ExtensionInstallFile(),
             new Command\ExtensionRegister(),
+
             new Command\PluginList(),
             new Command\PluginInstall(),
             new Command\PluginUninstall(),
+
+            new Command\Vhost\Create(),
+            new Command\Vhost\Remove(),
+
+            new Command\Symlink(),
             new Command\Versions(),
             new Command\CacheClear(),
             new Command\CacheList(),
