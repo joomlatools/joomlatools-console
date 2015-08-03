@@ -14,15 +14,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class CacheDelete extends SiteAbstract
+class CacheClear extends SiteAbstract
 {
     protected function configure()
     {
         parent::configure();
 
         $this
-            ->setName('cache:delete')
-            ->setDescription('Delete a Joomla site cache')
+            ->setName('cache:clear')
+            ->setDescription('Clear the Joomla cache')
             ->addOption(
                 'group',
                 'g',
