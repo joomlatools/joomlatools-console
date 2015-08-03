@@ -5,7 +5,7 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Cache;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class CacheClear extends SiteAbstract
+class Clear extends AbstractCache
 {
     protected function configure()
     {
@@ -43,56 +43,51 @@ class CacheClear extends SiteAbstract
     {
         parent::execute($input, $output);
 
-        $this->check($input, $output);
-        $this->deleteCache($input, $output);
-    }
-
-    public function check(InputInterface $input, OutputInterface $output)
-    {
-        if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
-        }
-    }
-
-    public function deleteCache(InputInterface $input, OutputInterface $output)
-    {
-        Bootstrapper::getApplication($this->target_dir);
-
-        $group = $input->getOption('group');
-        $client = $input->getOption('client');
+        $group   = $input->getOption('group');
+        $client  = $input->getOption('client');
         $client_string = $client ? 'administrative ' : 'front end ';
 
-        $options = array(
-            'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
-        );
-
-        $cache = \JCache::getInstance('', $options);
-
-        if(!count($group)){
-            $group = $cache->getAll();
+        $deleted = $this->deleteCache($client, $group);
+        foreach ($deleted as $item) {
+            $output->writeln('<info>' . $client_string . $item . ' cache items have been deleted</info>');
         }
+    }
 
-        if($group === false)
+    public function deleteCache($client, $group = array())
+    {
+        $deleted = array();
+
+        if (!$this->_isAPCEnabled())
         {
-            $output->writeln("<info>It appears that your cache is not enabled via the configuration</info>");
-            return;
-        }
-        elseif(!count($group))
-        {
-            $output->writeln("<info>There appears to be no cache items for the $client_string</info>");
-            return;
-        }
-        else
-        {
+            $options = array(
+                'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
+            );
+
+            $cache = \JCache::getInstance('', $options);
+
+            if(!count($group)){
+                $group = $cache->getAll();
+            }
+
             foreach($group as $item)
             {
                 $cache_item = isset($item->group) ? $item->group : $item;
                 $result = $cache->clean($cache_item);
 
                 if($result){
-                    $output->writeln('<info>' . $client_string . $cache_item . ' cache items have been deleted</info>');
+                    $deleted[] = $cache_item;
                 }
             }
         }
+        else
+        {
+            $deleted = $this->_doHTTP('clear', $client, $group);
+
+            if ($deleted === false) {
+                throw new \Exception('Could not query '.$this->url.'console-cache.php');
+            }
+        }
+
+        return $deleted;
     }
 }

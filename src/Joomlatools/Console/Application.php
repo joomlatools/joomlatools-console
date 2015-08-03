@@ -106,15 +106,12 @@ class Application extends \Symfony\Component\Console\Application
         $commands = parent::getDefaultCommands();
 
         $commands = array_merge($commands, array(
+            new Command\Cache\Clear(),
+            new Command\Cache\ListObjects(),
+            new Command\Cache\Purge(),
+
             new Command\Database\Install(),
             new Command\Database\Drop(),
-
-            new Command\Site\Configure(),
-            new Command\Site\Create(),
-            new Command\Site\Delete(),
-            new Command\Site\Download(),
-            new Command\Site\Install(),
-            new Command\Site\Token(),
 
             new Command\ExtensionSymlink(),
             new Command\ExtensionInstall(),
@@ -125,14 +122,18 @@ class Application extends \Symfony\Component\Console\Application
             new Command\PluginInstall(),
             new Command\PluginUninstall(),
 
+            new Command\Site\Configure(),
+            new Command\Site\Create(),
+            new Command\Site\Delete(),
+            new Command\Site\Download(),
+            new Command\Site\Install(),
+            new Command\Site\Token(),
+
             new Command\Vhost\Create(),
             new Command\Vhost\Remove(),
 
             new Command\Symlink(),
-            new Command\Versions(),
-            new Command\CacheClear(),
-            new Command\CacheList(),
-            new Command\CachePurge()
+            new Command\Versions()
         ));
 
         return $commands;

@@ -5,16 +5,14 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Cache;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Joomlatools\Console\Joomla\Bootstrapper;
-
-class CacheList extends SiteAbstract
+class ListObjects extends AbstractCache
 {
     protected function configure()
     {
@@ -38,29 +36,9 @@ class CacheList extends SiteAbstract
         parent::execute($input, $output);
 
         $this->check($input, $output);
-        $this->listCache($input, $output);
-    }
 
-    public function check(InputInterface $input, OutputInterface $output)
-    {
-        if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
-        }
-    }
-
-    public function listCache(InputInterface $input, OutputInterface $output)
-    {
-        Bootstrapper::getApplication($this->target_dir);
-
-        $client = $input->getOption('client');
-        $client_string = $client ? 'administrative side' : 'front end';
-
-        $options = array(
-            'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
-        );
-
-        $cache = \JCache::getInstance('', $options);
-        $items = $cache->getAll();
+        $items = $this->listCache($input, $output);
+        $client_string = $input->getOption('client') == 1 ? 'administrative side' : 'front end';
 
         if($items === false)
         {
@@ -74,9 +52,40 @@ class CacheList extends SiteAbstract
         }
         else
         {
-            foreach($items as $item){
+            foreach ($items as $item) {
                 $output->writeln($item->group);
             }
         }
+    }
+
+    public function check(InputInterface $input, OutputInterface $output)
+    {
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+        }
+    }
+
+    public function listCache(InputInterface $input, OutputInterface $output)
+    {
+        $client = $input->getOption('client');
+
+        if (!$this->_isAPCEnabled())
+        {
+            $options = array(
+                'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
+            );
+
+            $items = \JCache::getInstance('', $options)->getAll();
+        }
+        else
+        {
+            $items = $this->_doHTTP('list', $client);
+
+            if ($items === false) {
+                throw new \Exception('Could not query '.$this->url.'console-cache.php');
+            }
+        }
+
+        return $items;
     }
 }

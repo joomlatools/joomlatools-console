@@ -1,0 +1,91 @@
+<?php
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    exit();
+}
+
+$autoloader = '%1$s';
+$target_dir = '%2$s';
+
+if (!file_exists($autoloader)) {
+    exit('Failed to load autoloader');
+}
+
+require_once $autoloader;
+
+class CacheManager
+{
+    public function execute($task, $client = 0, $group = array())
+    {
+        switch ($task)
+        {
+            case 'list':
+                $result = $this->_listItems($client);
+                break;
+            case 'purge':
+                $result = $this->_purge();
+                break;
+            case 'clear':
+                $result = $this->_clear($client, $group);
+                break;
+            default:
+                $result = null;
+                break;
+        }
+
+        echo json_encode($result);
+        exit();
+    }
+
+    protected function _listItems($client)
+    {
+        $options = array(
+            'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
+        );
+
+        return \JCache::getInstance('', $options)->getAll();
+    }
+
+    protected function _purge()
+    {
+        \JFactory::getCache()->gc();
+
+        return array('result' => true);
+    }
+
+    protected function _clear($client, array $group = array())
+    {
+        $group = array_filter($group);
+
+        $options = array(
+            'cachebase' => $client ? JPATH_ADMINISTRATOR . '/cache' : JPATH_CACHE
+        );
+
+        $cache = \JCache::getInstance('', $options);
+
+        if (!count($group)) {
+            $group = $cache->getAll();
+        }
+
+        $cleared = array();
+        foreach($group as $item)
+        {
+            $cache_item = isset($item->group) ? $item->group : $item;
+            $result = $cache->clean($cache_item);
+
+            if($result) {
+                $cleared[] = $cache_item;
+            }
+        }
+
+        return $cleared;
+    }
+}
+
+$task   = $_POST['task'];
+$client = $_POST['client'];
+$group  = isset($_POST['group']) ? explode(',', $_POST['group']) : array();
+
+Joomlatools\Console\Joomla\Bootstrapper::bootstrap($target_dir);
+
+$cache = new CacheManager();
+$cache->execute($task, $client, $group);
