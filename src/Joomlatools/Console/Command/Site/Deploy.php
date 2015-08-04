@@ -55,11 +55,30 @@ class Deploy extends AbstractSite
         $this->user     = $input->getOption('user');
         $this->password = $input->getOption('password');
 
+        $this->check($input, $output);
+
         chdir($this->target_dir);
 
         $this->checkGit($input, $output);
         $this->checkGitFTP($input, $output);
         $this->deploy();
+    }
+
+    public function check(InputInterface $input, OutputInterface $output)
+    {
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site %s does not exist', $this->site));
+        }
+
+        $result = shell_exec('command -v git-ftp >/dev/null 2>&1 || { echo "false"; }');
+
+        if (trim($result) == 'false')
+        {
+            $output->writeln('<error>ERROR:</error> git-ftp is not installed.');
+            $output->writeln('Refer to https://github.com/git-ftp/git-ftp/blob/develop/INSTALL.md for installation instructions.');
+
+            exit(1);
+        }
     }
 
     public function checkGit()
@@ -92,7 +111,7 @@ class Deploy extends AbstractSite
     public function deploy()
     {
         $password = $this->_buildPasswordString();
-        
+
         passthru('git ftp push --user ' . $this->user . ' ' . $password . ' ' .$this->server);
     }
 
