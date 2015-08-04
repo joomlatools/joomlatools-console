@@ -27,19 +27,22 @@ class Deploy extends AbstractSite
             ->setName('site:deploy')
             ->setDescription('Deploy your website with git-ftp')
             ->addArgument(
-                'user',
-                InputArgument::REQUIRED,
-                'What is your FTP username?'
-            )
-            ->addArgument(
-                'password',
-                InputArgument::REQUIRED,
-                'What is your FTP password?'
-            )
-            ->addArgument(
                 'server',
                 InputArgument::REQUIRED,
-                'What is your FTP server?'
+                'FTP server to deploy to. You can add a different port or subdirectory. Example: ftp://ftp.domain.com:21/httpdocs'
+            )
+            ->addOption(
+                'user',
+                'U',
+                InputOption::VALUE_REQUIRED,
+                "FTP user",
+                exec('whoami')
+            )
+            ->addOption(
+                'password',
+                'P',
+                InputOption::VALUE_OPTIONAL,
+                "FTP password. Omit for interactive password prompt."
             )
             ;
     }
@@ -48,23 +51,22 @@ class Deploy extends AbstractSite
     {
         parent::execute($input, $output);
 
-        $this->user     = $input->getArgument('user');
-        $this->password = $input->getArgument('password');
         $this->server   = $input->getArgument('server');
+        $this->user     = $input->getOption('user');
+        $this->password = $input->getOption('password');
 
         chdir($this->target_dir);
 
         $this->checkGit($input, $output);
         $this->checkGitFTP($input, $output);
-        $this->deploy($input, $output);
+        $this->deploy();
     }
 
-    public function checkGit(InputInterface $input, OutputInterface $output)
+    public function checkGit()
     {
         if(!file_exists($this->target_dir . '/.git'))
         {
-            $result = exec('git init');
-            $output->writeln($result);
+            passthru('git init');
 
             `touch .gitignore`;
             `echo ".git-ftp" > .gitignore`;
@@ -74,19 +76,50 @@ class Deploy extends AbstractSite
         }
     }
 
-    public function checkGitFTP(InputInterface $input, OutputInterface $output)
+    public function checkGitFTP()
     {
         if(!file_exists($this->target_dir . '/.git-ftp'))
         {
-            passthru('git ftp init --user ' . $this->user . ' --passwd ' . $this->password . ' ' . $this->server);
+            $password = $this->_buildPasswordString();
+
+            passthru('git ftp init --user ' . $this->user . ' ' . $password . ' ' . $this->server);
 
             `touch .git-ftp`;
             `echo "used for local deployment purposes, do not delete" > .git-ftp`;
         }
     }
 
-    public function deploy(InputInterface $input, OutputInterface $output)
+    public function deploy()
     {
-        passthru('git ftp push --user ' . $this->user . ' --passwd ' . $this->password . ' ' .$this->server);
+        $password = $this->_buildPasswordString();
+        
+        passthru('git ftp push --user ' . $this->user . ' ' . $password . ' ' .$this->server);
+    }
+
+    protected function _getInstalledVersion()
+    {
+        $result = `git-ftp --version`;
+
+        if (preg_match('/\d+(?:\.\d+)+/', $result, $matches)) {
+            return $matches[0];
+        }
+
+        return '0.0.0';
+    }
+
+    protected function _buildPasswordString()
+    {
+        if (empty($this->password))
+        {
+            $version = $this->_getInstalledVersion();
+
+            if (version_compare($version, '1.0.2', '<')) {
+                return '-p -';
+            }
+
+            return '-P';
+        }
+
+        return '--passwd ' . $this->password;
     }
 }
