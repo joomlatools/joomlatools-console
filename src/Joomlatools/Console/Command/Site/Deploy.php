@@ -5,7 +5,7 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Site;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,12 +13,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SiteDeploy extends SiteAbstract
+class Deploy extends AbstractSite
 {
     protected $username = '';
-
     protected $password = '';
-
     protected $server = '';
 
     protected function configure()
@@ -48,7 +46,6 @@ class SiteDeploy extends SiteAbstract
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         parent::execute($input, $output);
 
         $this->user = $input->getArgument('user');
