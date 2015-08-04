@@ -48,9 +48,11 @@ class Deploy extends AbstractSite
     {
         parent::execute($input, $output);
 
-        $this->user = $input->getArgument('user');
+        $this->user     = $input->getArgument('user');
         $this->password = $input->getArgument('password');
-        $this->server = $input->getArgument('server');
+        $this->server   = $input->getArgument('server');
+
+        chdir($this->target_dir);
 
         $this->checkGit($input, $output);
         $this->checkGitFTP($input, $output);
@@ -59,8 +61,6 @@ class Deploy extends AbstractSite
 
     public function checkGit(InputInterface $input, OutputInterface $output)
     {
-        `cd $this->target_dir`;
-
         if(!file_exists($this->target_dir . '/.git'))
         {
             $result = exec('git init');
@@ -69,8 +69,8 @@ class Deploy extends AbstractSite
             `touch .gitignore`;
             `echo ".git-ftp" > .gitignore`;
 
-            $output->writeln('<info>New git repository added please make your first commit</info>');
-            exit();
+            `git add -A`;
+            `git commit -a -m "Initial commit"`;
         }
     }
 
@@ -78,21 +78,15 @@ class Deploy extends AbstractSite
     {
         if(!file_exists($this->target_dir . '/.git-ftp'))
         {
-            $result = exec('git ftp init --user ' . $this->user . ' --passwd ' . $this->password . ' ' . $this->server);
-            $output->writeln($result);
+            passthru('git ftp init --user ' . $this->user . ' --passwd ' . $this->password . ' ' . $this->server);
 
             `touch .git-ftp`;
             `echo "used for local deployment purposes, do not delete" > .git-ftp`;
-
-            exit();
         }
     }
 
     public function deploy(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln("<info>about to deploy</info>");
-
-        $result = exec('git ftp push --user ' . $this->user . ' --passwd ' . $this->password . ' ' .$this->server);
-        $output->writeln("$result");
+        passthru('git ftp push --user ' . $this->user . ' --passwd ' . $this->password . ' ' .$this->server);
     }
 }
