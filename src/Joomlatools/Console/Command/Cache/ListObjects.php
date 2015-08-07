@@ -51,13 +51,6 @@ class ListObjects extends AbstractCache
         else $output->writeln("<info>There appears to be no cache items for the $client_string</info>");
     }
 
-    public function check(InputInterface $input, OutputInterface $output)
-    {
-        if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
-        }
-    }
-
     public function listCache(InputInterface $input, OutputInterface $output)
     {
         $client = $input->getOption('client');
