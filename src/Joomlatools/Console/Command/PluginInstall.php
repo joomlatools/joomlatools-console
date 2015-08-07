@@ -23,9 +23,9 @@ class PluginInstall extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $result = `command -v composer >/dev/null 2>&1 || { echo >&2 "false"; }`;
+        $result = shell_exec('command -v composer >/dev/null 2>&1 || { echo "false"; }');
 
-        if ($result == 'false')
+        if (trim($result) == 'false')
         {
             $output->writeln('<error>Composer was not found. It is either not installed or globally available</error>');
             return;
