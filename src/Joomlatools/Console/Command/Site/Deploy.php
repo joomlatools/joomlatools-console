@@ -88,7 +88,7 @@ class Deploy extends AbstractSite
             passthru('git init');
 
             `touch .gitignore`;
-            `echo ".git-ftp" > .gitignore`;
+            `echo ".git-ftp*" > .gitignore`;
 
             `git add -A`;
             `git commit -a -m "Initial commit"`;
