@@ -74,7 +74,7 @@ class ExtensionUninstall extends SiteAbstract
                 throw new \RuntimeException(sprintf('Extension Uninstall: %s extension not found',  $extension));
                 return;
             }
-var_dump($result);
+
             $result = $installer->uninstall($row->type, $row->extension_id);
 
             if ($result) {
