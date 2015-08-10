@@ -63,11 +63,16 @@ class ExtensionUninstall extends SiteAbstract
             $query = \JFactory::getDbo()->getQuery(true)
                 ->select('*')
                 ->from('#__extensions')
-                ->where($dbo->quoteName('protected') .' = 0')
                 ->where($dbo->quoteName('element') . ' = ' . $dbo->quote($extension));
 
             $dbo->setQuery($query);
             $row = $dbo->loadObject();
+
+            if($row->protected)
+            {
+                throw new \RuntimeException(sprintf('Extension Uninstall: %s is a core extension',  $extension));
+                return;
+            }
 
             if(!$row || !$row->extension_id)
             {
