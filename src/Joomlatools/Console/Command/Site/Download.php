@@ -104,11 +104,14 @@ class Download extends AbstractSite
                 unlink($tarball);
             }
 
-            if (file_exists($this->target_dir.'/htaccess.txt')) {
-                `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
+            $isPlatform = Util::isPlatform($this->target_dir);
+
+            $directory = $this->target_dir. ($isPlatform ? '/web' : '');
+            if (file_exists($directory.'/htaccess.txt')) {
+                `cp $directory/htaccess.txt $directory/.htaccess`;
             }
 
-            if (Util::isPlatform($this->target_dir)) {
+            if ($isPlatform) {
                 `cd $this->target_dir; composer install -q`;
             }
         }
