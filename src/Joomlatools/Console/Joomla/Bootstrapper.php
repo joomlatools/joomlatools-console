@@ -7,6 +7,8 @@
 
 namespace Joomlatools\Console\Joomla;
 
+use Joomlatools\Console\Application;
+
 class Bootstrapper
 {
     /**
@@ -22,8 +24,8 @@ class Bootstrapper
         if (!class_exists('\\JApplicationCli'))
         {
             $_SERVER['HTTP_HOST'] = 'localhost';
-            $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/1.0.0';
-
+            $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/' . Application::VERSION;
+            
             define('_JEXEC', 1);
             define('DS', DIRECTORY_SEPARATOR);
 
