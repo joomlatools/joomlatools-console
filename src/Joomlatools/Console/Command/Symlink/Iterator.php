@@ -7,6 +7,8 @@
 
 namespace Joomlatools\Console\Command\Symlink;
 
+use Joomlatools\Console\Joomla\Util;
+
 class Iterator extends \RecursiveIteratorIterator
 {
     protected $source;
@@ -35,6 +37,11 @@ class Iterator extends \RecursiveIteratorIterator
 
         $target = str_replace($this->source, '', $source);
         $target = str_replace('/site', '', $target);
+
+        if (Util::isPlatform($this->target)) {
+            $target = $this->setPlatformPath($target);
+        }
+
         $target = $this->target.$target;
 
         if (is_link($target)) {
@@ -55,5 +62,30 @@ class Iterator extends \RecursiveIteratorIterator
         if (!file_exists($target)) {
             `ln -sf $source $target`;
         }
+    }
+
+    public function setPlatformPath($target)
+    {
+        $paths = array(
+            '/administrator' => '/app/administrator',
+            '/components'    => '/app/site/components',
+            '/modules'       => '/app/site/modules',
+            '/language'      => '/app/site/language',
+            '/media'         => '/web/media',
+            '/plugins'       => '/lib/plugins',
+            '/libraries'     => '/lib/libraries',
+            '/images'        => '/web/images'
+        );
+
+        foreach ($paths as $path => $replacement)
+        {
+            if (substr($target, 0, strlen($path)) == $path)
+            {
+                $target = $replacement . substr($target, strlen($path));
+                break;
+            }
+        }
+
+        return $target;
     }
 }
