@@ -37,12 +37,7 @@ class Iterator extends \RecursiveIteratorIterator
 
         $target = str_replace($this->source, '', $source);
         $target = str_replace('/site', '', $target);
-
-        if (Util::isPlatform($this->target)) {
-            $target = $this->setPlatformPath($target);
-        }
-
-        $target = $this->target.$target;
+        $target = $this->buildTargetPath($target, $this->target);
 
         if (is_link($target)) {
             unlink($target);
@@ -64,28 +59,37 @@ class Iterator extends \RecursiveIteratorIterator
         }
     }
 
-    public function setPlatformPath($target)
+    public function buildTargetPath($path, $target_directory = '')
     {
-        $paths = array(
-            '/administrator' => '/app/administrator',
-            '/components'    => '/app/site/components',
-            '/modules'       => '/app/site/modules',
-            '/language'      => '/app/site/language',
-            '/media'         => '/web/media',
-            '/plugins'       => '/lib/plugins',
-            '/libraries'     => '/lib/libraries',
-            '/images'        => '/web/images'
-        );
+        if (!empty($target_directory) && substr($target_directory, -1) == '/') {
+            $target_directory = substr($target_directory, 0, -1);
+        }
 
-        foreach ($paths as $path => $replacement)
+        $path = str_replace($target_directory, '', $path);
+
+        if (Util::isPlatform($target_directory))
         {
-            if (substr($target, 0, strlen($path)) == $path)
+            $paths = array(
+                '/administrator' => '/app/administrator',
+                '/components'    => '/app/site/components',
+                '/modules'       => '/app/site/modules',
+                '/language'      => '/app/site/language',
+                '/media'         => '/web/media',
+                '/plugins'       => '/lib/plugins',
+                '/libraries'     => '/lib/libraries',
+                '/images'        => '/web/images'
+            );
+
+            foreach ($paths as $original => $replacement)
             {
-                $target = $replacement . substr($target, strlen($path));
-                break;
+                if (substr($path, 0, strlen($original)) == $original)
+                {
+                    $path = $replacement . substr($path, strlen($original));
+                    break;
+                }
             }
         }
 
-        return $target;
+        return $target_directory.$path;
     }
 }
