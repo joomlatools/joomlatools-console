@@ -7,8 +7,6 @@
 
 namespace Joomlatools\Console\Joomla;
 
-use Joomlatools\Console\Application;
-
 class Bootstrapper
 {
     /**
@@ -24,19 +22,32 @@ class Bootstrapper
         if (!class_exists('\\JApplicationCli'))
         {
             $_SERVER['HTTP_HOST'] = 'localhost';
-            $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/' . Application::VERSION;
+            $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/' . \Joomlatools\Console\Application::VERSION;
 
             define('_JEXEC', 1);
             define('DS', DIRECTORY_SEPARATOR);
 
-            define('JPATH_BASE', realpath($base));
+            if (Util::isPlatform($base))
+            {
+                define('JPATH_WEB'   , $base.'/web');
+                define('JPATH_ROOT'  , $base);
+                define('JPATH_BASE'  , JPATH_ROOT . '/app/administrator');
+                define('JPATH_CACHE' , JPATH_ROOT . '/cache/site');
+                define('JPATH_THEMES', __DIR__.'/templates');
 
-            require_once JPATH_BASE . '/includes/defines.php';
+                require_once JPATH_ROOT . '/app/defines.php';
+                require_once JPATH_ROOT . '/app/bootstrap.php';
+            }
+            else
+            {
+                define('JPATH_BASE', realpath($base));
 
-            require_once JPATH_BASE . '/includes/framework.php';
-            require_once JPATH_LIBRARIES . '/import.php';
+                require_once JPATH_BASE . '/includes/defines.php';
+                require_once JPATH_BASE . '/includes/framework.php';
 
-            require_once JPATH_LIBRARIES . '/cms.php';
+                require_once JPATH_LIBRARIES . '/import.php';
+                require_once JPATH_LIBRARIES . '/cms.php';
+            }
         }
 
         $credentials = array(
