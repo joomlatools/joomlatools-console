@@ -38,7 +38,7 @@ class Download extends AbstractSite
             ->setName('site:download')
             ->setDescription('Download and extract the given Joomla version')
             ->addOption(
-                'joomla',
+                'release',
                 null,
                 InputOption::VALUE_REQUIRED,
                 "Joomla version. Can be a release number (2, 3.2, ..) or branch name. Run `joomla versions` for a full list.\nUse \"none\" for an empty virtual host.",
@@ -85,7 +85,7 @@ class Download extends AbstractSite
             $this->versions->clearcache($output);
         }
 
-        $this->setVersion($input->getOption('joomla'));
+        $this->setVersion($input->getOption('release'));
 
         if ($this->version != 'none')
         {
