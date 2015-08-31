@@ -77,4 +77,54 @@ class Util
 
         return false;
     }
+
+    /**
+     * Builds the full path for a given path inside a Joomla project.
+     * If base is a Joomla Platform installation, the path will be
+     * translated into the correct path in platform.
+     *
+     * Example: /administrator/components/com_xyz becomes /app/administrator/components/com_xyz in platform.
+     * 
+     * @param string $path The original relative path to the file/directory
+     * @param string $base The root directory of the Joomla installation
+     * @return string Target path
+     */
+    public static function buildTargetPath($path, $base = '')
+    {
+        if (!empty($base) && substr($base, -1) == '/') {
+            $base = substr($base, 0, -1);
+        }
+
+        $path = str_replace($base, '', $path);
+
+        if (substr($path, 0, 1) != '/') {
+            $path = '/'.$path;
+        }
+
+        if (self::isPlatform($base))
+        {
+            $paths = array(
+                '/administrator/manifests' => '/config/manifests/',
+                '/administrator' => '/app/administrator',
+                '/components'    => '/app/site/components',
+                '/modules'       => '/app/site/modules',
+                '/language'      => '/app/site/language',
+                '/media'         => '/web/media',
+                '/plugins'       => '/lib/plugins',
+                '/libraries'     => '/lib/libraries',
+                '/images'        => '/web/images'
+            );
+
+            foreach ($paths as $original => $replacement)
+            {
+                if (substr($path, 0, strlen($original)) == $original)
+                {
+                    $path = $replacement . substr($path, strlen($original));
+                    break;
+                }
+            }
+        }
+
+        return $base.$path;
+    }
 }

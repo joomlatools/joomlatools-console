@@ -7,6 +7,8 @@
 
 namespace Joomlatools\Console\Command\Symlink;
 
+use Joomlatools\Console\Joomla\Util;
+
 class Iterator extends \RecursiveIteratorIterator
 {
     protected $source;
@@ -35,7 +37,7 @@ class Iterator extends \RecursiveIteratorIterator
 
         $target = str_replace($this->source, '', $source);
         $target = str_replace('/site', '', $target);
-        $target = $this->target.$target;
+        $target = Util::buildTargetPath($target, $this->target);
 
         if (is_link($target)) {
             unlink($target);
