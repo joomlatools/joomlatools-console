@@ -109,7 +109,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Database\Install(),
             new Command\Database\Drop(),
 
-            new Command\SiteCheckIn(),
+            new Command\Site\CheckIn(),
             new Command\Site\Configure(),
             new Command\Site\Create(),
             new Command\Site\Deploy(),

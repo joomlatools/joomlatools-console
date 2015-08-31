@@ -5,7 +5,7 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\SIte;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class SiteCheckIn extends SiteAbstract
+class CheckIn extends AbstractSite
 {
     protected $_user_column;
 
@@ -46,10 +46,9 @@ class SiteCheckIn extends SiteAbstract
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $site = $input->getArgument('site');
+        parent::execute($input, $output);
 
-        // Bootstrap Joomla.
-        Bootstrapper::getApplication(sprintf('/var/www/%s', $site));
+        Bootstrapper::getApplication($this->target_dir);
 
         $this->_user_column = $input->getOption('user-column');
         $this->_date_column = $input->getOption('date-column');
@@ -70,7 +69,7 @@ class SiteCheckIn extends SiteAbstract
 
         foreach ($tables as $table)
         {
-            $output->writeln("<comment>Checking in the {$table} table ...</comment>");
+            $output->write("<comment>Checking in the {$table} table ... </comment>");
 
             $table = $prefix . $table;
 
@@ -86,17 +85,12 @@ class SiteCheckIn extends SiteAbstract
             {
                 $affected = $dbo->getAffectedRows();
 
-                $format = 'Table successfully checked in (%s)';
+                $format  = '[<info>OK</info>] (%d %s checked in)';
+                $message = sprintf($format, $affected, ($affected == 1 ? 'row' : 'rows'));
 
-                if ($affected == 1) {
-                    $message = sprintf($format, "{$affected} row was checked in");
-                } else {
-                    $message = sprintf($format, "{$affected} rows were checked in");
-                }
-
-                $output->writeln("<info>{$message}</info>");
+                $output->writeln("$message");
             }
-            else $output->writeln("<error>There was an error while trying to check in the table</error>");
+            else $output->writeln("[<error>FAILED</error>]");
         }
     }
 
