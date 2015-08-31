@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
@@ -12,9 +12,23 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionSymlink extends SiteAbstract
+class ExtensionSymlink extends Site\AbstractSite
 {
     protected $symlink = array();
+
+    protected static $_symlinkers = array();
+
+    protected static $_dependencies = array();
+
+    public static function registerDependencies($project, array $dependencies)
+    {
+        static::$_dependencies[$project] = $dependencies;
+    }
+
+    public static function registerSymlinker($symlinker)
+    {
+        array_unshift(static::$_symlinkers, $symlinker);
+    }
 
     protected function configure()
     {
@@ -26,7 +40,7 @@ class ExtensionSymlink extends SiteAbstract
             ->addArgument(
                 'symlink',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of folders to symlink from projects folder'
+                'A list of folders to symlink from projects folder. Use \'all\' to symlink every folder.'
             )
             ->addOption(
                 'projects-dir',
@@ -43,6 +57,16 @@ class ExtensionSymlink extends SiteAbstract
 
         $this->symlink = $input->getArgument('symlink');
 
+        if (count($this->symlink) == 1 && $this->symlink[0] == 'all')
+        {
+            $this->symlink = array();
+            $source = $input->getOption('projects-dir') . '/*';
+
+            foreach(glob($source, GLOB_ONLYDIR) as $folder) {
+                $this->symlink[] = basename($folder);
+            }
+        }
+
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
     }
@@ -56,129 +80,83 @@ class ExtensionSymlink extends SiteAbstract
 
     public function symlinkProjects(InputInterface $input, OutputInterface $output)
     {
-        // koowa is here for backwards compatibility, can be removed once Nooku Framework 2.2 is out
-        static $dependencies = array(
-            'nooku-framework-joomla' => array('nooku-framework'),
-            'extman'  => array('koowa', 'nooku-framework-joomla', 'nooku-framework'),
-            'docman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
-            'fileman' => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_files'),
-            'logman'  => array('extman', 'koowa', 'nooku-framework-joomla', 'nooku-framework', 'com_activities')
-        );
-
         $project_folder = $input->getOption('projects-dir');
 
         $projects = array();
         foreach ($this->symlink as $symlink)
         {
             $projects[] = $symlink;
-            if (array_key_exists($symlink, $dependencies)) {
-                $projects = array_merge($projects, $dependencies[$symlink]);
-            }
-        }
-
-        // If we are symlinking Koowa, we need to create this structure to allow multiple symlinks in them
-        if (array_intersect(array('nooku-framework', 'nooku-framework-joomla', 'koowa'), $projects))
-        {
-            $dirs = array($this->target_dir.'/libraries/koowa/components', $this->target_dir.'/media/koowa');
-            foreach ($dirs as $dir)
-            {
-                if (!is_dir($dir)) {
-                    mkdir($dir, 0777, true);
-                }
-            }
+            $projects   = array_unique(array_merge($projects, $this->_getDependencies($symlink)));
         }
 
         foreach ($projects as $project)
         {
-            $root = $project_folder.'/'.$project;
+            $result = false;
+            $root   = $project_folder.'/'.$project;
 
             if (!is_dir($root)) {
                 continue;
             }
 
-            if ($this->_isNookuFramework($root))
+            foreach (static::$_symlinkers as $symlinker)
             {
-                $vendor_path = $this->target_dir.'/vendor';
+                $result = call_user_func($symlinker, $root, $this->target_dir, $project, $projects);
 
-                if(file_exists($this->target_dir.'/composer.json'))
-                {
-                    $content  = file_get_contents($this->target_dir.'/composer.json');
-                    $composer = json_decode($content);
-
-                    if(isset($composer->config->{'vendor-dir'})) {
-                        $vendor_path = $this->target_dir.'/'.$composer->config->{'vendor-dir'};
-                    }
+                if ($result === true) {
+                    break;
                 }
-
-                $destination = $vendor_path.'/nooku/nooku-framework';
-
-                if (!is_dir(dirname($destination))) {
-                    mkdir(dirname($destination), 0777, true);
-                }
-
-                if (!file_exists($destination)) {
-                    `ln -sf $root $destination`;
-                }
-
-                $media_source      = $root.'/code/resources/assets';
-                $media_destination = $this->target_dir.'/media/koowa/framework';
-
-                if (!file_exists($media_destination)) {
-                    `ln -sf $media_source $media_destination`;
-                }
-
             }
-            else if ($this->_isKoowaComponent($root)) {
-                $this->_symlinkKoowaComponent($root);
-            }
-            else
-            {
-                if (is_dir($root.'/code')) {
-                    $root = $root.'/code';
-                }
 
-                $iterator = new Symlink\Iterator($root, $this->target_dir);
-
-                while ($iterator->valid()) {
-                    $iterator->next();
-                }
+            if (!$result) {
+                $this->_symlink($root, $this->target_dir, $project, $projects);
             }
         }
     }
 
-    protected function _isNookuFramework($folder)
+    /**
+     * Default symlinker
+     *
+     * @param $project
+     * @param $destination
+     * @param $name
+     * @param $projects
+     * @return bool
+     */
+    protected function _symlink($project, $destination, $name, $projects)
     {
-        return is_file($folder.'/code/koowa.php');
+        if (is_dir($project.'/code')) {
+            $project .= '/code';
+        }
+
+        $iterator = new Symlink\Iterator($project, $destination);
+
+        while ($iterator->valid()) {
+            $iterator->next();
+        }
+
+        return true;
     }
 
-    protected function _isKoowaComponent($folder)
+    /**
+     * Look for the dependencies of the dependency
+     *
+     * @param  string $project      The directory name of Project
+     * @return array                An array of dependencies
+     */
+    protected function _getDependencies($project)
     {
-        return is_file($folder.'/koowa-component.xml');
-    }
+        $projects     = array();
+        $dependencies = static::$_dependencies;
 
-    protected function _symlinkKoowaComponent($folder)
-    {
-        if (is_file($folder.'/koowa-component.xml'))
+        if(array_key_exists($project, $dependencies) && is_array($dependencies[$project]))
         {
-            $xml       = simplexml_load_file($folder.'/koowa-component.xml');
-            $component = 'com_'.$xml->name;
+            $projects = $dependencies[$project];
 
-            $destination = $this->target_dir.'/libraries/koowa/components/'.$component;
-
-            if (!file_exists($destination)) {
-                `ln -sf $folder $destination`;
+            foreach ($projects as $dependency) {
+                $projects = array_merge($projects, $this->_getDependencies($dependency));
             }
-
-            // Special treatment for media files
-            $media = $folder.'/resources/assets';
-            $target = $this->target_dir.'/media/koowa/'.$component;
-
-            if (is_dir($media) && !file_exists($target)) {
-                `ln -sf $media $target`;
-            }
-
-            return true;
         }
-        else return false;
+
+        return $projects;
     }
 }

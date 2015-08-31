@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
@@ -23,9 +23,9 @@ class PluginInstall extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $result = `command -v composer >/dev/null 2>&1 || { echo >&2 "false"; }`;
+        $result = shell_exec('command -v composer >/dev/null 2>&1 || { echo "false"; }');
 
-        if ($result == 'false')
+        if (trim($result) == 'false')
         {
             $output->writeln('<error>Composer was not found. It is either not installed or globally available</error>');
             return;

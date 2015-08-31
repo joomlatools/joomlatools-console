@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
@@ -12,10 +12,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
+use Joomlatools\Console\Joomla\Util;
 
-class ExtensionInstall extends SiteAbstract
+class ExtensionInstall extends Site\AbstractSite
 {
-    protected $extension = array();
+    protected $extensions = array();
 
     protected function configure()
     {
@@ -27,7 +28,7 @@ class ExtensionInstall extends SiteAbstract
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of extensions to install to the site using discover install'
+                'A list of extensions to install to the site using discover install. Use \'all\' to install all discovered extensions.'
             );
     }
 
@@ -35,7 +36,7 @@ class ExtensionInstall extends SiteAbstract
     {
         parent::execute($input, $output);
 
-        $this->extension = $input->getArgument('extension');
+        $this->extensions = (array) $input->getArgument('extension');
 
         $this->check($input, $output);
         $this->install($input, $output);
@@ -51,6 +52,7 @@ class ExtensionInstall extends SiteAbstract
     public function install(InputInterface $input, OutputInterface $output)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
+        $db  = \JFactory::getDbo();
 
         // Output buffer is used as a guard against Joomla including ._ files when searching for adapters
         // See: http://kadin.sdf-us.org/weblog/technology/software/deleting-dot-underscore-files.html
@@ -59,41 +61,83 @@ class ExtensionInstall extends SiteAbstract
         $installer = $app->getInstaller();
         $installer->discover();
 
-        require_once $app->getPath().'/administrator/components/com_installer/models/discover.php';
+        $path = $app->getPath() . (Util::isPlatform($this->target_dir) ? '/app' : '');
+        $path .= '/administrator/components/com_installer/models/discover.php';
+
+        require_once $path;
 
         $model = new \InstallerModelDiscover();
         $model->discover();
 
         $results = $model->getItems();
 
-        $install = array();
-        foreach ($results as $result)
-        {
-            if ($result->element === 'com_extman') {
-                array_unshift($install, $result->extension_id);
-            }
-
-            if ($result->type === 'component'
-                && (in_array(substr($result->element, 4), $this->extension) || in_array($result->element, $this->extension))) {
-                $install[] = $result->extension_id;
-            }
-        }
-
         ob_end_clean();
 
-        if(class_exists('Koowa') && !class_exists('ComExtmanDatabaseRowExtension')) {
-            \KObjectManager::getInstance()->getObject('com://admin/extman.database.row.extension');
+        $install = array();
+        $plugins = array();
+
+        foreach ($this->extensions as $extension)
+        {
+            foreach ($results as $result)
+            {
+                $included = false;
+
+                if (in_array($result->element, array('com_extman', 'koowa')) && ($extension == 'all' || $extension == $result->element))
+                {
+                    array_unshift($install, $result);
+                    $included = true;
+                }
+                elseif ($extension == 'all' || in_array($extension, array($result->element, substr($result->element, 4))))
+                {
+                    $install[] = $result;
+                    $included  = true;
+                }
+
+                if ($result->type == 'plugin' && $included) {
+                    $plugins[] = $result->extension_id;
+                }
+            }
         }
 
-        $install = array_unique($install);
-
-        foreach ($install as $extension_id)
+        foreach ($install as $extension)
         {
             try {
-                $installer->discover_install($extension_id);
+                $installer->discover_install($extension->extension_id);
             }
             catch (\Exception $e) {
-                $output->writeln("<info>Caught exception during install: " . $e->getMessage() . "</info>\n");
+                $output->writeln("<info>Caught exception whilst installing $extension->type $extension->element: " . $e->getMessage() . "</info>\n");
+            }
+
+            if (in_array($extension->extension_id, $plugins))
+            {
+                $sql = "UPDATE `#__extensions` SET `enabled` = 1 WHERE `extension_id` = '$extension->extension_id'";
+
+                $db->setQuery($sql);
+                $db->execute();
+
+                switch ($extension->element)
+                {
+                    case 'com_extman':
+                        if(class_exists('Koowa') && !class_exists('ComExtmanDatabaseRowExtension')) {
+                            \KObjectManager::getInstance()->getObject('com://admin/extman.database.row.extension');
+                        }
+                        break;
+                    case 'koowa':
+                        $path = JPATH_PLUGINS . '/system/koowa/koowa.php';
+
+                        if (!file_exists($path)) {
+                            return;
+                        }
+
+                        require_once $path;
+
+                        if (class_exists('\PlgSystemKoowa'))
+                        {
+                            $dispatcher = \JEventDispatcher::getInstance();
+                            new \PlgSystemKoowa($dispatcher, (array)\JPLuginHelper::getPLugin('system', 'koowa'));
+                        }
+                        break;
+                }
             }
         }
     }
