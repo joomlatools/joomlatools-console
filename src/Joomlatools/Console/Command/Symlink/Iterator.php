@@ -1,11 +1,13 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
 namespace Joomlatools\Console\Command\Symlink;
+
+use Joomlatools\Console\Joomla\Util;
 
 class Iterator extends \RecursiveIteratorIterator
 {
@@ -35,7 +37,7 @@ class Iterator extends \RecursiveIteratorIterator
 
         $target = str_replace($this->source, '', $source);
         $target = str_replace('/site', '', $target);
-        $target = $this->target.$target;
+        $target = Util::buildTargetPath($target, $this->target);
 
         if (is_link($target)) {
             unlink($target);
