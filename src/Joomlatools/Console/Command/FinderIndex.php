@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class FinderIndex extends SiteAbstract
+class FinderIndex extends Site\AbstractSite
 {
     private $filters = array();
 
