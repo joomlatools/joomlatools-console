@@ -38,7 +38,7 @@ class Download extends AbstractSite
             ->setName('site:download')
             ->setDescription('Download and extract the given Joomla version')
             ->addOption(
-                'joomla',
+                'release',
                 null,
                 InputOption::VALUE_REQUIRED,
                 "Joomla version. Can be a release number (2, 3.2, ..) or branch name. Run `joomla versions` for a full list.\nUse \"none\" for an empty virtual host.",
@@ -85,7 +85,7 @@ class Download extends AbstractSite
             $this->versions->clearcache($output);
         }
 
-        $this->setVersion($input->getOption('joomla'));
+        $this->setVersion($input->getOption('release'));
 
         if ($this->version != 'none')
         {
@@ -104,11 +104,14 @@ class Download extends AbstractSite
                 unlink($tarball);
             }
 
-            if (file_exists($this->target_dir.'/htaccess.txt')) {
-                `cp $this->target_dir/htaccess.txt $this->target_dir/.htaccess`;
+            $isPlatform = Util::isPlatform($this->target_dir);
+
+            $directory = $this->target_dir. ($isPlatform ? '/web' : '');
+            if (file_exists($directory.'/htaccess.txt')) {
+                `cp $directory/htaccess.txt $directory/.htaccess`;
             }
 
-            if (Util::isPlatform($this->target_dir)) {
+            if ($isPlatform) {
                 `cd $this->target_dir; composer install -q`;
             }
         }

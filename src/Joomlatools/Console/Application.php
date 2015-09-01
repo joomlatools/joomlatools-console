@@ -11,7 +11,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @var string
      */
-    const VERSION = '1.3.1';
+    const VERSION = '1.3.3';
 
     /**
      * Application name
@@ -118,12 +118,17 @@ class Application extends \Symfony\Component\Console\Application
             new Command\ExtensionInstallFile(),
             new Command\ExtensionRegister(),
 
+            new Command\FinderIndex(),
+            new Command\FinderPurge(),
+
             new Command\PluginList(),
             new Command\PluginInstall(),
             new Command\PluginUninstall(),
 
+            new Command\Site\CheckIn(),
             new Command\Site\Configure(),
             new Command\Site\Create(),
+            new Command\Site\Deploy(),
             new Command\Site\Delete(),
             new Command\Site\Download(),
             new Command\Site\Install(),

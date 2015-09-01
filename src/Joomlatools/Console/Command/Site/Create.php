@@ -39,7 +39,7 @@ class Create extends Database\AbstractDatabase
             ->setName('site:create')
             ->setDescription('Create a new Joomla site from scratch')
             ->addOption(
-                'joomla',
+                'release',
                 null,
                 InputOption::VALUE_REQUIRED,
                 "Joomla version. Can be a release number (2, 3.2, ..) or branch name. Run `joomla versions` for a full list.\nUse \"none\" for an empty virtual host.",
@@ -115,7 +115,7 @@ class Create extends Database\AbstractDatabase
     {
         parent::execute($input, $output);
 
-        $this->version = $input->getOption('joomla');
+        $this->version = $input->getOption('release');
 
         $this->check($input, $output);
 
@@ -159,7 +159,7 @@ class Create extends Database\AbstractDatabase
         $arguments = array(
             'site:download',
             'site'          => $this->site,
-            '--joomla'      => $input->getOption('joomla'),
+            '--release'      => $input->getOption('release'),
             '--clear-cache' => $input->getOption('clear-cache'),
             '--www'         => $this->www
         );

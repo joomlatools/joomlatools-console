@@ -184,7 +184,10 @@ class ExtensionRegister extends Site\AbstractSite
         }
 
         // get the #__extensions model and table
-        require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
+        $path = $app->getPath() . (Util::isPlatform($this->target_dir) ? '/app' : '');
+        $path .= '/administrator/components/com_installer/models/extension.php';
+
+        require_once $path;
 
         $model = new \InstallerModel();
         $table = $model->getTable('extension', 'JTable');

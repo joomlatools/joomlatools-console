@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
+use Joomlatools\Console\Joomla\Util;
 
 class ExtensionInstall extends Site\AbstractSite
 {
@@ -60,7 +61,10 @@ class ExtensionInstall extends Site\AbstractSite
         $installer = $app->getInstaller();
         $installer->discover();
 
-        require_once $app->getPath().'/administrator/components/com_installer/models/discover.php';
+        $path = $app->getPath() . (Util::isPlatform($this->target_dir) ? '/app' : '');
+        $path .= '/administrator/components/com_installer/models/discover.php';
+
+        require_once $path;
 
         $model = new \InstallerModelDiscover();
         $model->discover();
@@ -83,7 +87,7 @@ class ExtensionInstall extends Site\AbstractSite
                     array_unshift($install, $result);
                     $included = true;
                 }
-                elseif ($extension == 'all' || in_array(substr($result->element, 4), $extension) || in_array($result->element, $extension))
+                elseif ($extension == 'all' || in_array($extension, array($result->element, substr($result->element, 4))))
                 {
                     $install[] = $result;
                     $included  = true;
@@ -93,7 +97,6 @@ class ExtensionInstall extends Site\AbstractSite
                     $plugins[] = $result->extension_id;
                 }
             }
-
         }
 
         foreach ($install as $extension)
