@@ -93,7 +93,7 @@ abstract class AbstractExtension extends Command
 
     protected function toggle($enable = false)
     {
-        $app = Bootstrapper::getApplication($this->target_dir);
+        Bootstrapper::getApplication($this->target_dir);
 
         $dbo = \JFactory::getDbo();
         $query = \JFactory::getDbo()->getQuery(true)
@@ -104,21 +104,21 @@ abstract class AbstractExtension extends Command
         $dbo->setQuery($query);
         $extension = $dbo->loadResult('extension_id');
 
-        require_once JPATH_ADMINISTRATOR.'/components/com_installer/models/manage.php';
+        if (!$extension) {
+            throw new \RuntimeException("$this->extension does not exist");
+        }
 
-        $manage = new \InstallerModelManage();
-        $manage->publish($extension, (int) $enable);
+        $table = \JTable::getInstance('Extension');
+        $table->load($extension);
 
-        $messages = $app->getMessageQueue();
+        if ($table->protected == 1) {
+            throw new \RuntimeException("Cannot disable core component $this->extension");
+        }
 
-        if (is_array($messages) && count($messages))
-        {
-            foreach ($messages as $msg)
-            {
-                if (isset($msg['type']) && isset($msg['message'])) {
-                    throw new \RuntimeException(sprintf('Extension %s: %s', $this->extension, $msg['message']));
-                }
-            }
+        $table->enabled = (int) $enable;
+
+        if (!$table->store()) {
+            throw new \RuntimeException("Failed to update row: " . $table->getError());
         }
     }
 }
