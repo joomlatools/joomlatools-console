@@ -191,7 +191,7 @@ class Register extends AbstractExtension
         $exception = $this->exceptions[$this->type];
 
         foreach($exception['require'] AS $require){
-            require_once $app->getPath() . $require;
+            require_once JPATH_ADMINISTRATOR . $require;
         }
 
         $model = new $exception['model'];

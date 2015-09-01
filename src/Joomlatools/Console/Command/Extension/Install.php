@@ -63,10 +63,7 @@ class Install extends AbstractSite
         $installer = $app->getInstaller();
         $installer->discover();
 
-        $path = $app->getPath() . (Util::isPlatform($this->target_dir) ? '/app' : '');
-        $path .= '/administrator/components/com_installer/models/discover.php';
-
-        require_once $path;
+        require_once JPATH_ADMINISTRATOR . '/components/com_installer/models/discover.php';
 
         $model = new \InstallerModelDiscover();
         $model->discover();

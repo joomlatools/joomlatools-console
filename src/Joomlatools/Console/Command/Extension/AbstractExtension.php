@@ -37,7 +37,7 @@ abstract class AbstractExtension extends Command
     protected $exceptions = array(
         'module' => array(
             'require' => array(
-                'model' => '/administrator/components/com_modules/models/module.php'
+                'model' => '/components/com_modules/models/module.php'
             ),
             'model' => '\\ModulesModelModule',
             'table' => array(
@@ -47,8 +47,8 @@ abstract class AbstractExtension extends Command
         ),
         'template' => array(
             'require' => array(
-                'model' => '/administrator/components/com_templates/models/style.php',
-                'table' => '/administrator/components/com_templates/tables/style.php'
+                'model' => '/components/com_templates/models/style.php',
+                'table' => '/components/com_templates/tables/style.php'
             ),
             'model' => 'TemplatesModelStyle',
             'table' => array(
@@ -95,11 +95,11 @@ abstract class AbstractExtension extends Command
     {
         Bootstrapper::getApplication($this->target_dir);
 
-        $dbo = \JFactory::getDbo();
+        $dbo   = \JFactory::getDbo();
         $query = \JFactory::getDbo()->getQuery(true)
             ->select('extension_id')
             ->from('#__extensions')
-            ->where($dbo->quoteName('name') ." = " . $dbo->quote($this->extension));
+            ->where($dbo->quoteName('element') ." = " . $dbo->quote($this->extension));
 
         $dbo->setQuery($query);
         $extension = $dbo->loadResult('extension_id');
