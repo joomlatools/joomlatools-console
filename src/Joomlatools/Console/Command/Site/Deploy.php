@@ -60,8 +60,12 @@ class Deploy extends AbstractSite
         chdir($this->target_dir);
 
         $this->checkGit($input, $output);
-        $this->checkGitFTP($input, $output);
-        $this->deploy();
+
+        $initialised = $this->initGitFTP($input, $output);
+
+        if (!$initialised) {
+            $this->deploy();
+        }
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -95,7 +99,7 @@ class Deploy extends AbstractSite
         }
     }
 
-    public function checkGitFTP()
+    public function initGitFTP()
     {
         if(!file_exists($this->target_dir . '/.git-ftp'))
         {
@@ -105,7 +109,11 @@ class Deploy extends AbstractSite
 
             `touch .git-ftp`;
             `echo "used for local deployment purposes, do not delete" > .git-ftp`;
+
+            return true;
         }
+
+        return false;
     }
 
     public function deploy()
