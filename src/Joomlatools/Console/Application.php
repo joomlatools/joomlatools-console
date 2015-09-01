@@ -116,6 +116,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Extension\Disable(),
             new Command\Extension\Enable(),
             new Command\Extension\Install(),
+            new Command\Extension\Uninstall(),
             new Command\Extension\InstallFile(),
             new Command\Extension\Register(),
             new Command\Extension\Symlink(),
