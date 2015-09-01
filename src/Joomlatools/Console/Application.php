@@ -113,10 +113,12 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Database\Install(),
             new Command\Database\Drop(),
 
-            new Command\Extension\Symlink(),
+            new Command\Extension\Disable(),
+            new Command\Extension\Enable(),
             new Command\Extension\Install(),
             new Command\Extension\InstallFile(),
             new Command\Extension\Register(),
+            new Command\Extension\Symlink(),
 
             new Command\Finder\Index(),
             new Command\Finder\Purge(),

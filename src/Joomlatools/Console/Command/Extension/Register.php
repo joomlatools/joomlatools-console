@@ -12,40 +12,16 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Joomlatools\Console\Command\Site\AbstractSite;
-
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class Register extends AbstractSite
+class Register extends AbstractExtension
 {
-    /**
-     * name of extension
-     *
-     * @var string
-     */
-    protected $extension = '';
     /**
      * type of extension
      *
      * @var string
      */
     protected $type = '';
-    /**
-     * File cache
-     *
-     * @var array
-     */
-    protected $typeMap = '';
-    /**
-     * default values
-     * @var array
-     */
-    protected $defaults = '';
-    /**
-     * extension exceptions
-     * @var string
-     */
-    protected $exceptions = '';
 
     protected function configure()
     {
@@ -55,10 +31,6 @@ class Register extends AbstractSite
             ->setName('extension:register')
             ->setDescription('Register an extension with the `#__extensions` table.')
             ->addArgument(
-                'extension',
-                InputArgument::REQUIRED,
-                'The extension name to register'
-            )->addArgument(
                 'type',
                 InputArgument::OPTIONAL,
                 'Type of extension being registered. ')
@@ -99,11 +71,6 @@ class Register extends AbstractSite
 
         $type = false;
 
-        $this->extension = $input->getArgument('extension');
-        $this->defaults = new RegisterDefaults();
-        $this->typeMap = $this->defaults->typeMap;
-        $this->exceptions = $this->defaults->exceptions;
-
         // passed in type argument
         $forceType = $input->getArgument('type');
 
@@ -129,13 +96,6 @@ class Register extends AbstractSite
 
         $this->check($input, $output);
         $this->register($input, $output);
-    }
-
-    public function check(InputInterface $input, OutputInterface $output)
-    {
-        if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
-        }
     }
 
     public function register(InputInterface $input, OutputInterface $output)
@@ -186,10 +146,7 @@ class Register extends AbstractSite
         }
 
         // get the #__extensions model and table
-        $path = $app->getPath() . (Util::isPlatform($this->target_dir) ? '/app' : '');
-        $path .= '/administrator/components/com_installer/models/extension.php';
-
-        require_once $path;
+        require_once JPATH_ADMINISTRATOR . '/components/com_installer/models/extension.php';
 
         $model = new \InstallerModel();
         $table = $model->getTable('extension', 'JTable');
@@ -234,7 +191,7 @@ class Register extends AbstractSite
         $exception = $this->exceptions[$this->type];
 
         foreach($exception['require'] AS $require){
-            require_once $app->getPath() . $require;
+            require_once JPATH_ADMINISTRATOR . $require;
         }
 
         $model = new $exception['model'];
