@@ -5,7 +5,7 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,16 +13,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionEnable extends ExtensionAbstract
+class Enable extends AbstractExtension
 {
-    /**
-     * Int for enable state
-     *
-     * @var int
-     */
-    protected $toggle = 1;
-
-
     protected function configure()
     {
         parent::configure();
@@ -37,6 +29,8 @@ class ExtensionEnable extends ExtensionAbstract
 
         $this->check($input, $output);
 
-        $this->toggleEnable($input, $output);
+        $this->toggle(true);
+
+        $output->writeln(sprintf("<info>Extension %s has been enabled</info>", $this->extension));
     }
 }

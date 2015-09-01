@@ -5,7 +5,7 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-abstract class ExtensionAbstract extends Command
+abstract class AbstractExtension extends Command
 {
     /**
      * Extension name
@@ -91,7 +91,7 @@ abstract class ExtensionAbstract extends Command
         }
     }
 
-    protected function toggleEnable(InputInterface $input, OutputInterface $output)
+    protected function toggle($enable = false)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
 
@@ -104,26 +104,21 @@ abstract class ExtensionAbstract extends Command
         $dbo->setQuery($query);
         $extension = $dbo->loadResult('extension_id');
 
-        require_once $app->getPath().'/administrator/components/com_installer/models/manage.php';
+        require_once JPATH_ADMINISTRATOR.'/components/com_installer/models/manage.php';
 
         $manage = new \InstallerModelManage();
-        $manage->publish($extension, $this->toggle);
+        $manage->publish($extension, (int) $enable);
 
-        $app = \JFactory::getApplication();
         $messages = $app->getMessageQueue();
-        $state = $this->toggle ? 'enabled' : 'disabled';
 
         if (is_array($messages) && count($messages))
         {
             foreach ($messages as $msg)
             {
-                if (isset($msg['type']) && isset($msg['message']))
-                {
+                if (isset($msg['type']) && isset($msg['message'])) {
                     throw new \RuntimeException(sprintf('Extension %s: %s', $this->extension, $msg['message']));
                 }
             }
         }
-        else
-            $output->writeln(sprintf("<info>Extension %s was successfully %s</info>", $this->extension, $state));
     }
 }

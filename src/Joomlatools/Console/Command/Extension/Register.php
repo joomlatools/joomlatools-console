@@ -12,11 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Joomlatools\Console\Command\Site\AbstractSite;
-
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class Register extends AbstractSite
+class Register extends AbstractExtension
 {
     /**
      * type of extension
@@ -148,10 +146,7 @@ class Register extends AbstractSite
         }
 
         // get the #__extensions model and table
-        $path = $app->getPath() . (Util::isPlatform($this->target_dir) ? '/app' : '');
-        $path .= '/administrator/components/com_installer/models/extension.php';
-
-        require_once $path;
+        require_once JPATH_ADMINISTRATOR . '/components/com_installer/models/extension.php';
 
         $model = new \InstallerModel();
         $table = $model->getTable('extension', 'JTable');
