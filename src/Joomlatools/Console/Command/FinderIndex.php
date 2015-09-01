@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Application;
 use Joomlatools\Console\Joomla\Bootstrapper;
 
 class FinderIndex extends Site\AbstractSite
@@ -44,7 +45,7 @@ class FinderIndex extends Site\AbstractSite
     {
         parent::execute($input, $output);
 
-        $this->app = Bootstrapper::getApplication($this->target_dir);
+        $this->app = Bootstrapper::getApplication($this->target_dir, Bootstrapper::SITE);
         // Load Library language
         $lang = \JFactory::getLanguage();
 
@@ -137,9 +138,7 @@ class FinderIndex extends Site\AbstractSite
         // Remove the script time limit.
         @set_time_limit(0);
 
-        // Fool the system into thinking we are running as JSite with Smart Search as the active component.
         $_SERVER['HTTP_HOST'] = 'domain.com';
-        \JFactory::getApplication('site');
 
         // Disable caching.
         $config = \JFactory::getConfig();

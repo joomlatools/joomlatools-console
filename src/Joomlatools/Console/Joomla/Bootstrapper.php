@@ -9,13 +9,19 @@ namespace Joomlatools\Console\Joomla;
 
 class Bootstrapper
 {
+    const SITE  = 0;
+    const ADMIN = 1;
+    const CLI   = 2;
+
     /**
      * Returns a Joomla application with a root user logged in
      *
      * @param string $base Base path for the Joomla installation
+     * @param int    $client_id Application client id to spoof. Defaults to admin.
+     *
      * @return Application
      */
-    public static function getApplication($base)
+    public static function getApplication($base, $client_id = self::ADMIN)
     {
         $_SERVER['SERVER_PORT'] = 80;
 
@@ -50,6 +56,13 @@ class Bootstrapper
             }
         }
 
+        $options = array(
+            'root_user' => 'root',
+            'client_id' => $client_id
+        );
+
+        $application = new Application($options);
+
         $credentials = array(
             'name'      => 'root',
             'username'  => 'root',
@@ -57,7 +70,6 @@ class Bootstrapper
             'email'     => 'root@localhost.home'
         );
 
-        $application = new Application(array('root_user' => 'root'));
         $application->authenticate($credentials);
 
         // If there are no marks in JProfiler debug plugin performs a division by zero using count($marks)
