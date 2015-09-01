@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
@@ -11,6 +11,7 @@ use \JApplicationCli as JApplicationCli;
 use \JDispatcher as JDispatcher;
 use \JFactory as JFactory;
 use \JInstaller as JInstaller;
+use \JMenu as JMenu;
 use \JPluginHelper as JPluginHelper;
 use \JSession as JSession;
 
@@ -22,6 +23,8 @@ use \JSession as JSession;
  */
 class Application extends JApplicationCli
 {
+    protected $_clientId     = Bootstrapper::CLI;
+    protected $_application  = null;
     protected $_messageQueue = array();
     protected $_options      = array();
 
@@ -44,6 +47,10 @@ class Application extends JApplicationCli
         $this->_options = $options;
 
         parent::__construct($input, $config, $dispatcher);
+
+        if (isset($this->_options['client_id'])) {
+            $this->_clientId = $this->_options['client_id'];
+        }
 
         $this->_initialize();
     }
@@ -87,6 +94,13 @@ class Application extends JApplicationCli
         $lang = JFactory::getLanguage();
         $lang->load('lib_joomla', JPATH_ADMINISTRATOR, null, true);
         $lang->load('com_installer', JPATH_ADMINISTRATOR, null, true);
+
+        // Instiantiate the Joomla application object if we
+        // need either admin or site
+        $name = $this->getName();
+        if (in_array($name, array('administrator', 'site'))) {
+            $this->_application = \JApplicationCms::getInstance($name);
+        }
     }
 
     /**
@@ -226,14 +240,38 @@ class Application extends JApplicationCli
     }
 
     /**
+     * Gets the client id of the current running application.
+     *
+     * @return  integer  A client identifier.
+     */
+    public function getClientId()
+    {
+        return $this->_clientId;
+    }
+
+    /**
      * Get the current application name.
-     * Always returns 'cli'.
      *
      * @return string
      */
     public function getName()
     {
-        return 'cli';
+        $name = '';
+
+        switch ($this->_clientId)
+        {
+            case Bootstrapper::SITE:
+                $name = 'site';
+                break;
+            case Bootstrapper::ADMIN:
+                $name = 'administrator';
+                break;
+            default:
+                $name = 'cli';
+                break;
+        }
+
+        return $name;
     }
 
     /**
@@ -243,7 +281,7 @@ class Application extends JApplicationCli
      */
     public function isSite()
     {
-        return false;
+        return $this->_clientId == Bootstrapper::SITE;
     }
 
     /**
@@ -253,21 +291,41 @@ class Application extends JApplicationCli
      */
     public function isAdmin()
     {
-        return true;
+        return $this->_clientId == Bootstrapper::ADMIN;
     }
 
+    /**
+     * Determine if we are using a secure (SSL) connection.
+     *
+     * @return  boolean  True if using SSL, false if not.
+     */
     public function isSSLConnection()
     {
         return false;
     }
 
+    /**
+     * Stub for flushAssets() method.
+     */
     public function flushAssets()
     {
     }
 
+    /**
+     * Return a reference to the JRouter object.
+     *
+     * @param   string  $name     The name of the application.
+     * @param   array   $options  An optional associative array of configuration settings.
+     *
+     * @return  JRouter
+     */
     public static function getRouter($name = null, array $options = array())
     {
-        $name = 'administrator';
+        if (!isset($name))
+        {
+            $app  = \JFactory::getApplication();
+            $name = $app->getName();
+        }
 
         try
         {
@@ -449,11 +507,58 @@ class Application extends JApplicationCli
     {
 		/**
 		 * Throw an exception, to short circuit whatever code called us, as the J! redirect()
-		 * would usually close() and go no futher, so we don't want to just return.
+		 * would usually close() and go no further, so we don't want to just return.
 		 * We can then catch this exception in (for instance) ExtensionInstallFile, and
 		 * go about our business.
 		 */
     	throw new \RuntimeException(sprintf('Application tried to redirect to %s', $url));
     }
-    
+
+    /**
+     * Returns the application JMenu object.
+     *
+     * @param   string  $name     The name of the application/client.
+     * @param   array   $options  An optional associative array of configuration settings.
+     *
+     * @return  JMenu
+     */
+    public function getMenu($name = null, $options = array())
+    {
+        if (!isset($name))
+        {
+            $app = JFactory::getApplication();
+            $name = $app->getName();
+        }
+
+        try
+        {
+            if (!class_exists('JMenu' . ucfirst($name))) {
+                jimport('cms.menu.'.strtolower($name));
+            }
+
+            $menu = JMenu::getInstance($name, $options);
+        }
+        catch (Exception $e) {
+            return null;
+        }
+
+        return $menu;
+    }
+
+    /**
+     * Forward m
+     *
+     * @param $method
+     * @param $args
+     * @return mixed
+     * @throws Exception
+     */
+    public function __call($method, $args)
+    {
+        if (!method_exists($this, $method) && is_object($this->_application)) {
+            return call_user_func_array(array($this->_application, $method), $args);
+        }
+
+        return parent::__call($method, $args);
+    }
 }

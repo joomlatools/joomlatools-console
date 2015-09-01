@@ -1,11 +1,11 @@
 <?php
 /**
- * @copyright    Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright    Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license        Mozilla Public License, version 2.0
  * @link        http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,36 +14,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class ExtensionRegister extends SiteAbstract
+class Register extends AbstractExtension
 {
-    /**
-     * name of extension
-     *
-     * @var string
-     */
-    protected $extension = '';
     /**
      * type of extension
      *
      * @var string
      */
     protected $type = '';
-    /**
-     * File cache
-     *
-     * @var array
-     */
-    protected $typeMap = '';
-    /**
-     * default values
-     * @var array
-     */
-    protected $defaults = '';
-    /**
-     * extension exceptions
-     * @var string
-     */
-    protected $exceptions = '';
 
     protected function configure()
     {
@@ -53,10 +31,6 @@ class ExtensionRegister extends SiteAbstract
             ->setName('extension:register')
             ->setDescription('Register an extension with the `#__extensions` table.')
             ->addArgument(
-                'extension',
-                InputArgument::REQUIRED,
-                'The extension name to register'
-            )->addArgument(
                 'type',
                 InputArgument::OPTIONAL,
                 'Type of extension being registered. ')
@@ -97,11 +71,6 @@ class ExtensionRegister extends SiteAbstract
 
         $type = false;
 
-        $this->extension = $input->getArgument('extension');
-        $this->defaults = new ExtensionRegisterDefaults();
-        $this->typeMap = $this->defaults->typeMap;
-        $this->exceptions = $this->defaults->exceptions;
-
         // passed in type argument
         $forceType = $input->getArgument('type');
 
@@ -127,13 +96,6 @@ class ExtensionRegister extends SiteAbstract
 
         $this->check($input, $output);
         $this->register($input, $output);
-    }
-
-    public function check(InputInterface $input, OutputInterface $output)
-    {
-        if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
-        }
     }
 
     public function register(InputInterface $input, OutputInterface $output)
@@ -184,7 +146,7 @@ class ExtensionRegister extends SiteAbstract
         }
 
         // get the #__extensions model and table
-        require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
+        require_once JPATH_ADMINISTRATOR . '/components/com_installer/models/extension.php';
 
         $model = new \InstallerModel();
         $table = $model->getTable('extension', 'JTable');
@@ -229,7 +191,7 @@ class ExtensionRegister extends SiteAbstract
         $exception = $this->exceptions[$this->type];
 
         foreach($exception['require'] AS $require){
-            require_once $app->getPath() . $require;
+            require_once JPATH_ADMINISTRATOR . $require;
         }
 
         $model = new $exception['model'];

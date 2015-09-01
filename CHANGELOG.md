@@ -7,6 +7,28 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomla-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomla-console/compare/v1.0.0...v1.0.1
 
+* 1.4.0 (2015-09-01)
+ * Added - Implemented support for [joomla-platform](http://github.com/joomlatools/joomla-platform)
+ * Added - Deploy command to push sites using [git-ftp](https://github.com/git-ftp/git-ftp)
+ * Added - Commands to handle cache manipulation in Joomla sites (list, purge and clean)
+ * Added - Check-in command
+ * Added - Uninstall command to remove extensions
+ * Added - Interactive mode (prompts for configuration details)
+ * Added - Commands to build and purge com_finder indexes
+ * Added - Ability to enable and/or disable extensions
+ * Improved - Decoupled the various installation steps into separate commands (#5)
+ * Improved - Symlinker logic is now extendible using plugins.
+ * Improved - Ability to install from a different repository instead of the joomla/joomla-cms
+ * Improved - Renamed the --joomla version flag to --release
+ * Improved - It is now possible to symlink all available projects in the Projects directory at once using _all_ as argument
+ * Improved - Install all discovered extensions in one command using the _all_ argument
+ * Fixed - Documentroot in virtual hosts now works for non-default --www arguments
+ * Fixed - Improved Joomla bootstrapper, add client_id as configuration option
+
+
+* 1.3.3 (2015-07-30)
+ * Fixed - Update dependency names in symlink command
+
 * 1.3.2 (2015-05-12)
  * Improved - Updated installation instructions and README
  * Added - Allow custom toplevel namespace for plugins
