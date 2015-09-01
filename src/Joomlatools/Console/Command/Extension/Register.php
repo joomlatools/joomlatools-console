@@ -1,20 +1,22 @@
 <?php
 /**
- * @copyright    Copyright (C) 2007 - 2014 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright    Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license        Mozilla Public License, version 2.0
  * @link        http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Command\Site\AbstractSite;
+
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class ExtensionRegister extends ExtensionAbstract
+class Register extends AbstractSite
 {
     /**
      * type of extension
@@ -70,9 +72,6 @@ class ExtensionRegister extends ExtensionAbstract
         parent::execute($input, $output);
 
         $type = false;
-
-        $this->typeMap = $this->typeMap;
-        $this->exceptions = $this->exceptions;
 
         // passed in type argument
         $forceType = $input->getArgument('type');
@@ -149,7 +148,10 @@ class ExtensionRegister extends ExtensionAbstract
         }
 
         // get the #__extensions model and table
-        require_once $app->getPath() . '/administrator/components/com_installer/models/extension.php';
+        $path = $app->getPath() . (Util::isPlatform($this->target_dir) ? '/app' : '');
+        $path .= '/administrator/components/com_installer/models/extension.php';
+
+        require_once $path;
 
         $model = new \InstallerModel();
         $table = $model->getTable('extension', 'JTable');

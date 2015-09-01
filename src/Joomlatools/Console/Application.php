@@ -11,7 +11,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @var string
      */
-    const VERSION = '1.3.1';
+    const VERSION = '1.3.3';
 
     /**
      * Application name
@@ -68,12 +68,15 @@ class Application extends \Symfony\Component\Console\Application
     public function run(Input\InputInterface $input = null, Output\OutputInterface $output = null)
     {
         if (null === $input) {
-            $this->_input = new Input\ArgvInput();
+            $input = new Input\ArgvInput();
         }
 
         if (null === $output) {
-            $this->_output = new Output\ConsoleOutput();
+            $output = new Output\ConsoleOutput();
         }
+
+        $this->_input  = $input;
+        $this->_output = $output;
 
         $this->configureIO($this->_input, $this->_output);
 
@@ -103,20 +106,41 @@ class Application extends \Symfony\Component\Console\Application
         $commands = parent::getDefaultCommands();
 
         $commands = array_merge($commands, array(
+            new Command\Cache\Clear(),
+            new Command\Cache\ListObjects(),
+            new Command\Cache\Purge(),
+
+            new Command\Database\Install(),
+            new Command\Database\Drop(),
+
+            new Command\Extension\Disable(),
+            new Command\Extension\Enable(),
+            new Command\Extension\Install(),
+            new Command\Extension\InstallFile(),
+            new Command\Extension\Register(),
+            new Command\Extension\Symlink(),
+
+            new Command\Finder\Index(),
+            new Command\Finder\Purge(),
+
+            new Command\Plugin\ListAll(),
+            new Command\Plugin\Install(),
+            new Command\Plugin\Uninstall(),
+
+            new Command\Site\CheckIn(),
+            new Command\Site\Configure(),
+            new Command\Site\Create(),
+            new Command\Site\Deploy(),
+            new Command\Site\Delete(),
+            new Command\Site\Download(),
+            new Command\Site\Install(),
+            new Command\Site\Token(),
+
+            new Command\Vhost\Create(),
+            new Command\Vhost\Remove(),
+
             new Command\Symlink(),
-            new Command\SiteCreate(),
-            new Command\SiteDelete(),
-            new Command\SiteToken(),
-            new Command\ExtensionSymlink(),
-            new Command\ExtensionInstall(),
-            new Command\ExtensionInstallFile(),
-            new Command\ExtensionRegister(),
-            new Command\ExtensionEnable(),
-            new Command\ExtensionDisable(),
-            new Command\PluginList(),
-            new Command\PluginInstall(),
-            new Command\PluginUninstall(),
-            new Command\Versions(),
+            new Command\Versions()
         ));
 
         return $commands;
