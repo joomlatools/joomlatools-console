@@ -13,10 +13,11 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
+use Joomlatools\Console\Joomla\Util;
 
 class FinderPurge extends Site\AbstractSite
 {
-    private $app = '';
+    private $app = null;
 
     protected function configure()
     {
@@ -38,9 +39,10 @@ class FinderPurge extends Site\AbstractSite
         $lang = \JFactory::getLanguage();
 
         // Try the finder_cli file in the current language (without allowing the loading of the file in the default language)
-        $lang->load('finder_cli', JPATH_SITE, null, false, false)
-        // Fallback to the finder_cli file in the default language
-        || $lang->load('finder_cli', JPATH_SITE, null, true);
+        $path = Util::isPlatform($this->target_dir) ? JPATH_SITE . '/components/com_finder' : JPATH_SITE;
+
+        $lang->load('finder_cli', $path, null, false, false)
+            || $lang->load('finder_cli', $path, null, true); // Fallback to the finder_cli file in the default language
 
         $this->check($input, $output);
         $this->purgeFinder($input, $output);
@@ -57,7 +59,8 @@ class FinderPurge extends Site\AbstractSite
     {
         $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE'));
 
-        require_once $this->app->getPath() . '/administrator/components/com_finder/models/index.php';
+        require_once JPATH_ADMINISTRATOR . '/components/com_finder/models/index.php';
+
         $model = new \FinderModelIndex();
 
         // Attempt to purge the index.

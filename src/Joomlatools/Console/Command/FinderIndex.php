@@ -12,14 +12,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Joomlatools\Console\Joomla\Application;
 use Joomlatools\Console\Joomla\Bootstrapper;
+use Joomlatools\Console\Joomla\Util;
 
 class FinderIndex extends Site\AbstractSite
 {
     private $filters = array();
 
-    private $app = '';
+    private $app = null;
 
     private $time = null;
 
@@ -50,9 +50,10 @@ class FinderIndex extends Site\AbstractSite
         $lang = \JFactory::getLanguage();
 
         // Try the finder_cli file in the current language (without allowing the loading of the file in the default language)
-        $lang->load('finder_cli', JPATH_SITE, null, false, false)
-        // Fallback to the finder_cli file in the default language
-        || $lang->load('finder_cli', JPATH_SITE, null, true);
+        $path = Util::isPlatform($this->target_dir) ? JPATH_SITE . '/components/com_finder' : JPATH_SITE;
+
+        $lang->load('finder_cli', $path, null, false, false)
+            || $lang->load('finder_cli', $path, null, true); // Fallback to the finder_cli file in the default language
 
         $this->check($input, $output);
 
@@ -130,7 +131,7 @@ class FinderIndex extends Site\AbstractSite
     {
         $output->writeln(\JText::_('FINDER_CLI_INDEX_PURGE'));
 
-        require_once $this->app->getPath() . '/administrator/components/com_finder/helpers/indexer/indexer.php';
+        require_once JPATH_ADMINISTRATOR . '/components/com_finder/helpers/indexer/indexer.php';
 
         // Initialize the time value.
         $this->time = microtime(true);
