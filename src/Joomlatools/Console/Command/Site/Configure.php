@@ -157,7 +157,7 @@ class Configure extends AbstractDatabase
         $remove('root_user', $contents);
 
         file_put_contents($target, $contents);
-        chmod($target, 0644);
+        chmod($target, 0664);
 
         if (file_exists($this->target_dir.'/installation')) {
             `mv $this->target_dir/installation $this->target_dir/_installation`;
