@@ -1,8 +1,7 @@
 <?php
+namespace Joomlatools\Console\Command\Extension;
 
-namespace Joomlatools\Console\Command;
-
-class ExtensionRegisterDefaults
+class RegisterDefaults
 {
     public $typeMap = array(
         'com_' => 'component',

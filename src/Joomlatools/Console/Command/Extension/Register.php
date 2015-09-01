@@ -5,16 +5,18 @@
  * @link        http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Command\Site\AbstractSite;
+
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class ExtensionRegister extends Site\AbstractSite
+class Register extends AbstractSite
 {
     /**
      * name of extension
@@ -98,7 +100,7 @@ class ExtensionRegister extends Site\AbstractSite
         $type = false;
 
         $this->extension = $input->getArgument('extension');
-        $this->defaults = new ExtensionRegisterDefaults();
+        $this->defaults = new RegisterDefaults();
         $this->typeMap = $this->defaults->typeMap;
         $this->exceptions = $this->defaults->exceptions;
 

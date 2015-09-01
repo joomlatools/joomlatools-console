@@ -13,6 +13,8 @@ class Bootstrapper
     const ADMIN = 1;
     const CLI   = 2;
 
+    protected static $_application;
+
     /**
      * Returns a Joomla application with a root user logged in
      *
@@ -25,6 +27,40 @@ class Bootstrapper
     {
         $_SERVER['SERVER_PORT'] = 80;
 
+        if (!self::$_application)
+        {
+            self::bootstrap($base);
+
+            $options = array(
+                'root_user' => 'root',
+                'client_id' => $client_id
+            );
+
+            self::$_application = new Application($options);
+
+            $credentials = array(
+                'name'      => 'root',
+                'username'  => 'root',
+                'groups'    => array(8),
+                'email'     => 'root@localhost.home'
+            );
+
+            self::$_application->authenticate($credentials);
+
+            // If there are no marks in JProfiler debug plugin performs a division by zero using count($marks)
+            \JProfiler::getInstance('Application')->mark('Hello world');
+        }
+
+        return self::$_application;
+    }
+
+    /**
+     * Load the Joomla application files
+     *
+     * @param $base
+     */
+    public static function bootstrap($base)
+    {
         if (!class_exists('\\JApplicationCli'))
         {
             $_SERVER['HTTP_HOST'] = 'localhost';
@@ -55,26 +91,5 @@ class Bootstrapper
                 require_once JPATH_LIBRARIES . '/cms.php';
             }
         }
-
-        $options = array(
-            'root_user' => 'root',
-            'client_id' => $client_id
-        );
-
-        $application = new Application($options);
-
-        $credentials = array(
-            'name'      => 'root',
-            'username'  => 'root',
-            'groups'    => array(8),
-            'email'     => 'root@localhost.home'
-        );
-
-        $application->authenticate($credentials);
-
-        // If there are no marks in JProfiler debug plugin performs a division by zero using count($marks)
-        \JProfiler::getInstance('Application')->mark('Hello world');
-
-        return $application;
     }
 } 
