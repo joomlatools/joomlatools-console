@@ -5,16 +5,18 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Command\Site\AbstractSite;
+
 use Joomlatools\Console\Joomla\Bootstrapper;
 
-class ExtensionUninstall extends SiteAbstract
+class Uninstall extends AbstractSite
 {
     protected $extensions = array();
 
@@ -39,7 +41,7 @@ class ExtensionUninstall extends SiteAbstract
         $this->extensions = $input->getArgument('extensions');
 
         $this->check($input, $output);
-        $this->unInstall($input, $output);
+        $this->uninstall($input, $output);
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -49,7 +51,7 @@ class ExtensionUninstall extends SiteAbstract
         }
     }
 
-    public function unInstall(InputInterface $input, OutputInterface $output)
+    public function uninstall(InputInterface $input, OutputInterface $output)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
 
@@ -68,16 +70,12 @@ class ExtensionUninstall extends SiteAbstract
             $dbo->setQuery($query);
             $row = $dbo->loadObject();
 
-            if($row->protected)
-            {
-                throw new \RuntimeException(sprintf('Extension Uninstall: %s is a core extension',  $extension));
-                return;
+            if(!$row || !$row->extension_id) {
+                throw new \RuntimeException(sprintf('Extension Uninstall: %s extension not found',  $extension));
             }
 
-            if(!$row || !$row->extension_id)
-            {
-                throw new \RuntimeException(sprintf('Extension Uninstall: %s extension not found',  $extension));
-                return;
+            if($row->protected) {
+                throw new \RuntimeException(sprintf('Extension Uninstall: %s is a core extension',  $extension));
             }
 
             $result = $installer->uninstall($row->type, $row->extension_id);
