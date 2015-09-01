@@ -5,16 +5,18 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Command\Site\AbstractSite;
+
 use Joomlatools\Console\Joomla\Bootstrapper;
 use Joomlatools\Console\Joomla\Util;
 
-class ExtensionInstall extends Site\AbstractSite
+class Install extends AbstractSite
 {
     protected $extensions = array();
 

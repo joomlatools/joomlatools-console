@@ -174,7 +174,7 @@ class Install extends Database\AbstractDatabase
             '--www'   => $this->www,
             '--projects-dir' => $input->getOption('projects-dir')
         ));
-        $symlink = new Command\ExtensionSymlink();
+        $symlink = new Command\Extension\Symlink();
 
         $symlink->run($symlink_input, $output);
     }
@@ -187,7 +187,7 @@ class Install extends Database\AbstractDatabase
             'extension' => 'all',
             '--www'     => $this->www
         ));
-        $installer = new Command\ExtensionInstall();
+        $installer = new Command\Extension\Install();
 
         $installer->run($extension_input, $output);
     }

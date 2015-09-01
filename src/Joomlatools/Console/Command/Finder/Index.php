@@ -5,17 +5,19 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Finder;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Command\Site\AbstractSite;
+
 use Joomlatools\Console\Joomla\Bootstrapper;
 use Joomlatools\Console\Joomla\Util;
 
-class FinderIndex extends Site\AbstractSite
+class Index extends AbstractSite
 {
     private $filters = array();
 
@@ -69,17 +71,17 @@ class FinderIndex extends Site\AbstractSite
             $this->createIndexes($input, $output);
             $this->putFilters($input, $output);
         }
-        else
-        {
-            $this->createIndexes($input, $output);
-        }
-
+        else $this->createIndexes($input, $output);
     }
 
     public function check(InputInterface $input, OutputInterface $output)
     {
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+        }
+
+        if (!file_exists(JPATH_ADMINISTRATOR . '/components/com_finder')) {
+            throw new \RuntimeException(sprintf('Finder component is not installed in %s', $this->site));
         }
     }
 

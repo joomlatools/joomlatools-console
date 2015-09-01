@@ -113,17 +113,17 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Database\Install(),
             new Command\Database\Drop(),
 
-            new Command\ExtensionSymlink(),
-            new Command\ExtensionInstall(),
-            new Command\ExtensionInstallFile(),
-            new Command\ExtensionRegister(),
+            new Command\Extension\Symlink(),
+            new Command\Extension\Install(),
+            new Command\Extension\InstallFile(),
+            new Command\Extension\Register(),
 
-            new Command\FinderIndex(),
-            new Command\FinderPurge(),
+            new Command\Finder\Index(),
+            new Command\Finder\Purge(),
 
-            new Command\PluginList(),
-            new Command\PluginInstall(),
-            new Command\PluginUninstall(),
+            new Command\Plugin\ListAll(),
+            new Command\Plugin\Install(),
+            new Command\Plugin\Uninstall(),
 
             new Command\Site\CheckIn(),
             new Command\Site\Configure(),

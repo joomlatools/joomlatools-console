@@ -5,14 +5,17 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command;
+namespace Joomlatools\Console\Command\Extension;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionSymlink extends Site\AbstractSite
+use Joomlatools\Console\Command\Site\AbstractSite;
+use Joomlatools\Console\Command\Symlink\Iterator;
+
+class Symlink extends AbstractSite
 {
     protected $symlink = array();
 
@@ -128,7 +131,7 @@ class ExtensionSymlink extends Site\AbstractSite
             $project .= '/code';
         }
 
-        $iterator = new Symlink\Iterator($project, $destination);
+        $iterator = new Iterator($project, $destination);
 
         while ($iterator->valid()) {
             $iterator->next();
