@@ -8,14 +8,14 @@ To get the diff for a specific change, go to https://github.com/joomlatools/joom
 To view the diff between two versions, go to https://github.com/joomlatools/joomla-console/compare/v1.0.0...v1.0.1
 
 * 1.4.0 (2015-09-01)
- * Added - Implemented support for [joomla-platform](http://github.com/joomlatools/joomla-platform)
- * Added - Deploy command to push sites using [git-ftp](https://github.com/git-ftp/git-ftp)
- * Added - Commands to handle cache manipulation in Joomla sites (list, purge and clean)
- * Added - Check-in command
- * Added - Uninstall command to remove extensions
- * Added - Interactive mode (prompts for configuration details)
- * Added - Commands to build and purge com_finder indexes
- * Added - Ability to enable and/or disable extensions
+ * Added - `site:deploy`: deploy command to push sites using [git-ftp](https://github.com/git-ftp/git-ftp)
+ * Added - `cache:list`, `cache:purge`, `cache:clear`: commands to handle cache manipulation in Joomla sites
+ * Added - `site:checkin`: check-in locked rows
+ * Added - `extension:uninstall`: Uninstall command to remove extensions
+ * Added - `finder:index`, `finder:purge`: commands to build and purge com_finder indexes
+ * Added - `extension:enable`, `extension:disable`: ability to enable and/or disable extensions
+ * Added - Interactive mode (prompts for configuration details) 
+ * Improved - Implemented support for [joomla-platform](http://github.com/joomlatools/joomla-platform)
  * Improved - Decoupled the various installation steps into separate commands (#5)
  * Improved - Symlinker logic is now extendible using plugins.
  * Improved - Ability to install from a different repository instead of the joomla/joomla-cms
