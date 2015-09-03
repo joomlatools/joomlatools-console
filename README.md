@@ -47,7 +47,7 @@ Installation
 
 ## Contributing
 
-Fork the project, create a feature branch, and send us a pull request.
+Fork the project, create a feature branch from the develop branch, and send us a pull request. We do not accept pull requests against the master branch.
 
 ## Authors
 
