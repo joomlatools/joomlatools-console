@@ -18,8 +18,12 @@ class Uninstall extends Command
     protected function configure()
     {
         $this->setName('plugin:uninstall')
-             ->setDescription('Used for uninstalling plugins, i.e. joomla console command bundles')
-             ->addArgument('package', InputArgument::REQUIRED, 'The composer package containing the plugin to uninstall');
+             ->setDescription('Used for uninstalling plugins')
+             ->addArgument(
+                 'package',
+                 InputArgument::REQUIRED,
+                 'The composer package containing the plugin to uninstall'
+             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

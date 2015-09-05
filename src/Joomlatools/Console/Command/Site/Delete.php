@@ -44,7 +44,7 @@ class Delete extends Database\AbstractDatabase
         parent::execute($input, $output);
 
         $this->check($input, $output);
-        $this->deleteFolder($input, $output);
+        $this->deleteDirectory($input, $output);
         $this->deleteVirtualHost($input, $output);
         $this->deleteDatabase($input, $output);
     }
@@ -60,7 +60,7 @@ class Delete extends Database\AbstractDatabase
         }
     }
 
-    public function deleteFolder(InputInterface $input, OutputInterface $output)
+    public function deleteDirectory(InputInterface $input, OutputInterface $output)
     {
         `rm -rf $this->target_dir`;
     }

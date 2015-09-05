@@ -40,10 +40,27 @@ class Symlink extends AbstractSite
         $this
             ->setName('extension:symlink')
             ->setDescription('Symlink projects into a site')
+            ->setHelp(<<<EOL
+This command will symlink the directories from the <comment>--projects-dir</comment> directory into the given site. This is ideal for testing your custom extensions while you are working on them.
+Your source code should resemble the Joomla directory structure for symlinking to work well. For example, the directory structure of your component should look like this:
+
+ administrator/components/com_foobar
+ components/com_foobar
+ media/com_foobar
+
+To symlink <comment>com_foobar</comment> into your tesite:
+
+    <info>%command.full_name% testsite com_foobar</info>
+
+You can now use the <comment>extension:register</comment> or <comment>extension:install</comment> commands to make your component available to Joomla.
+
+Note that you can use the <comment>site:create</comment> command to both create a new site and symlink your projects into it using the <comment>--symlink</comment> flag.
+EOL
+            )
             ->addArgument(
                 'symlink',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'A list of folders to symlink from projects folder. Use \'all\' to symlink every folder.'
+                'A list of directories to symlink from projects directory. Use \'all\' to symlink every directory.'
             )
             ->addOption(
                 'projects-dir',
@@ -65,8 +82,8 @@ class Symlink extends AbstractSite
             $this->symlink = array();
             $source = $input->getOption('projects-dir') . '/*';
 
-            foreach(glob($source, GLOB_ONLYDIR) as $folder) {
-                $this->symlink[] = basename($folder);
+            foreach(glob($source, GLOB_ONLYDIR) as $directory) {
+                $this->symlink[] = basename($directory);
             }
         }
 
@@ -83,7 +100,7 @@ class Symlink extends AbstractSite
 
     public function symlinkProjects(InputInterface $input, OutputInterface $output)
     {
-        $project_folder = $input->getOption('projects-dir');
+        $project_directory = $input->getOption('projects-dir');
 
         $projects = array();
         foreach ($this->symlink as $symlink)
@@ -95,7 +112,7 @@ class Symlink extends AbstractSite
         foreach ($projects as $project)
         {
             $result = false;
-            $root   = $project_folder.'/'.$project;
+            $root   = $project_directory.'/'.$project;
 
             if (!is_dir($root)) {
                 continue;

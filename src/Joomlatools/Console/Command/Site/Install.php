@@ -55,7 +55,7 @@ class Install extends Database\AbstractDatabase
                 'symlink',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'A comma separated list of folders to symlink from projects folder. Use \'all\' to symlink every folder.'
+                'A comma separated list of directories to symlink from the projects directory. Use \'all\' to symlink every folder.'
             )
             ->addOption(
                 'projects-dir',

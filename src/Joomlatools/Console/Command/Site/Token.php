@@ -22,7 +22,7 @@ class Token extends AbstractSite
         $this
             ->setName('site:token')
             ->setDescription('Generate a login token for a user name to be used for JWT authentication')
-            ->setHelp('Add the token to your query string such as ?auth_token=TOKEN and the given user will be automatically logged in')
+            ->setHelp('Add the token to your query string such as <comment>?auth_token=TOKEN</comment> and the given user will be automatically logged in')
             ->addArgument(
                 'username',
                 InputArgument::REQUIRED,

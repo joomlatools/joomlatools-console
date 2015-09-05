@@ -26,7 +26,20 @@ class Install extends AbstractSite
 
         $this
             ->setName('extension:install')
-            ->setDescription('Install extensions into a site')
+            ->setDescription('Install extensions into a site using the discover method')
+            ->setHelp(<<<EOL
+After copying or symlinking your extension code into the Joomla application, you can use this command to
+have Joomla automatically find the extension files and install it:
+
+    <info>%command.full_name% testsite com_foobar</info>
+
+The extension argument should match the element name (<comment>com_foobar</comment>) as defined in your extension XML manifest.
+
+For more information about Joomla's discover method, refer to the documentation:
+
+    <info>https://docs.joomla.org/Help34:Extensions_Extension_Manager_Discover</info>
+EOL
+            )
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,

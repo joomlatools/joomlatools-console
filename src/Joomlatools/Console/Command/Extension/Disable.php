@@ -20,7 +20,7 @@ class Disable extends AbstractExtension
         parent::configure();
 
         $this->setName('extension:disable')
-             ->setDescription('Disable a joomla extension');
+             ->setDescription('Disable a Joomla extension');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

@@ -39,7 +39,7 @@ class Symlink extends Command
         $target = realpath($input->getArgument('target'));
 
         if ($source === false || $target === false) {
-            throw new \InvalidArgumentException('Invalid folders passed');
+            throw new \InvalidArgumentException('Invalid directories passed');
         }
 
         $iterator = new Iterator($source, $target);

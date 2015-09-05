@@ -30,6 +30,44 @@ class Register extends AbstractExtension
         $this
             ->setName('extension:register')
             ->setDescription('Register an extension with the `#__extensions` table.')
+            ->setHelp(<<<EOL
+You can register your extension in the extensions table without the need for a complete install package containing a valid XML manifest file.
+
+    <info>%command.full_name% testsite com_foobar</info>
+
+The type of extension that gets registered is based on the first 4 characters of the extension argument you pass in. Example:
+
+  com_ => component
+  mod_ => module
+  plg_ => plugin (the plg_ will get stripped from the element field)
+  lib_ => library
+  pkg_ => package
+  tpl_ => template (the tpl_ will get stripped from the name and element field)
+  lng_ => language
+
+This example registers an extension of the ‘plugin’ type:
+
+    <info>%command.full_name% testsite plg_foobar</info>
+
+You can use naming without the type prefixes by adding a type argument to the end of the command:
+
+    <info>%command.full_name% testsite foobar package</info>
+
+In all cases, if the type is not specified or recognized then the default value, component, will be used.
+
+When registering a plugin type you can use the <comment>--folder</comment> option to specify the plugin group that will get registered with the record. This defaults to <comment>system</comment>. Example:
+
+    <info>%command.full_name% testsite foobar plugin --folder=content</info>
+
+For a language type extension, you should use the <comment>--element</comment> option to ensure your language files can be loaded correctly:
+
+    <info>%command.full_name% testsite spanglish language --element=en-GB</info>
+
+When registering a module type extension, you can use the <comment>--position</comment> option to ensure your module displays where you would like it to. A record gets added to the <comment>#_modules</comment> table:
+
+    <info>%command.full_name% testsite mod_foobar --position=debug</info>
+EOL
+            )
             ->addArgument(
                 'type',
                 InputArgument::OPTIONAL,

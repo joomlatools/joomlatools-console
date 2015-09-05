@@ -33,7 +33,7 @@ class Index extends AbstractSite
 
         $this
             ->setName('finder:index')
-            ->setDescription('Create finder indexes')
+            ->setDescription('Run the Smart Search indexer')
             ->addOption(
                 'purge',
                 'p',

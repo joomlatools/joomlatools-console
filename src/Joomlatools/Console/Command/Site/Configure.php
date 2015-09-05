@@ -37,12 +37,12 @@ class Configure extends AbstractDatabase
 
         $this
             ->setName('site:configure')
-            ->setDescription('Create the configuration.php file')
+            ->setDescription('Configure a Joomla site')
             ->addOption(
                 'overwrite',
                 null,
                 InputOption::VALUE_NONE,
-                'Overwrite configuration.php if it already exists'
+                'Overwrite configuration.php or .env file if it already exists'
             )
             ->addOption(
                 'interactive',

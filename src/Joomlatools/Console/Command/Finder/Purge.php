@@ -27,7 +27,7 @@ class Purge extends AbstractSite
 
         $this
             ->setName('finder:purge')
-            ->setDescription('Purge all finder indexes')
+            ->setDescription('Purge the Smart Search index')
             ;
     }
 
