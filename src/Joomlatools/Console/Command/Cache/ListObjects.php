@@ -26,7 +26,7 @@ class ListObjects extends AbstractCache
             ->addOption(
                 'client',
                 'c',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Specify the client cache to list',
                 0
             )

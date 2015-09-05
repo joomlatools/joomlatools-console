@@ -41,7 +41,7 @@ abstract class AbstractDatabase extends AbstractSite
         ->addOption(
             'mysql_db_prefix',
             null,
-            InputOption::VALUE_OPTIONAL,
+            InputOption::VALUE_REQUIRED,
             "MySQL database prefix",
             $this->target_db_prefix
         )

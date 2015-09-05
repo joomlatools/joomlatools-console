@@ -75,7 +75,7 @@ EOL
             ->addOption(
                 'folder',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Specifically for the Plugin typed extension, default "system"'
             )->addOption(
                 'enabled',
@@ -86,20 +86,18 @@ EOL
             )->addOption(
                 'client_id',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 '"0" for Site, "1" for Administrator'
             )->addOption(
                 'element',
                 null,
-                InputOption::VALUE_OPTIONAL,
-                "Provide the element name for languages",
-                null
+                InputOption::VALUE_REQUIRED,
+                "Provide the element name for languages"
             )->addOption(
                 'position',
                 null,
-                InputOption::VALUE_OPTIONAL,
-                "Provide the position the module should appear",
-                null
+                InputOption::VALUE_REQUIRED,
+                "Provide the position the module should appear"
             );
     }
 

@@ -34,21 +34,21 @@ class Create extends AbstractSite
             ->addOption(
                 'ssl-crt',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The full path to the signed cerfificate file',
                 '/etc/apache2/ssl/server.crt'
             )
             ->addOption(
                 'ssl-key',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The full path to the private cerfificate file',
                 '/etc/apache2/ssl/server.key'
             )
             ->addOption(
                 'ssl-port',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The port on which the server will listen for SSL requests',
                 '443'
             )

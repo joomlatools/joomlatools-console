@@ -59,7 +59,7 @@ class Download extends AbstractSite
             ->addOption(
                 'repo',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.'
             )
         ;

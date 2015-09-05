@@ -54,7 +54,7 @@ class Versions extends Command
             ->addOption(
                 'repo',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.',
                 $this->repository
             );
