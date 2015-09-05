@@ -41,14 +41,14 @@ class Create extends Database\AbstractDatabase
             ->setHelp(<<<EOF
 To create a site with the latest Joomla version, run:
 
-   <info>%command.full_name% foobar</info>
+   <info>joomla site:create foobar</info>
 
 The newly installed site will be available at <comment>/var/www/foobar</comment> and <comment>foobar.dev</comment> after that. You can login into your fresh Joomla installation using these credentials: admin/admin.
 By default, the web server root is set to <comment>/var/www</comment>. You can pass <comment>–www=/my/server/path</comment> to commands for custom values.
 
 You can choose the Joomla version or the sample data to be installed. A more elaborate example:
 
-   <info>%command.full_name% testsite --joomla=2.5 --sample-data=blog</info>
+   <info>joomla site:create testsite --joomla=2.5 --sample-data=blog</info>
 EOF
     )
             ->addOption(

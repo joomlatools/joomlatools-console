@@ -50,7 +50,7 @@ Your source code should resemble the Joomla directory structure for symlinking t
 
 To symlink <comment>com_foobar</comment> into your tesite:
 
-    <info>%command.full_name% testsite com_foobar</info>
+    <info>joomla extension:symlink testsite com_foobar</info>
 
 You can now use the <comment>extension:register</comment> or <comment>extension:install</comment> commands to make your component available to Joomla.
 

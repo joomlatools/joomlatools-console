@@ -22,15 +22,13 @@ class Install extends Command
 You can install plugins into the Joomla Console to add new commands or extend the symlinking logic. Plugins are installed using Composer and must be available on Packagist.
 You then pass their package name to this command. In the case of our example, the package name is <comment>joomlatools/joomla-console-backup</comment>:
 
-  <info>%command.full_name% joomlatools/joomla-console-backup</info>
+  <info>joomla plugin:install joomlatools/joomla-console-backup</info>
 
 You can specify a specific version or branch by appending the version number to the package name. Version constraints follow Composer’s convention:
 
-  <info>%command.full_name% joomlatools/joomla-console-backup:dev-develop</info>
+  <info>joomla plugin:install joomlatools/joomla-console-backup:dev-develop</info>
 
-Refer to the online documentation at the following URL on how to write your own plugins:
-
-    <comment>http://developer.joomlatools.com/tools/console/plugins.html#creating-custom-plugins</comment>
+Refer to the online documentation at the following URL on how to write your own plugins: http://developer.joomlatools.com/tools/console/plugins.html#creating-custom-plugins
 EOF
             )
              ->addArgument(

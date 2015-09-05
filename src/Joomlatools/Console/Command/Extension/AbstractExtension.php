@@ -66,7 +66,7 @@ abstract class AbstractExtension extends Command
             )->addArgument(
                 'extension',
                 InputArgument::REQUIRED,
-                ''
+                'Extension name'
             )->addOption(
                 'www',
                 null,
