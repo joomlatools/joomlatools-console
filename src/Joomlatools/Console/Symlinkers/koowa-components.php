@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Koowa components custom symlinker
  */
-Extension\Symlink::registerSymlinker(function($project, $destination, $name, $projects, $verbosity = OutputInterface::VERBOSITY_NORMAL) {
+Extension\Symlink::registerSymlinker(function($project, $destination, $name, $projects, OutputInterface $output) {
     if (!is_file($project.'/composer.json')) {
         return false;
     }
@@ -25,15 +25,15 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     if (!isset($manifest->{'nooku-component'}->name))
     {
-        echo "Found nooku-component in `" . basename($project) . "` but composer.json is missing the `nooku-component` property. Skipping." . PHP_EOL;
+        $output->writeln("<comment>[warning]</comment> Found nooku-component in `" . basename($project) . "` but composer.json is missing the `nooku-component` property. Skipping!");
 
         return true;
     }
 
     $component = 'com_'.$manifest->{'nooku-component'}->name;
 
-    if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-        echo "Symlinking `$component` into `destination`" . PHP_EOL;
+    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+        $output->writeln("Symlinking `$component` into `destination`");
     }
 
     $dirs = array(Util::buildTargetPath('/libraries/koowa/components', $destination), Util::buildTargetPath('/media/koowa', $destination));
@@ -41,8 +41,8 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
     {
         if (!is_dir($dir))
         {
-            if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                echo " * creating empty directory `$dir`" . PHP_EOL;
+            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $output->writeln(" * creating empty directory `$dir`");
             }
 
             mkdir($dir, 0777, true);
@@ -53,8 +53,8 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     if (!file_exists($code_destination))
     {
-        if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-            echo " * creating link `$code_destination` -> $project" . PHP_EOL;
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln(" * creating link `$code_destination` -> $project");
         }
 
         `ln -sf $project $code_destination`;
@@ -66,8 +66,8 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     if (is_dir($media) && !file_exists($target))
     {
-        if ($verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-            echo " * creating link `$target` -> $media" . PHP_EOL;
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln(" * creating link `$target` -> $media");
         }
 
         `ln -sf $media $target`;

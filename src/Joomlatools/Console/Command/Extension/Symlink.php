@@ -10,6 +10,7 @@ namespace Joomlatools\Console\Command\Extension;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Site\AbstractSite;
@@ -17,8 +18,6 @@ use Joomlatools\Console\Command\Extension\Iterator\Iterator;
 
 class Symlink extends AbstractSite
 {
-    protected $_verbosity = OutputInterface::VERBOSITY_NORMAL;
-
     protected $symlink  = array();
     protected $projects = array();
 
@@ -60,8 +59,6 @@ class Symlink extends AbstractSite
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input, $output);
-
-        $this->_verbosity = $output->getVerbosity();
 
         $path = dirname(dirname(dirname(__FILE__))).'/Symlinkers';
 
@@ -132,7 +129,7 @@ class Symlink extends AbstractSite
 
             foreach (static::$_symlinkers as $symlinker)
             {
-                $result = call_user_func($symlinker, $root, $this->target_dir, $project, $this->projects, $this->_verbosity);
+                $result = call_user_func($symlinker, $root, $this->target_dir, $project, $this->projects, $output);
 
                 if ($result === true) {
                     break;
@@ -140,7 +137,7 @@ class Symlink extends AbstractSite
             }
 
             if (!$result) {
-                $this->_symlink($root, $this->target_dir);
+                $this->_symlink($root, $this->target_dir, $output);
             }
         }
     }
@@ -154,17 +151,17 @@ class Symlink extends AbstractSite
      * @param $projects
      * @return bool
      */
-    protected function _symlink($project, $destination)
+    protected function _symlink($project, $destination, OutputInterface $output)
     {
         if (is_dir($project.'/code')) {
             $project .= '/code';
         }
 
         $iterator = new Iterator($project, $destination);
-        $iterator->setVerbosity($this->_verbosity);
+        $iterator->setOutput($output);
 
-        if ($this->_verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-            echo "Symlinking `$project` into `$destination`" . PHP_EOL;
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln("Symlinking `$project` into `$destination`");
         }
 
         while ($iterator->valid()) {

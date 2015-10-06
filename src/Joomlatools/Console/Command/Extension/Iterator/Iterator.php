@@ -15,7 +15,7 @@ class Iterator extends \RecursiveIteratorIterator
     protected $source;
     protected $target;
 
-    protected $_verbosity = OutputInterface::VERBOSITY_NORMAL;
+    protected $_output;
 
     /**
      * @param string $source Source dir (usually from an IDE workspace)
@@ -59,16 +59,16 @@ class Iterator extends \RecursiveIteratorIterator
     {
         if (!file_exists($target))
         {
-            if ($this->_verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
-                echo " * creating link: `$target` -> `$source`" . PHP_EOL;
+            if (!is_null($this->_output) && $this->_output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $this->_output->writeln(" * creating link: `$target` -> `$source`");
             }
 
             `ln -sf $source $target`;
         }
     }
 
-    public function setVerbosity($level)
+    public function setOutput(OutputInterface $output)
     {
-        $this->_verbosity = $level;
+        $this->_output = $output;
     }
 }
