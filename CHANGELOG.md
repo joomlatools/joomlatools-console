@@ -7,6 +7,12 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomla-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomla-console/compare/v1.0.0...v1.0.1
 
+* 1.4.1 (2015-10-06)
+ * Added - Ensure `extension:symlink` can properly symlink nooku-component repositories
+ * Improved - Throw error and exit execution if symlink cannot find the given element
+ * Improved - Increased verbosity for the `extension:symlink` and `extension:install` commands when using the `-v` flag.
+ * Removed - `symlink` command
+
 * 1.4.0 (2015-09-01)
  * Added - `site:deploy`: deploy command to push sites using [git-ftp](https://github.com/git-ftp/git-ftp)
  * Added - `cache:list`, `cache:purge`, `cache:clear`: commands to handle cache manipulation in Joomla sites
