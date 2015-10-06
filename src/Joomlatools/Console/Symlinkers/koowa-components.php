@@ -18,6 +18,14 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     $xml       = simplexml_load_file($project.'/koowa-component.xml');
     $component = 'com_'.$xml->name;
+    
+    $dirs = array(Util::buildTargetPath('/libraries/koowa/components', $destination), Util::buildTargetPath('/media/koowa', $destination));
+    foreach ($dirs as $dir)
+    {
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+    }
 
     $code_destination = Util::buildTargetPath('/libraries/koowa/components/'.$component, $destination);
 
