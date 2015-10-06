@@ -33,7 +33,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
     $component = 'com_'.$manifest->{'nooku-component'}->name;
 
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-        $output->writeln("Symlinking `$component` into `destination`");
+        $output->writeln("Symlinking `$component` into `$destination`");
     }
 
     $dirs = array(Util::buildTargetPath('/libraries/koowa/components', $destination), Util::buildTargetPath('/media/koowa', $destination));
