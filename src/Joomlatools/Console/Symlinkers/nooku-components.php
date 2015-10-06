@@ -25,7 +25,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     if (!isset($manifest->{'nooku-component'}->name))
     {
-        $output->writeln("<comment>[warning]</comment> Found nooku-component in `" . basename($project) . "` but composer.json is missing the `nooku-component` property. Skipping!");
+        $output->writeln("<comment>[warning]</comment> Found type nooku-component in `" . basename($project) . "` but composer.json is missing the `nooku-component` property. Skipping!");
 
         return true;
     }
