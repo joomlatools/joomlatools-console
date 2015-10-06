@@ -106,11 +106,19 @@ EOL
                 if ($result->type == 'plugin' && $included) {
                     $plugins[] = $result->extension_id;
                 }
+
+                if ($included && $output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                    $output->writeln("Queued $result->name for installation.");
+                }
             }
         }
 
         foreach ($install as $extension)
         {
+            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                $output->writeln("Installing $extension->element ..");
+            }
+
             try {
                 $installer->discover_install($extension->extension_id);
             }
@@ -120,6 +128,10 @@ EOL
 
             if (in_array($extension->extension_id, $plugins))
             {
+                if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                    $output->writeln("Enabling plugin `$extension->element` (ID #$extension->extension_id) ..");
+                }
+
                 $sql = "UPDATE `#__extensions` SET `enabled` = 1 WHERE `extension_id` = '$extension->extension_id'";
 
                 $db->setQuery($sql);
@@ -146,6 +158,11 @@ EOL
                             $dispatcher = \JEventDispatcher::getInstance();
                             new \PlgSystemKoowa($dispatcher, (array)\JPLuginHelper::getPLugin('system', 'koowa'));
                         }
+
+                        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                            $output->writeln("Initialised new PlgSystemKoowa instance");
+                        }
+
                         break;
                 }
             }

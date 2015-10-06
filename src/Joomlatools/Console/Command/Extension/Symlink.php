@@ -10,14 +10,16 @@ namespace Joomlatools\Console\Command\Extension;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Site\AbstractSite;
-use Joomlatools\Console\Command\Symlink\Iterator;
+use Joomlatools\Console\Command\Extension\Iterator\Iterator;
 
 class Symlink extends AbstractSite
 {
-    protected $symlink = array();
+    protected $symlink  = array();
+    protected $projects = array();
 
     protected static $_symlinkers = array();
 
@@ -71,6 +73,20 @@ EOL
             );
     }
 
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input, $output);
+
+        $path = dirname(dirname(dirname(__FILE__))).'/Symlinkers';
+
+        if (file_exists($path))
+        {
+            foreach (glob($path.'/*.php') as $symlinker) {
+                require_once $symlinker;
+            }
+        }
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
@@ -87,6 +103,13 @@ EOL
             }
         }
 
+        $this->projects = array();
+        foreach ($this->symlink as $symlink)
+        {
+            $this->projects[] = $symlink;
+            $this->projects   = array_unique(array_merge($this->projects, $this->_getDependencies($symlink)));
+        }
+
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
     }
@@ -96,20 +119,23 @@ EOL
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
+
+        $project_dir = $input->getOption('projects-dir');
+        foreach ($this->projects as $project)
+        {
+            $root =  $project_dir . '/' . $project;
+
+            if (!is_dir($root)) {
+                throw new \RuntimeException(sprintf('`%s` could not be found in %s', $project, $project_dir));
+            }
+        }
     }
 
     public function symlinkProjects(InputInterface $input, OutputInterface $output)
     {
         $project_directory = $input->getOption('projects-dir');
 
-        $projects = array();
-        foreach ($this->symlink as $symlink)
-        {
-            $projects[] = $symlink;
-            $projects   = array_unique(array_merge($projects, $this->_getDependencies($symlink)));
-        }
-
-        foreach ($projects as $project)
+        foreach ($this->projects as $project)
         {
             $result = false;
             $root   = $project_directory.'/'.$project;
@@ -120,7 +146,7 @@ EOL
 
             foreach (static::$_symlinkers as $symlinker)
             {
-                $result = call_user_func($symlinker, $root, $this->target_dir, $project, $projects);
+                $result = call_user_func($symlinker, $root, $this->target_dir, $project, $this->projects, $output);
 
                 if ($result === true) {
                     break;
@@ -128,7 +154,7 @@ EOL
             }
 
             if (!$result) {
-                $this->_symlink($root, $this->target_dir, $project, $projects);
+                $this->_symlink($root, $this->target_dir, $output);
             }
         }
     }
@@ -142,13 +168,18 @@ EOL
      * @param $projects
      * @return bool
      */
-    protected function _symlink($project, $destination, $name, $projects)
+    protected function _symlink($project, $destination, OutputInterface $output)
     {
         if (is_dir($project.'/code')) {
             $project .= '/code';
         }
 
         $iterator = new Iterator($project, $destination);
+        $iterator->setOutput($output);
+
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln("Symlinking `$project` into `$destination`");
+        }
 
         while ($iterator->valid()) {
             $iterator->next();
