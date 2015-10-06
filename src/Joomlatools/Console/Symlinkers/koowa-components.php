@@ -1,0 +1,37 @@
+<?php
+/**
+ * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @license		Mozilla Public License, version 2.0
+ * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
+ */
+
+use Joomlatools\Console\Command\Extension;
+use Joomlatools\Console\Joomla\Util;
+
+/**
+ * Koowa components custom symlinker
+ */
+Extension\Symlink::registerSymlinker(function($project, $destination, $name, $projects) {
+    if (!is_file($project.'/koowa-component.xml')) {
+        return false;
+    }
+
+    $xml       = simplexml_load_file($project.'/koowa-component.xml');
+    $component = 'com_'.$xml->name;
+
+    $code_destination = Util::buildTargetPath('/libraries/koowa/components/'.$component, $destination);
+
+    if (!file_exists($code_destination)) {
+        `ln -sf $project $code_destination`;
+    }
+
+    // Special treatment for media files
+    $media = $project.'/resources/assets';
+    $target = Util::buildTargetPath('/media/koowa/'.$component, $destination);
+
+    if (is_dir($media) && !file_exists($target)) {
+        `ln -sf $media $target`;
+    }
+
+    return true;
+});

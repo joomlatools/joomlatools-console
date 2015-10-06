@@ -5,7 +5,7 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command\Symlink;
+namespace Joomlatools\Console\Command\Extension\Iterator;
 
 use Joomlatools\Console\Joomla\Util;
 

@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Site\AbstractSite;
-use Joomlatools\Console\Command\Symlink\Iterator;
+use Joomlatools\Console\Command\Extension\Iterator\Iterator;
 
 class Symlink extends AbstractSite
 {
@@ -52,6 +52,20 @@ class Symlink extends AbstractSite
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
             );
+    }
+
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input, $output);
+
+        $path = dirname(dirname(dirname(__FILE__))).'/Symlinkers';
+
+        if (file_exists($path))
+        {
+            foreach (glob($path.'/*.php') as $symlinker) {
+                require_once $symlinker;
+            }
+        }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
