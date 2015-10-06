@@ -22,14 +22,14 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
         return false;
     }
 
-    if (!isset($manifest->manifest->name))
+    if (!isset($manifest->{'nooku-component'}->name))
     {
-        echo "Found koowa component in " . basename($project) . " but failed to find component name in composer.json. Skipping." . PHP_EOL;
+        echo "Found nooku-component in `" . basename($project) . "` but composer.json is missing the `nooku-component` property. Skipping." . PHP_EOL;
 
         return true;
     }
 
-    $component = 'com_'.$manifest->manifest->name;
+    $component = 'com_'.$manifest->{'nooku-component'}->name;
 
     $dirs = array(Util::buildTargetPath('/libraries/koowa/components', $destination), Util::buildTargetPath('/media/koowa', $destination));
     foreach ($dirs as $dir)
