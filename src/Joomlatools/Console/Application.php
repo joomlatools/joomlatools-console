@@ -140,7 +140,6 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Vhost\Create(),
             new Command\Vhost\Remove(),
 
-            new Command\Symlink(),
             new Command\Versions()
         ));
 
