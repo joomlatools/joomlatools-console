@@ -8,11 +8,14 @@
 namespace Joomlatools\Console\Command\Extension\Iterator;
 
 use Joomlatools\Console\Joomla\Util;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Iterator extends \RecursiveIteratorIterator
 {
     protected $source;
     protected $target;
+
+    protected $_verbosity = OutputInterface::VERBOSITY_NORMAL;
 
     /**
      * @param string $source Source dir (usually from an IDE workspace)
@@ -54,8 +57,18 @@ class Iterator extends \RecursiveIteratorIterator
 
     public function createLink($source, $target)
     {
-        if (!file_exists($target)) {
+        if (!file_exists($target))
+        {
+            if ($this->_verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
+                echo " * creating link: `$target` -> `$source`" . PHP_EOL;
+            }
+
             `ln -sf $source $target`;
         }
+    }
+
+    public function setVerbosity($level)
+    {
+        $this->_verbosity = $level;
     }
 }

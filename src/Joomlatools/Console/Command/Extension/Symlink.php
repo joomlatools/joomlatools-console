@@ -17,7 +17,10 @@ use Joomlatools\Console\Command\Extension\Iterator\Iterator;
 
 class Symlink extends AbstractSite
 {
-    protected $symlink = array();
+    protected $_verbosity = OutputInterface::VERBOSITY_NORMAL;
+
+    protected $symlink  = array();
+    protected $projects = array();
 
     protected static $_symlinkers = array();
 
@@ -58,6 +61,8 @@ class Symlink extends AbstractSite
     {
         parent::initialize($input, $output);
 
+        $this->_verbosity = $output->getVerbosity();
+
         $path = dirname(dirname(dirname(__FILE__))).'/Symlinkers';
 
         if (file_exists($path))
@@ -84,6 +89,13 @@ class Symlink extends AbstractSite
             }
         }
 
+        $this->projects = array();
+        foreach ($this->symlink as $symlink)
+        {
+            $this->projects[] = $symlink;
+            $this->projects   = array_unique(array_merge($this->projects, $this->_getDependencies($symlink)));
+        }
+
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
     }
@@ -93,20 +105,23 @@ class Symlink extends AbstractSite
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
+
+        $project_dir = $input->getOption('projects-dir');
+        foreach ($this->projects as $project)
+        {
+            $root =  $project_dir . '/' . $project;
+
+            if (!is_dir($root)) {
+                throw new \RuntimeException(sprintf('`%s` could not be found in %s', $project, $project_dir));
+            }
+        }
     }
 
     public function symlinkProjects(InputInterface $input, OutputInterface $output)
     {
         $project_folder = $input->getOption('projects-dir');
 
-        $projects = array();
-        foreach ($this->symlink as $symlink)
-        {
-            $projects[] = $symlink;
-            $projects   = array_unique(array_merge($projects, $this->_getDependencies($symlink)));
-        }
-
-        foreach ($projects as $project)
+        foreach ($this->projects as $project)
         {
             $result = false;
             $root   = $project_folder.'/'.$project;
@@ -117,7 +132,7 @@ class Symlink extends AbstractSite
 
             foreach (static::$_symlinkers as $symlinker)
             {
-                $result = call_user_func($symlinker, $root, $this->target_dir, $project, $projects);
+                $result = call_user_func($symlinker, $root, $this->target_dir, $project, $this->projects, $this->_verbosity);
 
                 if ($result === true) {
                     break;
@@ -125,7 +140,7 @@ class Symlink extends AbstractSite
             }
 
             if (!$result) {
-                $this->_symlink($root, $this->target_dir, $project, $projects);
+                $this->_symlink($root, $this->target_dir);
             }
         }
     }
@@ -139,13 +154,18 @@ class Symlink extends AbstractSite
      * @param $projects
      * @return bool
      */
-    protected function _symlink($project, $destination, $name, $projects)
+    protected function _symlink($project, $destination)
     {
         if (is_dir($project.'/code')) {
             $project .= '/code';
         }
 
         $iterator = new Iterator($project, $destination);
+        $iterator->setVerbosity($this->_verbosity);
+
+        if ($this->_verbosity >= OutputInterface::VERBOSITY_VERBOSE) {
+            echo "Symlinking `$project` into `$destination`" . PHP_EOL;
+        }
 
         while ($iterator->valid()) {
             $iterator->next();
