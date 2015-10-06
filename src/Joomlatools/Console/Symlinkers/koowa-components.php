@@ -12,13 +12,25 @@ use Joomlatools\Console\Joomla\Util;
  * Koowa components custom symlinker
  */
 Extension\Symlink::registerSymlinker(function($project, $destination, $name, $projects) {
-    if (!is_file($project.'/koowa-component.xml')) {
+    if (!is_file($project.'/composer.json')) {
         return false;
     }
 
-    $xml       = simplexml_load_file($project.'/koowa-component.xml');
-    $component = 'com_'.$xml->name;
-    
+    $manifest = json_decode(file_get_contents($project.'/composer.json'));
+
+    if ($manifest->type != 'nooku-component') {
+        return false;
+    }
+
+    if (!isset($manifest->manifest->name))
+    {
+        echo "Found koowa component in " . basename($project) . " but failed to find component name in composer.json. Skipping." . PHP_EOL;
+
+        return true;
+    }
+
+    $component = 'com_'.$manifest->manifest->name;
+
     $dirs = array(Util::buildTargetPath('/libraries/koowa/components', $destination), Util::buildTargetPath('/media/koowa', $destination));
     foreach ($dirs as $dir)
     {
