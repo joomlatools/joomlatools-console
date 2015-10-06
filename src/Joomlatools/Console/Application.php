@@ -11,7 +11,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @var string
      */
-    const VERSION = '1.4.0';
+    const VERSION = '1.4.1';
 
     /**
      * Application name
@@ -140,7 +140,6 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Vhost\Create(),
             new Command\Vhost\Remove(),
 
-            new Command\Symlink(),
             new Command\Versions()
         ));
 

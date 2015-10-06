@@ -66,8 +66,13 @@ class Bootstrapper
             $_SERVER['HTTP_HOST'] = 'localhost';
             $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/' . \Joomlatools\Console\Application::VERSION;
 
-            define('_JEXEC', 1);
-            define('DS', DIRECTORY_SEPARATOR);
+            if (!defined('_JEXEC')) {
+                define('_JEXEC', 1);
+            }
+
+            if (!defined('DS')) {
+                define('DS', DIRECTORY_SEPARATOR);
+            }
 
             if (Util::isPlatform($base))
             {
