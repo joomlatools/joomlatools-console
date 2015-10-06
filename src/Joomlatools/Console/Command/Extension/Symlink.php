@@ -44,9 +44,9 @@ class Symlink extends AbstractSite
 This command will symlink the directories from the <comment>--projects-dir</comment> directory into the given site. This is ideal for testing your custom extensions while you are working on them.
 Your source code should resemble the Joomla directory structure for symlinking to work well. For example, the directory structure of your component should look like this:
 
- administrator/components/com_foobar
- components/com_foobar
- media/com_foobar
+* administrator/components/com_foobar
+* components/com_foobar
+* media/com_foobar
 
 To symlink <comment>com_foobar</comment> into your tesite:
 
