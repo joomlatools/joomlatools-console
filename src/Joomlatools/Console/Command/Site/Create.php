@@ -90,6 +90,13 @@ EOF
                 sprintf('%s/Projects', trim(`echo ~`))
             )
             ->addOption(
+                'http-port',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The HTTP port the virtual host should listen to',
+                (php_uname('n') === 'joomlatools' ? 8080 : 80)
+            )
+            ->addOption(
                 'disable-ssl',
                 null,
                 InputOption::VALUE_NONE,
@@ -191,6 +198,7 @@ EOF
         $command_input = new ArrayInput(array(
             'vhost:create',
             'site'          => $this->site,
+            '--http-port'   => $input->getOption('http-port'),
             '--disable-ssl' => $input->getOption('disable-ssl'),
             '--ssl-crt'     => $input->getOption('ssl-crt'),
             '--ssl-key'     => $input->getOption('ssl-key'),
