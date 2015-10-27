@@ -152,9 +152,12 @@ class Download extends AbstractSite
     protected function _getTarball(OutputInterface $output)
     {
         $tar   = $this->version.'.tar.gz';
+        // Replace forward slashes with a dash, otherwise the path looks like it contains more subdirectories
+        $tar = str_replace('/', '-', $tar);
+
         $cache = $this->versions->getCacheDirectory().'/'.$tar;
 
-        if(file_exists($cache) && !$this->versions->isBranch($this->version)) {
+        if (file_exists($cache) && !$this->versions->isBranch($this->version)) {
             return $cache;
         }
 
