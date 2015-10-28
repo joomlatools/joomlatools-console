@@ -112,7 +112,8 @@ class Util
                 '/media'         => '/web/media',
                 '/plugins'       => '/lib/plugins',
                 '/libraries'     => '/lib/libraries',
-                '/images'        => '/web/images'
+                '/images'        => '/web/images',
+                '/configuration.php' => '/config/configuration.php'
             );
 
             foreach ($paths as $original => $replacement)

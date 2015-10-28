@@ -11,6 +11,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Util;
+
 class Token extends AbstractSite
 {
     protected $extension = array();
@@ -36,8 +38,8 @@ class Token extends AbstractSite
 
         $this->check($input, $output);
 
-        require_once $this->target_dir.'/libraries/koowa/libraries/koowa.php';
-        require_once $this->target_dir.'/configuration.php';
+        require_once Util::buildTargetPath('libraries/koowa/libraries/koowa.php', $this->target_dir);
+        require_once Util::buildTargetPath('configuration.php', $this->target_dir);
 
         \Koowa::getInstance();
 
@@ -56,7 +58,8 @@ class Token extends AbstractSite
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
-        if (!file_exists($this->target_dir.'/libraries/koowa/libraries/koowa.php')) {
+        $path = Util::buildTargetPath('libraries/koowa/libraries/koowa.php', $this->target_dir);
+        if (!file_exists($path)) {
             throw new \RuntimeException(sprintf('Koowa is not installed on site: %s', $this->site));
         }
     }
