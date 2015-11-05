@@ -7,6 +7,11 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomla-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomla-console/compare/v1.0.0...v1.0.1
 
+* 1.4.2 (2015-11-05)
+ * Added - `--http-port` flag to `site:create` command
+ * Improved - Command help descriptions
+ * Fixed - `site:token` used hardcoded paths
+
 * 1.4.1 (2015-10-06)
  * Added - Ensure `extension:symlink` can properly symlink nooku-component repositories
  * Improved - Throw error and exit execution if symlink cannot find the given element
