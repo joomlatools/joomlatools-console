@@ -33,13 +33,12 @@ class Index extends AbstractSite
 
         $this
             ->setName('finder:index')
-            ->setDescription('Create finder indexes')
+            ->setDescription('Run the Smart Search indexer')
             ->addOption(
                 'purge',
                 'p',
-                InputOption::VALUE_OPTIONAL,
-                'Whether the finder should purge existing results first?',
-                false
+                InputOption::VALUE_NONE,
+                'Purge existing indexes first'
             );
     }
 
@@ -65,7 +64,7 @@ class Index extends AbstractSite
         {
             $this->getFilters($input, $output);
 
-            $purge = new FinderPurge();
+            $purge = new Purge();
             $purge->purgeFinder($input, $output);
 
             $this->createIndexes($input, $output);

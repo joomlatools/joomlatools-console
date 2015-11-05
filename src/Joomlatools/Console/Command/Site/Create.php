@@ -38,6 +38,19 @@ class Create extends Database\AbstractDatabase
         $this
             ->setName('site:create')
             ->setDescription('Create a new Joomla site from scratch')
+            ->setHelp(<<<EOF
+To create a site with the latest Joomla version, run:
+
+   <info>joomla site:create foobar</info>
+
+The newly installed site will be available at <comment>/var/www/foobar</comment> and <comment>foobar.dev</comment> after that. You can login into your fresh Joomla installation using these credentials: admin/admin.
+By default, the web server root is set to <comment>/var/www</comment>. You can pass <comment>–www=/my/server/path</comment> to commands for custom values.
+
+You can choose the Joomla version or the sample data to be installed. A more elaborate example:
+
+   <info>joomla site:create testsite --joomla=2.5 --sample-data=blog</info>
+EOF
+    )
             ->addOption(
                 'release',
                 null,
@@ -55,12 +68,12 @@ class Create extends Database\AbstractDatabase
                 'symlink',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'A comma separated list of folders to symlink from projects folder'
+                'A comma separated list of directories to symlink from the projects directory. Use \'all\' to symlink every folder.'
             )
             ->addOption(
                 'repo',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.'
             )
             ->addOption(
@@ -77,6 +90,13 @@ class Create extends Database\AbstractDatabase
                 sprintf('%s/Projects', trim(`echo ~`))
             )
             ->addOption(
+                'http-port',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The HTTP port the virtual host should listen to',
+                (php_uname('n') === 'joomlatools' ? 8080 : 80)
+            )
+            ->addOption(
                 'disable-ssl',
                 null,
                 InputOption::VALUE_NONE,
@@ -85,21 +105,21 @@ class Create extends Database\AbstractDatabase
             ->addOption(
                 'ssl-crt',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The full path to the signed cerfificate file',
                 '/etc/apache2/ssl/server.crt'
             )
             ->addOption(
                 'ssl-key',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The full path to the private cerfificate file',
                 '/etc/apache2/ssl/server.key'
             )
             ->addOption(
                 'ssl-port',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The port on which the server will listen for SSL requests',
                 '443'
             )
@@ -178,6 +198,7 @@ class Create extends Database\AbstractDatabase
         $command_input = new ArrayInput(array(
             'vhost:create',
             'site'          => $this->site,
+            '--http-port'   => $input->getOption('http-port'),
             '--disable-ssl' => $input->getOption('disable-ssl'),
             '--ssl-crt'     => $input->getOption('ssl-crt'),
             '--ssl-key'     => $input->getOption('ssl-key'),

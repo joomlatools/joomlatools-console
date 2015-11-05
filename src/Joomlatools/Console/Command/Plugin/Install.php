@@ -17,8 +17,25 @@ class Install extends Command
     protected function configure()
     {
         $this->setName('plugin:install')
-             ->setDescription('Install plugin, i.e. joomla console command bundles')
-             ->addArgument('package', InputArgument::REQUIRED, 'The Composer package name and version. Example: vendor/foo-bar:1.*');
+             ->setDescription('Install plugin')
+            ->setHelp(<<<EOF
+You can install plugins into the Joomla Console to add new commands or extend the symlinking logic. Plugins are installed using Composer and must be available on Packagist.
+You then pass their package name to this command. In the case of our example, the package name is <comment>joomlatools/joomla-console-backup</comment>:
+
+  <info>joomla plugin:install joomlatools/joomla-console-backup</info>
+
+You can specify a specific version or branch by appending the version number to the package name. Version constraints follow Composer’s convention:
+
+  <info>joomla plugin:install joomlatools/joomla-console-backup:dev-develop</info>
+
+Refer to the online documentation at the following URL on how to write your own plugins: http://developer.joomlatools.com/tools/console/plugins.html#creating-custom-plugins
+EOF
+            )
+             ->addArgument(
+                 'package',
+                 InputArgument::REQUIRED,
+                 'The Composer package name and version. Example: vendor/foo-bar:1.*'
+             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

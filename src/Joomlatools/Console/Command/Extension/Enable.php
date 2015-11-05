@@ -20,7 +20,7 @@ class Enable extends AbstractExtension
         parent::configure();
 
         $this->setName('extension:enable')
-             ->setDescription('Enable a joomla extension');
+             ->setDescription('Enable a Joomla extension');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

@@ -52,8 +52,8 @@ class Install extends AbstractDatabase
             ->addOption(
                 'sql-dumps',
                 null,
-                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-                'Full path to SQL dump file to import. If none given, the command will use the default Joomla installation files.',
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+                'Full path to SQL dump file to import. If not set, the command will use the default Joomla installation files.',
                 array()
             )
             ->addOption(

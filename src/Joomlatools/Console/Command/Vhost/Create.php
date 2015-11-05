@@ -26,6 +26,13 @@ class Create extends AbstractSite
             ->setName('vhost:create')
             ->setDescription('Creates a new Apache2 virtual host')
             ->addOption(
+                'http-port',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The HTTP port the virtual host should listen to',
+                (php_uname('n') === 'joomlatools' ? 8080 : 80)
+            )
+            ->addOption(
                 'disable-ssl',
                 null,
                 InputOption::VALUE_NONE,
@@ -34,21 +41,21 @@ class Create extends AbstractSite
             ->addOption(
                 'ssl-crt',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The full path to the signed cerfificate file',
                 '/etc/apache2/ssl/server.crt'
             )
             ->addOption(
                 'ssl-key',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The full path to the private cerfificate file',
                 '/etc/apache2/ssl/server.key'
             )
             ->addOption(
                 'ssl-port',
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'The port on which the server will listen for SSL requests',
                 '443'
             )
@@ -62,13 +69,14 @@ class Create extends AbstractSite
         if (is_dir('/etc/apache2/sites-available'))
         {
             $site = $input->getArgument('site');
+            $port = $input->getOption('http-port');
             $path = realpath(__DIR__.'/../../../../../bin/.files/');
             $tmp  = '/tmp/vhost.tmp';
 
             $template     = file_get_contents($path.'/vhost.conf');
             $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
-            file_put_contents($tmp, sprintf($template, $site, $documentroot));
+            file_put_contents($tmp, sprintf($template, $site, $documentroot, $port));
 
             if (!$input->getOption('disable-ssl'))
             {

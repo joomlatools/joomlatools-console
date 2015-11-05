@@ -26,13 +26,13 @@ class Clear extends AbstractCache
             ->addOption(
                 'group',
                 'g',
-                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                 'Specify a cache group to delete'
             )
             ->addOption(
                 'client',
                 'c',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Specify the client cache to delete',
                 0
             )

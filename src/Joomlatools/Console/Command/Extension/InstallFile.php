@@ -26,6 +26,15 @@ class InstallFile extends AbstractSite
         $this
             ->setName('extension:installfile')
             ->setDescription('Install packaged extensions for file or directory into a site')
+            ->setHelp(<<<EOL
+You can install extensions using their installation packages using this command:
+
+    <info>joomla extension:installfile testsite /home/vagrant/com_component.v1.x.zip /home/vagrant/plg_plugin.v2.x.tar.gz</info>
+
+This will install both the <comment>com_component.v1.x.zip</comment> and <comment>plg_plugin.v2.x.tar.gz</comment> packages.
+You can also point to the directory where the extracted package can be found.
+EOL
+            )
             ->addArgument(
                 'extension',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
