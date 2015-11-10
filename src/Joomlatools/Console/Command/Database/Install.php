@@ -163,7 +163,7 @@ class Install extends AbstractDatabase
         $version = Util::getJoomlaVersion($this->target_dir);
         $imports = $this->_getInstallFiles($input->getOption('sample-data'));
 
-        if ($version !== false)
+        if ($version !== false && !Util::isPlatform($this->target_dir))
         {
             $users = 'joomla3.users.sql';
             if(is_numeric(substr($version, 0, 1)) && version_compare($version, '3.0.0', '<')) {

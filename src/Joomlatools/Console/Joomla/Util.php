@@ -24,7 +24,7 @@ class Util
 
         if (!isset(self::$_versions[$key]))
         {
-            $code = $base . '/libraries/cms/version/version.php';
+            $code = self::buildTargetPath('/libraries/cms/version/version.php', $base);
 
             if (file_exists($code))
             {
@@ -47,11 +47,25 @@ class Util
                 $class   = 'JVersion'.$identifier;
                 $version = new $class();
 
-                self::$_versions[$key] = $version->RELEASE.'.'.$version->DEV_LEVEL;
+                $canonical = function($version) {
+                    if (isset($version->RELEASE)) {
+                        return 'v' . $version->RELEASE . '.' . $version->DEV_LEVEL;
+                    }
+
+                    // Joomla 3.5 and up uses constants instead of properties in JVersion
+                    $className = get_class($version);
+                    if (defined("$className::RELEASE")) {
+                        return $version::RELEASE . '.' . $version::DEV_LEVEL;
+                    }
+
+                    return 'unknown';
+                };
+
+                self::$_versions[$key] = $canonical($version);
             }
             else self::$_versions[$key] = false;
         }
-
+        
         return self::$_versions[$key];
     }
 
