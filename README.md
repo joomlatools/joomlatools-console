@@ -45,7 +45,7 @@ Installation
 
 ## Contributing
 
-Joomlatools Platform is an open source, community-driven project. Contributions are welcome from everyone. 
+Joomlatools Console is an open source, community-driven project. Contributions are welcome from everyone. 
 We have [contributing guidelines](CONTRIBUTING.md) to help you get started.
 
 ## Contributors
