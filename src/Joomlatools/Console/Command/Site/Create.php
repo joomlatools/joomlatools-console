@@ -143,6 +143,10 @@ EOF
         $this->download($input, $output);
         $this->addVirtualHost($input, $output);
 
+        if (!file_exists($this->target_dir)) {
+            `mkdir -p $this->target_dir`;
+        }
+
         if ($this->version != 'none')
         {
             $arguments = array(
