@@ -24,7 +24,7 @@ class Util
 
         if (!isset(self::$_versions[$key]))
         {
-            $code = $base . '/libraries/cms/version/version.php';
+            $code = self::buildTargetPath('/libraries/cms/version/version.php', $base);
 
             if (file_exists($code))
             {
@@ -47,11 +47,25 @@ class Util
                 $class   = 'JVersion'.$identifier;
                 $version = new $class();
 
-                self::$_versions[$key] = $version->RELEASE.'.'.$version->DEV_LEVEL;
+                $canonical = function($version) {
+                    if (isset($version->RELEASE)) {
+                        return 'v' . $version->RELEASE . '.' . $version->DEV_LEVEL;
+                    }
+
+                    // Joomla 3.5 and up uses constants instead of properties in JVersion
+                    $className = get_class($version);
+                    if (defined("$className::RELEASE")) {
+                        return $version::RELEASE . '.' . $version::DEV_LEVEL;
+                    }
+
+                    return 'unknown';
+                };
+
+                self::$_versions[$key] = $canonical($version);
             }
             else self::$_versions[$key] = false;
         }
-
+        
         return self::$_versions[$key];
     }
 
@@ -127,5 +141,29 @@ class Util
         }
 
         return $base.$path;
+    }
+
+    /**
+     * Determine if we are running from inside the Joomlatools Box environment.
+     * Only boxes >= 1.4.0 can be recognized.
+     *
+     * @return boolean true|false
+     */
+    public static function isJoomlatoolsBox()
+    {
+        if (php_uname('n') === 'joomlatools') {
+            return true;
+        }
+
+        // Support boxes that do not have the correct hostname set
+        $user = exec('whoami');
+        if (trim($user) == 'vagrant' && file_exists('/home/vagrant/scripts/dashboard/index.php'))
+        {
+            if (file_exists('/etc/varnish/default.vcl')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

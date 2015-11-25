@@ -132,8 +132,12 @@ class Versions extends Command
             unlink(self::$file);
         }
 
-        $result = `git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'`;
-        $refs   = explode(PHP_EOL, $result);
+        $cmd = "git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'";
+        exec($cmd, $refs, $returnVal);
+
+        if ($returnVal != 0) {
+            throw new \RuntimeException(sprintf('Failed to connect to repository %s. Check the repository URL and your internet connection and try again.', $this->repository));
+        }
 
         $versions = array();
         $pattern  = '/^[a-z0-9]+\s+refs\/(heads|tags)\/([a-z0-9\.\-_\/]+)$/im';
@@ -145,7 +149,7 @@ class Versions extends Command
 
                 if($matches[1] == 'tags')
                 {
-                    if($matches[2] == '1.7.3' || !preg_match('/^\d\.\d+/m', $matches[2])) {
+                    if($matches[2] == '1.7.3' || !preg_match('/^v?\d\.\d+/m', $matches[2])) {
                         continue;
                     }
                 }
@@ -169,6 +173,13 @@ class Versions extends Command
         }
 
         $list = json_decode(file_get_contents(self::$file), true);
+
+        if (is_null($list))
+        {
+            $this->refresh();
+            $list = json_decode(file_get_contents(self::$file), true);
+        }
+
         $list = array_reverse($list, true);
 
         return $list;
@@ -183,17 +194,27 @@ class Versions extends Command
             return 'master';
         }
 
+        $major = $prefix;
+        if (!is_null($major) && substr($major, 0, 1) == 'v') {
+            $major = substr($major, 1);
+        }
+
         foreach($versions['tags'] as $version)
         {
-            if(!preg_match('/\d\.\d+\.\d+.*/im', $version) || preg_match('#(?:alpha|beta|rc)#i', $version)) {
+            if(!preg_match('/v?\d\.\d+\.\d+.*/im', $version) || preg_match('#(?:alpha|beta|rc)#i', $version)) {
                 continue;
             }
 
-            if(!is_null($prefix) && substr($version, 0, strlen($prefix)) != $prefix) {
+            $compare = $version;
+            if (substr($compare, 0, 1) == 'v') {
+                $compare = substr($compare, 1);
+            }
+
+            if(!is_null($major) && substr($compare, 0, strlen($major)) != $major) {
                 continue;
             }
 
-            if(version_compare($latest, strtolower($version), '<')) {
+            if(version_compare($latest, strtolower($compare), '<')) {
                 $latest = $version;
             }
         }
@@ -210,5 +231,12 @@ class Versions extends Command
         $versions = $this->_getVersions();
 
         return in_array($version, $versions['heads']);
+    }
+
+    public function isTag($version)
+    {
+        $versions = $this->_getVersions();
+
+        return in_array($version, $versions['tags']);
     }
 }

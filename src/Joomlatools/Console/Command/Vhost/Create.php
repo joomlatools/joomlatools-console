@@ -30,7 +30,7 @@ class Create extends AbstractSite
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTP port the virtual host should listen to',
-                (php_uname('n') === 'joomlatools' ? 8080 : 80)
+                (Util::isJoomlatoolsBox() ? 8080 : 80)
             )
             ->addOption(
                 'disable-ssl',

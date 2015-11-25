@@ -14,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Database;
 use Joomlatools\Console\Command\Vhost;
+use Joomlatools\Console\Joomla\Util;
 
 class Create extends Database\AbstractDatabase
 {
@@ -41,14 +42,14 @@ class Create extends Database\AbstractDatabase
             ->setHelp(<<<EOF
 To create a site with the latest Joomla version, run:
 
-   <info>joomla site:create foobar</info>
+    <info>joomla site:create foobar</info>
 
 The newly installed site will be available at <comment>/var/www/foobar</comment> and <comment>foobar.dev</comment> after that. You can login into your fresh Joomla installation using these credentials: admin/admin.
 By default, the web server root is set to <comment>/var/www</comment>. You can pass <comment>–www=/my/server/path</comment> to commands for custom values.
 
 You can choose the Joomla version or the sample data to be installed. A more elaborate example:
 
-   <info>joomla site:create testsite --joomla=2.5 --sample-data=blog</info>
+    <info>joomla site:create testsite --release=2.5 --sample-data=blog</info>
 EOF
     )
             ->addOption(
@@ -94,7 +95,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTP port the virtual host should listen to',
-                (php_uname('n') === 'joomlatools' ? 8080 : 80)
+                (Util::isJoomlatoolsBox() ? 8080 : 80)
             )
             ->addOption(
                 'disable-ssl',
@@ -139,10 +140,12 @@ EOF
 
         $this->check($input, $output);
 
-        `mkdir -p $this->target_dir`;
-
         $this->download($input, $output);
         $this->addVirtualHost($input, $output);
+
+        if (!file_exists($this->target_dir)) {
+            `mkdir -p $this->target_dir`;
+        }
 
         if ($this->version != 'none')
         {

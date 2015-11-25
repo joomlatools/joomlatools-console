@@ -90,8 +90,14 @@ class Download extends AbstractSite
         if ($this->version != 'none')
         {
             $tarball = $this->_getTarball($output);
-            if(!file_exists($tarball)) {
-                throw new \RuntimeException(sprintf('File %s does not exist', $tarball));
+
+            if (!$this->_isValidTarball($tarball))
+            {
+                if (file_exists($tarball)) {
+                    unlink($tarball);
+                }
+
+                throw new \RuntimeException(sprintf('Downloaded tarball "%s" could not be verified. A common cause is an interrupted download: check your internet connection and try again.', basename($tarball)));
             }
 
             if (!file_exists($this->target_dir)) {
@@ -134,7 +140,11 @@ class Download extends AbstractSite
         elseif ($version != 'none')
         {
             $length = strlen($version);
-            $format = is_numeric($version) || preg_match('/^\d\.\d+$/im', $version);
+            $format = is_numeric($version) || preg_match('/^v?\d(\.\d+)?$/im', $version);
+
+            if (substr($version, 0, 1) == 'v') {
+                $length--;
+            }
 
             if ( ($length == 1 || $length == 3) && $format)
             {
@@ -142,6 +152,24 @@ class Download extends AbstractSite
 
                 if($result == '0.0.0') {
                     $result = $version.($length == 1 ? '.0.0' : '.0');
+                }
+            }
+        }
+
+        if (!$this->versions->isBranch($result))
+        {
+            $isTag = $this->versions->isTag($result);
+
+            if (!$isTag)
+            {
+                $original = $result;
+                if (substr($original, 0, 1) == 'v') {
+                    $result = substr($original, 1);
+                }
+                else $result = 'v' . $original;
+
+                if (!$this->versions->isTag($result)) {
+                    throw new \RuntimeException(sprintf('Failed to find tag or branch "%s". Please refresh the version list first: `joomla versions --refresh`', $original));
                 }
             }
         }
@@ -210,14 +238,40 @@ class Download extends AbstractSite
         if ($this->versions->isBranch($this->version)) {
             $url = 'http://github.com/joomla/joomla-cms/tarball/'.$this->version;
         }
-        else {
-            $url = 'https://github.com/joomla/joomla-cms/archive/'.$this->version.'.tar.gz';
-        }
-
+        else $url = 'https://github.com/joomla/joomla-cms/archive/'.$this->version.'.tar.gz';
 
         $bytes = file_put_contents($target, fopen($url, 'r'));
         if ($bytes === false || $bytes == 0) {
             return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate the given gzipped tarball
+     *
+     * @param $file
+     * @return bool
+     */
+    protected function _isValidTarball($file)
+    {
+        if (!file_exists($file)) {
+            return false;
+        }
+
+        $commands = array(
+            "gunzip -t $file",
+            "tar -tzf $file >/dev/null"
+        );
+
+        foreach ($commands as $command)
+        {
+            exec($command, $output, $returnVal);
+
+            if ($returnVal != 0) {
+                return false;
+            }
         }
 
         return true;
