@@ -7,6 +7,13 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomla-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomla-console/compare/v1.0.0...v1.0.1
 
+* 1.4.3 (2015-11-25)
+ * Added - Support [Joomlatools Platform](http://github.com/joomlatools/joomla-platform) release tags
+ * Improved - Prevent creation of empty site when downloading Joomla codebase fails
+ * Improved - Verify list of branches and tags and throw exception if failed to update
+ * Fixed - `site:create` documentation mentioned `--joomla` flag instead of `--release`
+ * Fixed - Reading version number from Joomla CMS 3.5.x was broken due to changes in `JVersion` class
+
 * 1.4.2 (2015-11-05)
  * Added - `--http-port` flag to `site:create` command
  * Improved - Command help descriptions
@@ -26,7 +33,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Added - `finder:index`, `finder:purge`: commands to build and purge com_finder indexes
  * Added - `extension:enable`, `extension:disable`: ability to enable and/or disable extensions
  * Added - Interactive mode (prompts for configuration details) 
- * Improved - Implemented support for [joomla-platform](http://github.com/joomlatools/joomla-platform)
+ * Improved - Implemented support for [Joomlatools Platform](http://github.com/joomlatools/joomla-platform)
  * Improved - Decoupled the various installation steps into separate commands (#5)
  * Improved - Symlinker logic is now extendible using plugins.
  * Improved - Ability to install from a different repository instead of the joomla/joomla-cms
