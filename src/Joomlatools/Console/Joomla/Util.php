@@ -142,4 +142,28 @@ class Util
 
         return $base.$path;
     }
+
+    /**
+     * Determine if we are running from inside the Joomlatools Box environment.
+     * Only boxes >= 1.4.0 can be recognized.
+     *
+     * @return boolean true|false
+     */
+    public static function isJoomlatoolsBox()
+    {
+        if (php_uname('n') === 'joomlatools') {
+            return true;
+        }
+
+        // Support boxes that do not have the correct hostname set
+        $user = exec('whoami');
+        if (trim($user) == 'vagrant' && file_exists('/home/vagrant/scripts/dashboard/index.php'))
+        {
+            if (file_exists('/etc/varnish/default.vcl')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
