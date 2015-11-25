@@ -29,7 +29,7 @@ class Util
             if (file_exists($code))
             {
                 if (!defined('JPATH_PLATFORM')) {
-                    define('JPATH_PLATFORM', $base.'/libraries');
+                    define('JPATH_PLATFORM', self::buildTargetPath('/libraries', $base));
                 }
 
                 if (!defined('_JEXEC')) {
