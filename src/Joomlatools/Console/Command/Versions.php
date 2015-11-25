@@ -194,17 +194,27 @@ class Versions extends Command
             return 'master';
         }
 
+        $major = $prefix;
+        if (!is_null($major) && substr($major, 0, 1) == 'v') {
+            $major = substr($major, 1);
+        }
+
         foreach($versions['tags'] as $version)
         {
-            if(!preg_match('/\d\.\d+\.\d+.*/im', $version) || preg_match('#(?:alpha|beta|rc)#i', $version)) {
+            if(!preg_match('/v?\d\.\d+\.\d+.*/im', $version) || preg_match('#(?:alpha|beta|rc)#i', $version)) {
                 continue;
             }
 
-            if(!is_null($prefix) && substr($version, 0, strlen($prefix)) != $prefix) {
+            $compare = $version;
+            if (substr($compare, 0, 1) == 'v') {
+                $compare = substr($compare, 1);
+            }
+
+            if(!is_null($major) && substr($compare, 0, strlen($major)) != $major) {
                 continue;
             }
 
-            if(version_compare($latest, strtolower($version), '<')) {
+            if(version_compare($latest, strtolower($compare), '<')) {
                 $latest = $version;
             }
         }
@@ -221,5 +231,12 @@ class Versions extends Command
         $versions = $this->_getVersions();
 
         return in_array($version, $versions['heads']);
+    }
+
+    public function isTag($version)
+    {
+        $versions = $this->_getVersions();
+
+        return in_array($version, $versions['tags']);
     }
 }
