@@ -90,8 +90,14 @@ class Download extends AbstractSite
         if ($this->version != 'none')
         {
             $tarball = $this->_getTarball($output);
-            if(!file_exists($tarball)) {
-                throw new \RuntimeException(sprintf('File %s does not exist', $tarball));
+
+            if (!$this->_isValidTarball($tarball))
+            {
+                if (file_exists($tarball)) {
+                    unlink($tarball);
+                }
+
+                throw new \RuntimeException(sprintf('Downloadeded tarball "%s" could not be verified. A common cause is an interrupted download: check your internet connection and try again.', basename($tarball)));
             }
 
             if (!file_exists($this->target_dir)) {
@@ -214,10 +220,38 @@ class Download extends AbstractSite
             $url = 'https://github.com/joomla/joomla-cms/archive/'.$this->version.'.tar.gz';
         }
 
-
         $bytes = file_put_contents($target, fopen($url, 'r'));
         if ($bytes === false || $bytes == 0) {
             return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate the given gzipped tarball
+     *
+     * @param $file
+     * @return bool
+     */
+    protected function _isValidTarball($file)
+    {
+        if (!file_exists($file)) {
+            return false;
+        }
+
+        $commands = array(
+            "gunzip -t $file",
+            "tar -tzf $file >/dev/null"
+        );
+
+        foreach ($commands as $command)
+        {
+            exec($command, $output, $returnVal);
+
+            if ($returnVal != 0) {
+                return false;
+            }
         }
 
         return true;

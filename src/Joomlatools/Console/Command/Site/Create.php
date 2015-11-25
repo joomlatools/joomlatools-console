@@ -140,8 +140,6 @@ EOF
 
         $this->check($input, $output);
 
-        `mkdir -p $this->target_dir`;
-
         $this->download($input, $output);
         $this->addVirtualHost($input, $output);
 
