@@ -145,7 +145,7 @@ class Versions extends Command
 
                 if($matches[1] == 'tags')
                 {
-                    if($matches[2] == '1.7.3' || !preg_match('/^\d\.\d+/m', $matches[2])) {
+                    if($matches[2] == '1.7.3' || !preg_match('/^v?\d\.\d+/m', $matches[2])) {
                         continue;
                     }
                 }
