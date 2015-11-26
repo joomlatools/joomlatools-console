@@ -1,3 +1,5 @@
+![Screenshot](/screenshot.png?raw=true)
+
 [Joomlatools Console]
 =====================
 
@@ -45,14 +47,14 @@ Installation
 
 ## Contributing
 
-Joomlatools Console is an open source, community-driven project. Contributions are welcome from everyone. 
+Joomlatools Console is an open source, community-driven project. Contributions are welcome from everyone.
 We have [contributing guidelines](CONTRIBUTING.md) to help you get started.
 
 ## Contributors
 
 See the list of [contributors](https://github.com/joomlatools/joomla-console/contributors).
 
-## License 
+## License
 
 Joomlatools Console is free and open-source software licensed under the [MPLv2 license](LICENSE.txt).
 
