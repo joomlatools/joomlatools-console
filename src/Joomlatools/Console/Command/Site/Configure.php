@@ -122,7 +122,7 @@ class Configure extends AbstractDatabase
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
-            'host'      => $this->mysql->host,
+            'host'      => $this->mysql->host.':'.$this->mysql->port,
             'dbprefix'  => 'j_',
             'dbtype'    => $this->mysql->driver,
 
@@ -170,7 +170,7 @@ class Configure extends AbstractDatabase
             'JOOMLA_DB_NAME' => $this->target_db,
             'JOOMLA_DB_USER' => $this->mysql->user,
             'JOOMLA_DB_PASS' => $this->mysql->password,
-            'JOOMLA_DB_HOST' => $this->mysql->host,
+            'JOOMLA_DB_HOST' => $this->mysql->host.':'.$this->mysql->port,
             'JOOMLA_DB_TYPE' => $this->mysql->driver,
 
             'JOOMLA_LOG_PATH' => $this->_default_values['log_path'],

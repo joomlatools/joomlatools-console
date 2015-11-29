@@ -39,6 +39,13 @@ abstract class AbstractDatabase extends AbstractSite
             'localhost'
         )
         ->addOption(
+            'mysql-port',
+            'P',
+            InputOption::VALUE_REQUIRED,
+            "MySQL port",
+            3306
+        )
+        ->addOption(
             'mysql_db_prefix',
             null,
             InputOption::VALUE_REQUIRED,
@@ -83,6 +90,7 @@ abstract class AbstractDatabase extends AbstractSite
             'user'     => $credentials[0],
             'password' => $credentials[1],
             'host'     => $input->getOption('mysql-host'),
+            'port'     => (int) $input->getOption('mysql-port'),
             'driver'   => strtolower($input->getOption('mysql-driver'))
         );
 
@@ -94,7 +102,7 @@ abstract class AbstractDatabase extends AbstractSite
     protected function _executeSQL($query)
     {
         $password = empty($this->mysql->password) ? '' : sprintf("--password='%s'", $this->mysql->password);
-        $cmd      = sprintf("echo '$query' | mysql --host=%s --user='%s' %s", $this->mysql->host, $this->mysql->user, $password);
+        $cmd      = sprintf("echo '$query' | mysql --host=%s --port=%u --user='%s' %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password);
 
         return exec($cmd);
     }
@@ -104,6 +112,7 @@ abstract class AbstractDatabase extends AbstractSite
         $this->mysql->user     = $this->_ask($input, $output, 'MySQL user', $this->mysql->user, true);
         $this->mysql->password = $this->_ask($input, $output, 'MySQL password', $this->mysql->password, true, true);
         $this->mysql->host     = $this->_ask($input, $output, 'MySQL host', $this->mysql->host, true);
+        $this->mysql->port     = (int) $this->_ask($input, $output, 'MySQL port', $this->mysql->port, true);
         $this->mysql->driver   = $this->_ask($input, $output, 'MySQL driver', array('mysqli', 'mysql'), true);
 
         $output->writeln('Choose the database name. We will attempt to create it if it does not exist.');
@@ -111,6 +120,7 @@ abstract class AbstractDatabase extends AbstractSite
 
         $input->setOption('mysql-login', $this->mysql->user . ':' . $this->mysql->password);
         $input->setOption('mysql-host', $this->mysql->host);
+        $input->setOption('mysql-port', $this->mysql->port);
         $input->setOption('mysql-database', $this->target_db);
         $input->setOption('mysql-driver', $this->mysql->driver);
     }
