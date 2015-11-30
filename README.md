@@ -1,9 +1,9 @@
-Joomla Command Line Tools
-=========================
+![Screenshot](/screenshot.png?raw=true)
 
-This is a script developed by [Joomlatools](http://joomlatools.com) to ease the management of Joomla sites.
+[Joomlatools Console]
+=====================
 
-It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Vagrant box](https://github.com/joomlatools/joomla-vagrant)
+This is a script developed by [Joomlatools](http://joomlatools.com) to ease the management of Joomla sites. It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Vagrant box](https://github.com/joomlatools/joomla-vagrant)
 
 Installation
 ------------
@@ -47,12 +47,24 @@ Installation
 
 ## Contributing
 
-Fork the project, create a feature branch from the develop branch, and send us a pull request. We do not accept pull requests against the master branch.
+Joomlatools Console is an open source, community-driven project. Contributions are welcome from everyone.
+We have [contributing guidelines](CONTRIBUTING.md) to help you get started.
 
-## Authors
+## Contributors
 
 See the list of [contributors](https://github.com/joomlatools/joomlatools-console/contributors).
 
 ## License
 
-The `joomlatools/joomla-console` plugin is licensed under the MPL v2 license - see the LICENSE file for details.
+Joomlatools Console is free and open-source software licensed under the [MPLv2 license](LICENSE.txt).
+
+## Community
+
+Keep track of development and community news.
+
+* Follow [@joomlatoolsdev on Twitter](https://twitter.com/joomlatoolsdev)
+* Join [joomlatools/dev on Gitter](http://gitter.im/joomlatools/dev)
+* Read the [Joomlatools Developer Blog](http://developer.joomlatools.com/blog/)
+* Subscribe to the [Joomlatools Developer Newsletter](http://developer.joomlatools.com/newsletter)
+
+[Joomlatools Console]: http://developer.joomlatools.com/console
