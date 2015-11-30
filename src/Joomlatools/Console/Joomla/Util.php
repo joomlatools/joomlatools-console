@@ -70,7 +70,7 @@ class Util
     }
 
     /**
-     * Checks if we are dealing with joomlatools/joomla-platform or not
+     * Checks if we are dealing with joomlatools/platform or not
      *
      * @param string $base Base path for the Joomla installation
      * @return boolean
@@ -84,7 +84,7 @@ class Util
             $contents = file_get_contents($manifest);
             $package  = json_decode($contents);
 
-            if ($package->name == 'joomlatools/joomla-platform') {
+            if ($package->name == 'joomlatools/platform') {
                 return true;
             }
         }

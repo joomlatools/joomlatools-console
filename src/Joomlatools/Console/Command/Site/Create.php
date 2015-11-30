@@ -75,7 +75,7 @@ EOF
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.'
+                'Alternative Git repository to clone. To use joomlatools/platform, use --repo=platform.'
             )
             ->addOption(
                 'clear-cache',

@@ -9,6 +9,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
 
 * 1.4.4 (2015-11-30)
  * Improved - Renamed package to `joomlatools/console`, moved repository to `joomlatools/joomlatools-console`. 
+ * Improved - Renamed `joomlatools/joomla-platform` package to `joomlatools/platform`.
 
 * 1.4.3 (2015-11-25)
  * Added - Support [Joomlatools Platform](http://github.com/joomlatools/joomla-platform) release tags
