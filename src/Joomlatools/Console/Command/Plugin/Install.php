@@ -2,7 +2,7 @@
 /**
  * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
- * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
+ * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
 
 namespace Joomlatools\Console\Command\Plugin;
@@ -20,7 +20,7 @@ class Install extends Command
              ->setDescription('Install plugin')
             ->setHelp(<<<EOF
 You can install plugins into the Joomla Console to add new commands or extend the symlinking logic. Plugins are installed using Composer and must be available on Packagist.
-You then pass their package name to this command. In the case of our example, the package name is <comment>joomlatools/joomla-console-backup</comment>:
+You then pass their package name to this command. In the case of our example, the package name is <comment>joomlatools/console-backup</comment>:
 
   <info>joomla plugin:install joomlatools/console-backup</info>
 
@@ -88,7 +88,7 @@ EOF
             }
         }
 
-        if ($type != 'joomla-console-plugin')
+        if ($type != 'joomlatools-console-plugin')
         {
             $output->writeln("<comment>$package is not a Joomla console plugin</comment>");
             $output->writeln('<error>Plugin not installed</error>');

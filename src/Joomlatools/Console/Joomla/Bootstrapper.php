@@ -2,7 +2,7 @@
 /**
  * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
- * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
+ * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
 
 namespace Joomlatools\Console\Joomla;
@@ -64,7 +64,7 @@ class Bootstrapper
         if (!class_exists('\\JApplicationCli'))
         {
             $_SERVER['HTTP_HOST'] = 'localhost';
-            $_SERVER['HTTP_USER_AGENT'] = 'joomla-console/' . \Joomlatools\Console\Application::VERSION;
+            $_SERVER['HTTP_USER_AGENT'] = 'joomlatools-console/' . \Joomlatools\Console\Application::VERSION;
 
             if (!defined('_JEXEC')) {
                 define('_JEXEC', 1);

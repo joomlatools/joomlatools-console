@@ -4,14 +4,15 @@ CHANGELOG
 This changelog references the relevant changes (bug and security fixes) done
 in 1.x versions.
 
-To get the diff for a specific change, go to https://github.com/joomlatools/joomla-console/commit/xxx where xxx is the change hash.
-To view the diff between two versions, go to https://github.com/joomlatools/joomla-console/compare/v1.0.0...v1.0.1
+To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
+To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
 * 1.4.4 (2015-11-30)
- * Improved - Renamed package to `joomlatools/console`, moved repository to `joomlatools/joomlatools-console`. 
+ * Improved - Renamed package to `joomlatools/console`, moved repository to `joomlatools/joomlatools-console`.
+ * Improved - Renamed `joomlatools/joomla-platform` package to `joomlatools/platform`.
 
 * 1.4.3 (2015-11-25)
- * Added - Support [Joomlatools Platform](http://github.com/joomlatools/joomla-platform) release tags
+ * Added - Support [Joomlatools Platform](http://github.com/joomlatools/joomlatools-platform) release tags
  * Improved - Prevent creation of empty site when downloading Joomla codebase fails
  * Improved - Verify list of branches and tags and throw exception if failed to update
  * Fixed - `site:create` documentation mentioned `--joomla` flag instead of `--release`
@@ -35,8 +36,8 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Added - `extension:uninstall`: Uninstall command to remove extensions
  * Added - `finder:index`, `finder:purge`: commands to build and purge com_finder indexes
  * Added - `extension:enable`, `extension:disable`: ability to enable and/or disable extensions
- * Added - Interactive mode (prompts for configuration details) 
- * Improved - Implemented support for [Joomlatools Platform](http://github.com/joomlatools/joomla-platform)
+ * Added - Interactive mode (prompts for configuration details)
+ * Improved - Implemented support for [Joomlatools Platform](http://github.com/joomlatools/joomlatools-platform)
  * Improved - Decoupled the various installation steps into separate commands (#5)
  * Improved - Symlinker logic is now extendible using plugins.
  * Improved - Ability to install from a different repository instead of the joomla/joomla-cms

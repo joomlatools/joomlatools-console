@@ -2,7 +2,7 @@
 /**
  * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
- * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
+ * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
 
 namespace Joomlatools\Console\Command;
@@ -55,7 +55,7 @@ class Versions extends Command
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. To use joomlatools/joomla-platform, use --repo=platform.',
+                'Alternative Git repository to clone. To use joomlatools/platform, use --repo=platform.',
                 $this->repository
             );
     }
@@ -90,7 +90,7 @@ class Versions extends Command
     public function setRepository($repository)
     {
         if ($repository == 'platform') {
-            $repository = 'git@github.com:joomlatools/joomla-platform.git';
+            $repository = 'git@github.com:joomlatools/joomlatools-platform.git';
         }
 
         $this->repository = $repository;
