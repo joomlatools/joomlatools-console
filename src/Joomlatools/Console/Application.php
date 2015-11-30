@@ -7,7 +7,7 @@ use Symfony\Component\Console\Output;
 class Application extends \Symfony\Component\Console\Application
 {
     /**
-     * joomla-console version
+     * joomlatools/console version
      *
      * @var string
      */
