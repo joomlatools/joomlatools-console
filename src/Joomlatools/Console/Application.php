@@ -188,7 +188,7 @@ class Application extends \Symfony\Component\Console\Application
                         continue;
                     }
 
-                    if (isset($manifest->type) && $manifest->type == 'joomla-console-plugin') {
+                    if (isset($manifest->type) && $manifest->type == 'joomlatools-console-plugin') {
                         $this->_plugins[$package] = $version;
                     }
                 }

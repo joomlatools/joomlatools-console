@@ -10,7 +10,7 @@ Installation
 
 1. Install using Composer:
 
- `$ composer global require joomlatools/joomla-console`
+ `$ composer global require joomlatools/console`
 
 1. Tell your system where to find the executable by adding the composer directory to your PATH. Add the following line to your shell configuration file called either .profile, .bash_profile, .bash_aliases, or .bashrc. This file is located in your home folder.
 
@@ -51,7 +51,7 @@ Fork the project, create a feature branch from the develop branch, and send us a
 
 ## Authors
 
-See the list of [contributors](https://github.com/joomlatools/joomla-console/contributors).
+See the list of [contributors](https://github.com/joomlatools/joomlatools-console/contributors).
 
 ## License
 
