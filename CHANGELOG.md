@@ -8,6 +8,7 @@ To get the diff for a specific change, go to https://github.com/joomlatools/joom
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
 * 1.4.4 (2015-11-30)
+ * Added - Add `--mysql-port` configuration option #8
  * Improved - Renamed package to `joomlatools/console`, moved repository to `joomlatools/joomlatools-console`.
  * Improved - Renamed `joomlatools/joomla-platform` package to `joomlatools/platform`.
 
