@@ -1,10 +1,10 @@
 {
-    "name": "joomlatools/joomla-console",
+    "name": "joomlatools/console",
     "type": "project",
     "license": "MPLv2",
     "description": "This command-line script helps to ease the management of Joomla sites in your development environment.",
     "keywords": ["joomla", "console", "tools"],
-    "homepage": "https://github.com/joomlatools/joomla-console",
+    "homepage": "https://github.com/joomlatools/joomlatools-console",
     "authors": [
         {
             "name": "Joomlatools",

@@ -11,7 +11,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @var string
      */
-    const VERSION = '1.4.3';
+    const VERSION = '1.4.4';
 
     /**
      * Application name
@@ -188,7 +188,7 @@ class Application extends \Symfony\Component\Console\Application
                         continue;
                     }
 
-                    if (isset($manifest->type) && $manifest->type == 'joomla-console-plugin') {
+                    if (isset($manifest->type) && $manifest->type == 'joomlatools-console-plugin') {
                         $this->_plugins[$package] = $version;
                     }
                 }
