@@ -3,7 +3,7 @@
 [Joomlatools Console]
 =====================
 
-This is a script developed by [Joomlatools](http://joomlatools.com) to ease the management of Joomla sites. It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Vagrant box](https://github.com/joomlatools/joomla-vagrant)
+[Joomlatools Console](http://www.joomlatools.com/developer/tools/console/) simplifies the management of Joomla sites. It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Vagrant box](http://www.joomlatools.com/developer/tools/vagrant/).
 
 Installation
 ------------
@@ -38,7 +38,7 @@ Installation
 
   `$ joomla --list`
 
-1. Read our [documentation pages](http://developer.joomlatools.com/tools/console/usage.html) to learn more about using the tool.
+1. Read our [documentation pages](http://www.joomlatools.com/developer/tools/console/) to learn more about using the tool.
 
 ## Requirements
 
@@ -64,7 +64,7 @@ Keep track of development and community news.
 
 * Follow [@joomlatoolsdev on Twitter](https://twitter.com/joomlatoolsdev)
 * Join [joomlatools/dev on Gitter](http://gitter.im/joomlatools/dev)
-* Read the [Joomlatools Developer Blog](http://developer.joomlatools.com/blog/)
-* Subscribe to the [Joomlatools Developer Newsletter](http://developer.joomlatools.com/newsletter)
+* Read the [Joomlatools Developer Blog](http://www.joomlatools.com/developer/blog/)
+* Subscribe to the [Joomlatools Developer Newsletter](http://www.joomlatools.com/developer/newsletter/)
 
-[Joomlatools Console]: http://developer.joomlatools.com/console
+[Joomlatools Console]: http://www.joomlatools.com/developer/tools/console/
