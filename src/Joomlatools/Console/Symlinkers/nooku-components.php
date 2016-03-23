@@ -30,13 +30,20 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
         return true;
     }
 
-    $component = 'com_'.$manifest->{'nooku-component'}->name;
+    $component   = $manifest->{'nooku-component'}->name;
+    $code_folder = Util::buildTargetPath('/libraries/joomlatools/component', $destination);
+
+    // Old folder structure
+    if (!is_dir($code_folder)) {
+        $component   = 'com_'.$component;
+        $code_folder = Util::buildTargetPath('/libraries/koowa/components', $destination);
+    }
 
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
         $output->writeln("Symlinking `$component` into `$destination`");
     }
 
-    $dirs = array(Util::buildTargetPath('/libraries/koowa/components', $destination), Util::buildTargetPath('/media/koowa', $destination));
+    $dirs = array($code_folder, Util::buildTargetPath('/media/koowa', $destination));
     foreach ($dirs as $dir)
     {
         if (!is_dir($dir))
@@ -49,7 +56,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
         }
     }
 
-    $code_destination = Util::buildTargetPath('/libraries/koowa/components/'.$component, $destination);
+    $code_destination = $code_folder.'/'.$component;
 
     if (!file_exists($code_destination))
     {
