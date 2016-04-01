@@ -67,6 +67,11 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
         `ln -sf $project $code_destination`;
     }
 
+    // Media folder always has com_ prefix
+    if (substr($component, 0, 4) !== 'com_') {
+        $component = 'com_'.$component;
+    }
+
     // Special treatment for media files
     $media = $project.'/resources/assets';
     $target = Util::buildTargetPath('/media/koowa/'.$component, $destination);
