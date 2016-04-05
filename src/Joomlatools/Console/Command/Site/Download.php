@@ -132,12 +132,18 @@ class Download extends AbstractSite
 
     public function setVersion($version)
     {
+        if ($version == 'none')
+        {
+            $this->version = $version;
+            return;
+        }
+
         $result = strtolower($version);
 
         if (strtolower($version) === 'latest') {
             $result = $this->versions->getLatestRelease();
         }
-        elseif ($version != 'none')
+        else
         {
             $length = strlen($version);
             $format = is_numeric($version) || preg_match('/^v?\d(\.\d+)?$/im', $version);
@@ -156,7 +162,7 @@ class Download extends AbstractSite
             }
         }
 
-        if (!$this->versions->isBranch($result) && $version != 'none')
+        if (!$this->versions->isBranch($result))
         {
             $isTag = $this->versions->isTag($result);
 
