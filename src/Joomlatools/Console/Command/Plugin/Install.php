@@ -63,7 +63,7 @@ EOF
         }
         else list($name, $version) = explode(':', $package);
 
-        exec("composer show $name $version 2>&1", $result, $code);
+        exec("composer show --all $name $version 2>&1", $result, $code);
 
         if ($code === 1)
         {
