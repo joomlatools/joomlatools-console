@@ -271,9 +271,14 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Determine the location where joomlatools-console can store cache files.
      *
-     * @return string Directory path. Ex: "/home/myuser/.cache/joomlatools-console".
+     * @param string|NULL $item
+     *    An optional item to lookup within the cache. Ex: "widgets.json"
+     * @return string
+     *    Directory path.
+     *    Ex: "/home/myuser/.cache/joomlatools-console"
+     *    Ex: "/home/myuser/.cache/joomlatools-console/widgets.json"
      */
-    public function getCacheDir()
+    public function getCachePath($item = NULL)
     {
         $home = strpos(PHP_OS, 'WIN') !== FALSE ? getenv('USERPROFILE') : getenv('HOME');
         $dataDir = "$home/.cache/joomlatools-console";
@@ -287,7 +292,7 @@ class Application extends \Symfony\Component\Console\Application
                 throw new \RuntimeException("Failed to find or initialize data dir ($dir)");
             }
         }
-        return $dataDir;
+        return ($item === NULL) ? $dataDir : $dataDir . '/' . $item;
     }
 
 }

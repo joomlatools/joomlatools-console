@@ -231,7 +231,6 @@ class Versions extends Command
      * @return string
      */
     protected function getVersionsFile() {
-        return realpath($this->getApplication()->getCacheDir())
-        . '/' . md5($this->repository) . '/.versions';
+        return $this->getApplication()->getCachePath(md5($this->repository) . '/.versions');
     }
 }
