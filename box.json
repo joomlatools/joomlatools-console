@@ -1,0 +1,28 @@
+{
+    "chmod": "0755",
+    "directories": [
+        "src"
+    ],
+    "finder": [
+        {
+            "name": "*.php",
+            "exclude": [
+              "phpunit",
+              "Tests", "Test", "tests", "test"
+            ],
+            "in": "vendor"
+        },
+        {
+            "name": "*",
+            "exclude": [
+              "cache"
+            ],
+            "in": "bin/.files"
+        }
+
+    ],
+    "git-version": "package_version",
+    "main": "bin/joomla",
+    "output": "bin/joomla.phar",
+    "stub": true
+}
