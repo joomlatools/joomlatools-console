@@ -250,4 +250,37 @@ class Application extends \Symfony\Component\Console\Application
             }
         }
     }
+
+    /**
+     * Determine the location where joomlatools-console static data files.
+     *
+     * @return string
+     */
+    public function getDataDir()
+    {
+        return dirname(dirname(dirname(__DIR__))) . '/bin/.files';
+    }
+
+    /**
+     * Determine the location where joomlatools-console can store cache files.
+     *
+     * @return string Directory path. Ex: "/home/myuser/.cache/joomlatools-console".
+     */
+    public function getCacheDir()
+    {
+        $home = strpos(PHP_OS, 'WIN') !== FALSE ? getenv('USERPROFILE') : getenv('HOME');
+        $dataDir = "$home/.cache/joomlatools-console";
+        foreach (array(dirname($dataDir), $dataDir) as $dir) {
+            if (!file_exists($dir))
+            {
+                mkdir($dir);
+            }
+            if (!is_dir($dir) || !is_writable($dir))
+            {
+                throw new \RuntimeException("Failed to find or initialize data dir ($dir)");
+            }
+        }
+        return $dataDir;
+    }
+
 }
