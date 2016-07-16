@@ -254,11 +254,18 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Determine the location where joomlatools-console static data files.
      *
+     * @param string|NULL $item
+     *    An optional item to lookup within the cache. Ex: "widgets.json"
      * @return string
      */
-    public function getDataDir()
+    public function getDataPath($item = NULL)
     {
-        return dirname(dirname(dirname(__DIR__))) . '/bin/.files';
+        // This doesn't need to be limited to a single folder. For example,
+        // when loading `joomla3.users.sql`, one could do a prioritized
+        // search -- eg '~/.joomlatools-console' then '/etc/joomlatools-console'
+        // then '/usr/share/joomlatools-console'
+        $dir = dirname(dirname(dirname(__DIR__))) . '/bin/.files';
+        return ($item === NULL) ? $dir : $dir . '/' . $item;
     }
 
     /**

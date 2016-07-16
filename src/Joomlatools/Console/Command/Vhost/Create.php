@@ -70,10 +70,9 @@ class Create extends AbstractSite
         {
             $site = $input->getArgument('site');
             $port = $input->getOption('http-port');
-            $path = $this->getApplication()->getDataDir() . '/';
             $tmp  = '/tmp/vhost.tmp';
 
-            $template     = file_get_contents($path.'/vhost.conf');
+            $template     = file_get_contents($this->getApplication()->getDataPath('vhost.conf'));
             $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
             file_put_contents($tmp, sprintf($template, $site, $documentroot, $port));
@@ -86,7 +85,7 @@ class Create extends AbstractSite
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
-                    $template = "\n\n" . file_get_contents($path.'/vhost.ssl.conf');
+                    $template = "\n\n" . file_get_contents($this->getApplication()->getDataPath('vhost.ssl.conf'));
                     file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
                 else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');

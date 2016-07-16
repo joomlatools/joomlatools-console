@@ -170,7 +170,7 @@ class Install extends AbstractDatabase
                 $users = 'joomla2.users.sql';
             }
 
-            $imports[] = $this->getApplication()->getDataDir().'/'.$users;
+            $imports[] = $this->getApplication()->getDataPath($users);
         }
 
         foreach ($imports as $import)
