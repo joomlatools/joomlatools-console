@@ -17,13 +17,6 @@ use Symfony\Component\Console\Helper\TableHelper;
 class Versions extends Command
 {
     /**
-     * Cache file
-     *
-     * @var string
-     */
-    protected static $file;
-
-    /**
      * Git repository to use
      *
      * @var string
@@ -32,10 +25,6 @@ class Versions extends Command
 
     protected function configure()
     {
-        if (!self::$file) {
-            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
-        }
-
         $this
             ->setName('versions')
             ->setDescription('Show available versions in Joomla Git repository')
@@ -94,8 +83,6 @@ class Versions extends Command
         }
 
         $this->repository = $repository;
-
-        self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
     }
 
     public function getRepository()
@@ -105,7 +92,7 @@ class Versions extends Command
 
     public function getCacheDirectory()
     {
-        $cachedir = dirname(self::$file);
+        $cachedir = dirname($this->getVersionsFile());
 
         if (!file_exists($cachedir)) {
             mkdir($cachedir, 0755, true);
@@ -128,8 +115,8 @@ class Versions extends Command
 
     public function refresh()
     {
-        if(file_exists(self::$file)) {
-            unlink(self::$file);
+        if(file_exists($this->getVersionsFile())) {
+            unlink($this->getVersionsFile());
         }
 
         $cmd = "git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'";
@@ -159,25 +146,25 @@ class Versions extends Command
             }
         }
 
-        if (!file_exists(dirname(self::$file))) {
-            mkdir(dirname(self::$file), 0755, true);
+        if (!file_exists(dirname($this->getVersionsFile()))) {
+            mkdir(dirname($this->getVersionsFile()), 0755, true);
         }
 
-        file_put_contents(self::$file, json_encode($versions));
+        file_put_contents($this->getVersionsFile(), json_encode($versions));
     }
 
     protected function _getVersions()
     {
-        if(!file_exists(self::$file)) {
+        if(!file_exists($this->getVersionsFile())) {
             $this->refresh();
         }
 
-        $list = json_decode(file_get_contents(self::$file), true);
+        $list = json_decode(file_get_contents($this->getVersionsFile()), true);
 
         if (is_null($list))
         {
             $this->refresh();
-            $list = json_decode(file_get_contents(self::$file), true);
+            $list = json_decode(file_get_contents($this->getVersionsFile()), true);
         }
 
         $list = array_reverse($list, true);
@@ -238,5 +225,13 @@ class Versions extends Command
         $versions = $this->_getVersions();
 
         return in_array($version, $versions['tags']);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getVersionsFile() {
+        return realpath($this->getApplication()->getCacheDir())
+        . '/' . md5($this->repository) . '/.versions';
     }
 }

@@ -228,7 +228,7 @@ class Install extends Database\AbstractDatabase
             return;
         }
 
-        $filename = self::$files.'/cache/'.basename($url);
+        $filename = realpath($this->getApplication()->getCacheDir()).'/'.basename($url);
         if(!file_exists($filename))
         {
             $bytes = file_put_contents($filename, fopen($url, 'r'));

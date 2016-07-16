@@ -22,14 +22,8 @@ abstract class AbstractSite extends Command
 
     protected $target_dir;
 
-    protected static $files;
-
     protected function configure()
     {
-        if (empty(self::$files)) {
-            self::$files = realpath(__DIR__.'/../../../../../bin/.files');
-        }
-
         $this->addArgument(
             'site',
             InputArgument::REQUIRED,

@@ -114,7 +114,7 @@ abstract class AbstractCache extends AbstractSite
 
     protected function _createTemporaryScript($task, $hash, $client = 0, array $group = array())
     {
-        $template   = realpath(__DIR__.'/../../../../../bin/.files/console-cache.php-tpl');
+        $template   = $this->getApplication()->getDataDir() . '/console-cache.php-tpl';
         $autoloader = realpath(__DIR__.'/../../../../../vendor/autoload.php');
 
         $contents = file_get_contents($template);
