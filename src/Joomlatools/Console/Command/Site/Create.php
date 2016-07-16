@@ -168,7 +168,7 @@ EOF
                 }
             }
 
-            $command = new Install();
+            $command = $this->getApplication()->get('site:install');
             $command->setApplication($this->getApplication());
             $command->run(new ArrayInput($arguments), $output);
         }
@@ -196,7 +196,7 @@ EOF
             $arguments['--repo'] = $repo;
         }
 
-        $command = new Download();
+        $command = $this->getApplication()->get('site:download');
         $command->run(new ArrayInput($arguments), $output);
     }
 
@@ -212,7 +212,7 @@ EOF
             '--ssl-port'    => $input->getOption('ssl-port')
         ));
 
-        $command = new Vhost\Create();
+        $command = $this->getApplication()->get('vhost:create');
         $command->run($command_input, $output);
     }
 }

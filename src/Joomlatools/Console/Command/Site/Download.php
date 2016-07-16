@@ -71,7 +71,7 @@ class Download extends AbstractSite
 
         $this->check($input, $output);
 
-        $this->versions = new Versions();
+        $this->versions = $this->getApplication()->get('versions');;
 
         if ($input->getOption('repo')) {
             $this->versions->setRepository($input->getOption('repo'));

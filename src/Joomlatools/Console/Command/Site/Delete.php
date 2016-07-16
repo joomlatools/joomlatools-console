@@ -85,7 +85,7 @@ class Delete extends Database\AbstractDatabase
             }
         }
 
-        $command = new Database\Drop();
+        $command = $this->getApplication()->get('database:drop');
         $command->run(new ArrayInput($arguments), $output);
     }
 
@@ -100,7 +100,7 @@ class Delete extends Database\AbstractDatabase
             'site' => $this->site
         ));
 
-        $command = new Vhost\Remove();
+        $command = $this->getApplication()->get('vhost:remove');
         $command->run($command_input, $output);
     }
 }

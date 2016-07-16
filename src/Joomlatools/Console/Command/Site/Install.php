@@ -120,7 +120,7 @@ class Install extends Database\AbstractDatabase
     public function importdb(InputInterface $input, OutputInterface $output)
     {
         $arguments = array(
-            'site:database:install',
+            'database:install',
             'site'   => $this->site,
             '--www'  => $this->www
         );
@@ -138,7 +138,7 @@ class Install extends Database\AbstractDatabase
             $arguments['--skip-exists-check'] = true;
         }
 
-        $command = new Database\Install();
+        $command = $this->getApplication()->get('database:install');
         $command->run(new ArrayInput($arguments), $output);
     }
 
@@ -159,8 +159,7 @@ class Install extends Database\AbstractDatabase
             }
         }
 
-        $command = new Configure();
-        $command->setApplication($this->getApplication());
+        $command = $this->getApplication()->get('site:configure');
         $command->skipDatabasePrompt();
         $command->run(new ArrayInput($arguments), $output);
     }
