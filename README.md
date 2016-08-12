@@ -42,6 +42,7 @@ Installation
 
 ## Requirements
 
+* Git
 * Composer
 * Joomla version 2.5 and up.
 
