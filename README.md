@@ -40,6 +40,30 @@ Installation
 
 1. Read our [documentation pages](https://www.joomlatools.com/developer/tools/console/) to learn more about using the tool.
 
+## Development
+
+To setup the tool for development:
+
+1. Clone the repository:
+
+    ```
+git clone git@github.com:joomlatools/joomlatools-console.git
+    ```
+    
+1. Fetch the dependencies:
+
+   ```
+composer install
+   ```
+   
+1. Now you can execute the tool with:
+
+    ```
+bin/joomla list
+    ```
+
+1. Happy coding!
+
 ## Requirements
 
 * Git
