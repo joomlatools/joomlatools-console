@@ -92,11 +92,11 @@ class Listing extends Database\AbstractDatabase
         }
 
         $i = 1;
-        foreach ($sites as $site):
+        foreach ($sites as $site) {
             $output->write("\n");
             $output->write(sprintf("<info>%s. %s</info> (%s %s)", $i, $site->name, $site->type, $site->version));
             $i++;
-        endforeach;
+        }
         $output->write("\n");
     }
 }
