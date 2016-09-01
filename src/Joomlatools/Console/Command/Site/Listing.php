@@ -91,8 +91,6 @@ class Listing extends Database\AbstractDatabase
             }
         }
 
-        $output->write("\n");
-        $output->writeln("<comment>Sites Running On This Box:</comment>");
         $i = 1;
         foreach ($sites as $site):
             $output->write("\n");
