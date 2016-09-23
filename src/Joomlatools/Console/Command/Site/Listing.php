@@ -8,6 +8,7 @@
 namespace Joomlatools\Console\Command\Site;
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Database;
@@ -19,6 +20,13 @@ class Listing extends Database\AbstractDatabase
         $this
             ->setName('site:list')
             ->setDescription('List Joomla sites')
+            ->addOption(
+                'format',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The output format (txt or json)',
+                'txt'
+            )
             ->setHelp('List Joomla sites running on this box');
     }
 
@@ -91,12 +99,26 @@ class Listing extends Database\AbstractDatabase
             }
         }
 
-        $i = 1;
-        foreach ($sites as $site) {
-            $output->write("\n");
-            $output->write(sprintf("<info>%s. %s</info> (%s %s)", $i, $site->name, $site->type, $site->version));
-            $i++;
+        if (!in_array($input->getOption('format'), ['txt', 'json'])) {
+            throw new \InvalidArgumentException(sprintf('Unsupported format "%s".', $input->getOption('format')));
         }
-        $output->write("\n");
+
+        if ($input->getOption('format') == 'json') {
+            $result = new \stdClass();
+            $result->command = $input->getArgument('command');
+            $result->sites = [];
+            foreach ($sites as $site) {
+                $result->sites[] = (object) $site;
+            }
+            $output->writeln(json_encode($result));
+        } else if ($input->getOption('format') == 'txt') {
+            $i = 1;
+            foreach ($sites as $site) {
+                $output->write("\n");
+                $output->write(sprintf("<info>%s. %s</info> (%s %s)", $i, $site->name, $site->type, $site->version));
+                $i++;
+            }
+            $output->write("\n");
+        }
     }
 }
