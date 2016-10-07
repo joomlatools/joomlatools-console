@@ -117,9 +117,9 @@ abstract class AbstractDatabase extends AbstractSite
     {
         $db = $this->dbConnection();
         try {
-            $db->query($query);
+            $db->exec($query);
         } catch (\PDOException $ex) {
-            throw new \RuntimeException(sprintf('Database query failed: "%s"', $query));
+            throw new \RuntimeException(sprintf('Database query failed: error: "%s" "%s"',$ex->getMessage(), $query));
         }
     }
 

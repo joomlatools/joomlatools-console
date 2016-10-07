@@ -29,7 +29,7 @@ class Install extends Database\AbstractDatabase
     protected function configure()
     {
         parent::configure();
-
+            
         $this
             ->setName('site:install')
             ->setDescription('Install an existing Joomla codebase. Sets up configuration and installs the database.')
@@ -82,6 +82,7 @@ class Install extends Database\AbstractDatabase
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
+
 
         if ($input->getOption('interactive')) {
             $this->_promptDatabaseDetails($input, $output);

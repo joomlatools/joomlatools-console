@@ -93,16 +93,14 @@ class Install extends AbstractDatabase
         $imports = $this->_getSQLFiles($input, $output);
 
         foreach ($imports as $import) {
-            foreach ($this->file_lines($import) as $line) {
-                if (strlen($line) < 2) {
-                    continue;
-                }
-                $line = str_replace('#__', 'j_', $line);
-                // throws Exception
-                var_dump($line);
-                $this->executeSQL($line);
+            $content = file_get_contents($import);
+            if (strlen($content) < 2) {
+                continue;
             }
-            
+            $content = str_replace('#__', 'j_', $content);
+            // throws Exception
+            $this->executeSQL($content);
+          
             if (!empty($result)) {
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
             }
