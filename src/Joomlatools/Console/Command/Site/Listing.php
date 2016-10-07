@@ -99,7 +99,7 @@ class Listing extends Database\AbstractDatabase
             }
         }
 
-        if (!in_array($input->getOption('format'), ['txt', 'json'])) {
+        if (!in_array($input->getOption('format'), array('txt', 'json'))) {
             throw new \InvalidArgumentException(sprintf('Unsupported format "%s".', $input->getOption('format')));
         }
 
@@ -111,7 +111,7 @@ class Listing extends Database\AbstractDatabase
                 $result->sites[] = (object) $site;
             }
             $output->writeln(json_encode($result));
-        } else if ($input->getOption('format') == 'txt') {
+        } else {
             $i = 1;
             foreach ($sites as $site) {
                 $output->write("\n");
