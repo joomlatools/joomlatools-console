@@ -19,6 +19,7 @@ abstract class AbstractDatabase extends AbstractSite
     protected $target_db_prefix = 'sites_';
 
     protected $mysql;
+    protected $pdoDB;
 
     protected function configure()
     {
@@ -99,12 +100,40 @@ abstract class AbstractDatabase extends AbstractSite
         }
     }
 
-    protected function _executeSQL($query)
+    protected function _executeSQLCommandLine($query)
     {
         $password = empty($this->mysql->password) ? '' : sprintf("--password='%s'", $this->mysql->password);
         $cmd      = sprintf("echo '$query' | mysql --host=%s --port=%u --user='%s' %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password);
 
         return exec($cmd);
+    }
+
+    public function executeSQL($query) 
+    {
+        $this->_executeSQL($query);
+    }
+
+    protected function _executeSQL($query)
+    {
+        $db = $this->dbConnection();
+        try {
+            $db->query($query);
+        } catch (\PDOException $ex) {
+            throw new \RuntimeException(sprintf('Database query failed: "%s"', $query));
+        }
+    }
+
+    private function dbConnection() {
+        if (! $this->pdoDB) {
+            $password = empty($this->mysql->password) || $this->mysql->password == 'root' ? '' :  $this->mysql->password;
+            $connectionString = "mysql:host={$this->mysql->host}:{$this->mysql->port};dbname={$this->target_db};charset=utf8mb4";
+            var_dump($connectionString, $this->mysql->user, $password);
+            $pdoDB = new \PDO($connectionString, $this->mysql->user, $password);
+            $pdoDB->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $pdoDB->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        }
+
+        return $pdoDB;
     }
 
     protected function _promptDatabaseDetails(InputInterface $input, OutputInterface $output)

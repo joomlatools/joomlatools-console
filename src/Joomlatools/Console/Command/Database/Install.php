@@ -92,24 +92,23 @@ class Install extends AbstractDatabase
 
         $imports = $this->_getSQLFiles($input, $output);
 
-        foreach($imports as $import)
-        {
-            $tmp      = tempnam('/tmp', 'dump');
-            $contents = file_get_contents($import);
-            $contents = str_replace('#__', 'j_', $contents);
-
-            file_put_contents($tmp, $contents);
-
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-            $result = exec(sprintf("mysql --host=%s --port=%u --user='%s' %s %s < %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $tmp));
-
-            unlink($tmp);
-
+        foreach ($imports as $import) {
+            foreach ($this->file_lines($import) as $line) {
+                if (strlen($line) < 2) {
+                    continue;
+                }
+                $line = str_replace('#__', 'j_', $line);
+                // throws Exception
+                var_dump($line);
+                $this->executeSQL($line);
+            }
+            
             if (!empty($result)) {
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
             }
         }
     }
+
 
     public function check(InputInterface $input, OutputInterface $output)
     {
