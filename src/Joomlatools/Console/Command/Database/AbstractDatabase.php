@@ -119,15 +119,15 @@ abstract class AbstractDatabase extends AbstractSite
         try {
             $db->exec($query);
         } catch (\PDOException $ex) {
-            throw new \RuntimeException(sprintf('Database query failed: error: "%s" "%s"',$ex->getMessage(), $query));
+            throw new \RuntimeException(sprintf('Database query failed: error: "%s" "%s"', $ex->getMessage(), $query));
         }
     }
 
-    private function dbConnection() {
+    private function dbConnection()
+    {
         if (! $this->pdoDB) {
             $password = empty($this->mysql->password) || $this->mysql->password == 'root' ? '' :  $this->mysql->password;
             $connectionString = "mysql:host={$this->mysql->host}:{$this->mysql->port};dbname={$this->target_db};charset=utf8mb4";
-            var_dump($connectionString, $this->mysql->user, $password);
             $pdoDB = new \PDO($connectionString, $this->mysql->user, $password);
             $pdoDB->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $pdoDB->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);

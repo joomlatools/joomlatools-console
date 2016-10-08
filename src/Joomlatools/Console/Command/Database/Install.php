@@ -93,16 +93,28 @@ class Install extends AbstractDatabase
         $imports = $this->_getSQLFiles($input, $output);
 
         foreach ($imports as $import) {
-            $content = file_get_contents($import);
-            if (strlen($content) < 2) {
-                continue;
+            if (! file_exists($import)) {
+                 throw new \RuntimeException(sprintf('Cannot found  import file: "%s"', $import));
             }
+
+            $content = file_get_contents($import);
+            if (!$content) {
+                 throw new \RuntimeException(sprintf('File is empty: "%s"', $import));
+            }
+
             $content = str_replace('#__', 'j_', $content);
-            // throws Exception
-            $this->executeSQL($content);
-          
-            if (!empty($result)) {
-                throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
+            
+            // Shouldn't continue every table is equally important
+            try {
+                $this->executeSQL($content);
+            } catch (\Exception $exception) {
+                throw new \RuntimeException(
+                    sprintf(
+                        'Cannot import database file "%s". Error: %s',
+                        basename($import),
+                        $exception->getMessage()
+                    )
+                );
             }
         }
     }
