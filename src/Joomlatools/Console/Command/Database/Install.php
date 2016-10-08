@@ -108,17 +108,11 @@ class Install extends AbstractDatabase
             try {
                 $this->executeSQL($content);
             } catch (\Exception $exception) {
-                throw new \RuntimeException(
-                    sprintf(
-                        'Cannot import database file "%s". Error: %s',
-                        basename($import),
-                        $exception->getMessage()
-                    )
-                );
+                $message =  sprintf('Cannot import database file "%s". Error: %s', basename($import), $exception->getMessage());
+                throw new \RuntimeException($message);
             }
         }
     }
-
 
     public function check(InputInterface $input, OutputInterface $output)
     {
