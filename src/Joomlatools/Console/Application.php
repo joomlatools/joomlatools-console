@@ -135,6 +135,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Site\Delete(),
             new Command\Site\Download(),
             new Command\Site\Install(),
+            new Command\Site\Listing(),
             new Command\Site\Token(),
 
             new Command\Vhost\Create(),
