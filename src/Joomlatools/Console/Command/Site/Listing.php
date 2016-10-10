@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright	Copyright (C) 2007 - 2015 Johan Janssens and Timble CVBA. (http://www.timble.net)
+ * @copyright	Copyright (C) 2007 - 2016 Johan Janssens and Timble CVBA. (http://www.timble.net)
  * @license		Mozilla Public License, version 2.0
  * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
@@ -27,6 +27,13 @@ class Listing extends Database\AbstractDatabase
                 'The output format (txt or json)',
                 'txt'
             )
+            ->addOption(
+                'www',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "Web server root",
+                '/var/www'
+            )
             ->setHelp('List Joomla sites running on this box');
     }
 
@@ -36,7 +43,13 @@ class Listing extends Database\AbstractDatabase
         define('JPATH_BASE', true);
         define('JPATH_PLATFORM', true);
 
-        $dir = new \DirectoryIterator('/var/www');
+        $docroot = $input->getOption('www');
+
+        if (!file_exists($docroot)) {
+            throw new \RuntimeException(sprintf('Web server root \'%s\' does not exist.', $docroot));
+        }
+
+        $dir = new \DirectoryIterator($docroot);
         $sites = array();
 
         $canonical = function($version) {
@@ -91,7 +104,7 @@ class Listing extends Database\AbstractDatabase
 
                     $sites[] = (object) array(
                         'name'    => $fileinfo->getFilename(),
-                        'docroot' => $fileinfo->getFilename() . '/' . ($application == 'joomlatools-platform' ? 'web' : ''),
+                        'docroot' => $docroot . '/' . $fileinfo->getFilename() . '/' . ($application == 'joomlatools-platform' ? 'web' : ''),
                         'type'    => $application,
                         'version' => $canonical($version)
                     );
@@ -103,22 +116,29 @@ class Listing extends Database\AbstractDatabase
             throw new \InvalidArgumentException(sprintf('Unsupported format "%s".', $input->getOption('format')));
         }
 
-        if ($input->getOption('format') == 'json') {
-            $result = new \stdClass();
-            $result->command = $input->getArgument('command');
-            $result->sites = [];
-            foreach ($sites as $site) {
-                $result->sites[] = (object) $site;
-            }
-            $output->writeln(json_encode($result));
-        } else {
-            $i = 1;
-            foreach ($sites as $site) {
-                $output->write("\n");
-                $output->write(sprintf("<info>%s. %s</info> (%s %s)", $i, $site->name, $site->type, $site->version));
-                $i++;
-            }
-            $output->write("\n");
+
+
+        switch ($input->getOption('format'))
+        {
+            case 'json':
+                $result = new \stdClass();
+                $result->command = $input->getArgument('command');
+                $result->data    = $sites;
+
+                $options = (version_compare(phpversion(),'5.4.0') >= 0 ? JSON_PRETTY_PRINT : 0);
+                $string  = json_encode($result, $options);
+                break;
+            case 'txt':
+            default:
+                $lines = array();
+                foreach ($sites as $i => $site) {
+                    $lines[] = sprintf("<info>%s. %s</info> (%s %s)", ($i+1), $site->name, $site->type, $site->version);
+                }
+
+                $string = implode("\n", $lines);
+                break;
         }
+
+        $output->writeln($string);
     }
 }
