@@ -156,7 +156,7 @@ class Download extends AbstractSite
             }
         }
 
-        if (!$this->versions->isBranch($result))
+        if (!$this->versions->isBranch($result) && $version != 'none')
         {
             $isTag = $this->versions->isTag($result);
 
