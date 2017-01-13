@@ -6,11 +6,19 @@
  * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
 
-$autoload = __DIR__.'/../vendor/autoload.php';
-if(is_file($autoload)) {
-    require $autoload;
-} else {
-   require __DIR__.'/../../../../vendor/autoload.php';
+$autoloadPaths = array(
+    __DIR__ . '/../../autoload.php',
+    __DIR__ . '/../../../../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/vendor/autoload.php'
+);
+
+foreach ($autoloadPaths as $autoload) {
+    if (file_exists($autoload)) {
+        require_once $autoload;
+        break;
+    }
 }
 
 $application = new Joomlatools\Console\Application();
