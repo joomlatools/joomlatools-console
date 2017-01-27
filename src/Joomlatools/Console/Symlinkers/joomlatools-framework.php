@@ -25,7 +25,8 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     // build the folders to symlink into
     $dirs = array(
-        Util::buildTargetPath('/media/koowa', $destination)
+        Util::buildTargetPath('/media/koowa', $destination),
+        Util::buildTargetPath('/libraries/joomlatools-components', $destination)
     );
 
     foreach ($dirs as $dir)
