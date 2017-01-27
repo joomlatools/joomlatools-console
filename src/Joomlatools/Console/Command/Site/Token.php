@@ -38,7 +38,7 @@ class Token extends AbstractSite
 
         $this->check($input, $output);
 
-        require_once Util::buildTargetPath('libraries/koowa/libraries/koowa.php', $this->target_dir);
+        require_once Util::buildTargetPath('libraries/joomlatools/library/koowa.php', $this->target_dir);
         require_once Util::buildTargetPath('configuration.php', $this->target_dir);
 
         \Koowa::getInstance();
@@ -58,7 +58,7 @@ class Token extends AbstractSite
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
-        $path = Util::buildTargetPath('libraries/koowa/libraries/koowa.php', $this->target_dir);
+        $path = Util::buildTargetPath('libraries/joomlatools/library/koowa.php', $this->target_dir);
         if (!file_exists($path)) {
             throw new \RuntimeException(sprintf('Koowa is not installed on site: %s', $this->site));
         }
