@@ -92,7 +92,9 @@ EOL
             {
                 $included = false;
 
-                if (in_array($result->element, array('com_extman', 'koowa')) && ($extension == 'all' || $extension == $result->element))
+                if (($result->element === 'joomlatools' && $result->type === 'plugin' && $result->folder === 'system')
+                    && ($extension == 'all' || $extension == 'joomlatools-framework' || $extension == $result->element)
+                )
                 {
                     array_unshift($install, $result);
                     $included = true;
@@ -137,33 +139,25 @@ EOL
                 $db->setQuery($sql);
                 $db->execute();
 
-                switch ($extension->element)
+                if ($extension->element === 'joomlatools' && $extension->type === 'plugin' && $extension->folder === 'system')
                 {
-                    case 'com_extman':
-                        if(class_exists('Koowa') && !class_exists('ComExtmanDatabaseRowExtension')) {
-                            \KObjectManager::getInstance()->getObject('com://admin/extman.database.row.extension');
-                        }
-                        break;
-                    case 'koowa':
-                        $path = JPATH_PLUGINS . '/system/koowa/koowa.php';
+                    $path = JPATH_PLUGINS . '/system/joomlatools/joomlatools.php';
 
-                        if (!file_exists($path)) {
-                            return;
-                        }
+                    if (!file_exists($path)) {
+                        return;
+                    }
 
-                        require_once $path;
+                    require_once $path;
 
-                        if (class_exists('\PlgSystemKoowa'))
-                        {
-                            $dispatcher = \JEventDispatcher::getInstance();
-                            new \PlgSystemKoowa($dispatcher, (array)\JPLuginHelper::getPLugin('system', 'koowa'));
-                        }
+                    if (class_exists('\PlgSystemJoomlatools'))
+                    {
+                        $dispatcher = \JEventDispatcher::getInstance();
+                        new \PlgSystemJoomlatools($dispatcher, (array)\JPLuginHelper::getPLugin('system', 'joomlatools'));
+                    }
 
-                        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                            $output->writeln("Initialised new PlgSystemKoowa instance");
-                        }
-
-                        break;
+                    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+                        $output->writeln("Initialised new PlgSystemJoomlatools instance");
+                    }
                 }
             }
         }
