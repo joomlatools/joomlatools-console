@@ -19,31 +19,22 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     $manifest = json_decode(file_get_contents($project.'/composer.json'));
 
-    if (!isset($manifest->type) || $manifest->type != 'nooku-component') {
+    if (!isset($manifest->extra) || !isset($manifest->extra->{'joomlatools-component'})) {
         return false;
     }
 
-    if (!isset($manifest->{'nooku-component'}->name))
-    {
-        $output->writeln("<comment>[warning]</comment> Found type nooku-component in `" . basename($project) . "` but composer.json is missing the `nooku-component` property. Skipping!");
-
-        return true;
-    }
-
-    $component   = $manifest->{'nooku-component'}->name;
-    $code_folder = Util::buildTargetPath('/libraries/joomlatools/component', $destination);
-
-    // Old folder structure
-    if (!is_dir($code_folder)) {
-        $component   = 'com_'.$component;
-        $code_folder = Util::buildTargetPath('/libraries/koowa/components', $destination);
-    }
+    $component   = $manifest->extra->{'joomlatools-component'};
+    $code_folder = Util::buildTargetPath('/libraries/joomlatools-components', $destination);
 
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
         $output->writeln("Symlinking `$component` into `$destination`");
     }
 
-    $dirs = array($code_folder, Util::buildTargetPath('/media/koowa', $destination));
+    $dirs = array(
+        $code_folder,
+        Util::buildTargetPath('/media/koowa', $destination)
+    );
+
     foreach ($dirs as $dir)
     {
         if (!is_dir($dir))
@@ -52,7 +43,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
                 $output->writeln(" * creating empty directory `$dir`");
             }
 
-            mkdir($dir, 0777, true);
+            mkdir($dir, 0755, true);
         }
     }
 

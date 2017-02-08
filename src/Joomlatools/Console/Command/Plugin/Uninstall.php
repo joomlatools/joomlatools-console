@@ -47,6 +47,6 @@ class Uninstall extends Command
             return;
         }
 
-        passthru("composer --working-dir=$path --update-with-dependencies remove $package");
+        passthru("composer --working-dir=$path remove $package");
     }
 }
