@@ -7,6 +7,10 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.4.8 (2017-02-08)
+ * Fixed - Update pahts in `site:token` command (#57)
+ * Fixed - Update Joomlatools components and framework installers (#57)
+
 * 1.4.7 (2017-01-13)
  * Added - `site:list` command with JSON output (#17)
  * Fixed - Support recent versions of Composer in `plugin:install` (#41)
