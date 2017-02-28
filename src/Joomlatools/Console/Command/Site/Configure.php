@@ -101,7 +101,7 @@ class Configure extends AbstractDatabase
 
         $contents = file_get_contents($source);
         $replace  = function($name, $value, &$contents) {
-            $pattern = sprintf("#%s = '.*?'#", $name);
+            $pattern = sprintf("#%s\s+= '.*?'#", $name);
             $match   = preg_match($pattern, $contents);
 
             if(!$match)
