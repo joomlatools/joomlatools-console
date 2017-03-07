@@ -7,6 +7,9 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.4.9 (2017-03-07)
+ * Fixed - SiteCreate command fails on 3.7 (#58)
+
 * 1.4.8 (2017-02-08)
  * Fixed - Update pahts in `site:token` command (#57)
  * Fixed - Update Joomlatools components and framework installers (#57)
