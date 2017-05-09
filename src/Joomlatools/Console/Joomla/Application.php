@@ -295,6 +295,15 @@ class Application extends JApplicationCli
     }
 
     /**
+     * @param $identifier
+     * @return bool
+     */
+    public function isClient($identifier)
+    {
+        return $this->getName() === $identifier;
+    }
+
+    /**
      * Determine if we are using a secure (SSL) connection.
      *
      * @return  boolean  True if using SSL, false if not.
