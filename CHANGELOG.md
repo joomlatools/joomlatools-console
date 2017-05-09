@@ -7,6 +7,9 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.4.10 (2017-05-09)
+ * Fixed - Joomla 3.7 installation error (#59)
+ 
 * 1.4.9 (2017-03-07)
  * Fixed - SiteCreate command fails on 3.7 (#58)
 
