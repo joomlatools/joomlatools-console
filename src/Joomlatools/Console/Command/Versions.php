@@ -132,7 +132,7 @@ class Versions extends Command
             unlink(self::$file);
         }
 
-        $cmd = "git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'";
+        $cmd = "git ls-remote $this->repository | grep -E \"refs/(tags|heads)\" | grep -v '{}'";
         exec($cmd, $refs, $returnVal);
 
         if ($returnVal != 0) {
