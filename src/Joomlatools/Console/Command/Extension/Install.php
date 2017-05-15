@@ -20,6 +20,8 @@ class Install extends AbstractSite
 {
     protected $extensions = array();
 
+    protected $composer = false;
+
     protected function configure()
     {
         parent::configure();
@@ -52,7 +54,20 @@ EOL
         $this->extensions = (array) $input->getArgument('extension');
 
         $this->check($input, $output);
-        $this->install($input, $output);
+
+        foreach($input->getArgument('extension') as $extension)
+        {
+            //@todo check syntax of composer installs
+            if(strpos($extension, 'vendor/') !== false){
+                $this->composer = true;
+            }
+        }
+
+        if ($this->composer){
+            $this->composer_install($input, $output);
+        }else{
+            $this->install($input, $output);
+        }
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -60,6 +75,38 @@ EOL
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
+
+        if ($this->composer)
+        {
+            $result = shell_exec('composer -v > /dev/null 2>&1 || { echo "false"; }');
+
+            if (trim($result) == 'false' && !file_exists($this->target_dir . 'composer.phar'))
+            {
+                $output->writeln('<error>dude you need composer installed</error>');
+                exit();
+            }
+        }
+    }
+
+    public function composer_install(InputInterface $input, OutputInterface $output)
+    {
+        chdir($this->target_dir);
+
+        $extensions = $input->getArgument('extension');
+
+        foreach ($extensions as $extension)
+        {
+            //@todo need to double check the syntax for composer require
+            $result = shell_exec(sprintf('composer require "%s"', $extension));
+
+            if ($result == false)
+            {
+                $output->writeln('<error>Warning Will Robinson warning');
+                exit();
+            }
+        }
+
+        $output->writeln('<info>' . count($extensions) . ' dependencies installed');
     }
 
     public function install(InputInterface $input, OutputInterface $output)
