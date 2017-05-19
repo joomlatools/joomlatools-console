@@ -14,13 +14,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Joomlatools\Console\Command\Site\AbstractSite;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
-use Joomlatools\Console\Joomla\Util;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class Install extends AbstractSite
 {
     protected $extensions = array();
 
-    protected $composer = false;
+    protected $composer_extensions = array();
+
+    protected $composer_global = false;
 
     protected function configure()
     {
@@ -38,6 +41,8 @@ have Joomla automatically find the extension files and install it:
 The extension argument should match the element name (<comment>com_foobar</comment>) as defined in your extension XML manifest.
 
 For more information about Joomla's discover method, refer to the official documentation: https://docs.joomla.org/Help34:Extensions_Extension_Manager_Discover
+
+Alternatively simply pass in the composer dependancies you would like to install; provide these in the format (vendor/package:[commit || [operator version]) 
 EOL
             )
             ->addArgument(
@@ -51,21 +56,28 @@ EOL
     {
         parent::execute($input, $output);
 
-        $this->extensions = (array) $input->getArgument('extension');
+        $extensions = $input->getArgument('extension');
+
+        //https://regex101.com/r/fHlWZZ/1
+        $re = '/[a-zA-Z0-9_.-].*\/[a-zA-Z0-9_.-]*:[?:(a-z-_#)?:(\>=\<=~^)(0-9).\*]*/';
+        $matches = preg_grep($re, $extensions);
+
+        if(count($matches))
+        {
+            $this->composer_extensions = $matches;
+            $this->composer_global = true;
+            $extensions = array_diff($extensions, $this->composer_extensions);
+        }
+
+        $this->extensions = $extensions;
 
         $this->check($input, $output);
 
-        foreach($input->getArgument('extension') as $extension)
-        {
-            //@todo check syntax of composer installs
-            if(strpos($extension, 'vendor/') !== false){
-                $this->composer = true;
-            }
+        if (count($this->composer_extensions)) {
+            $this->composer_install($input, $output);
         }
 
-        if ($this->composer){
-            $this->composer_install($input, $output);
-        }else{
+        if (count($this->extensions)) {
             $this->install($input, $output);
         }
     }
@@ -76,14 +88,18 @@ EOL
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
-        if ($this->composer)
+        if (count($this->composer_extensions))
         {
             $result = shell_exec('composer -v > /dev/null 2>&1 || { echo "false"; }');
 
-            if (trim($result) == 'false' && !file_exists($this->target_dir . 'composer.phar'))
+            if (trim($result) == 'false' && !file_exists($this->target_dir . '/composer.phars'))
             {
-                $output->writeln('<error>dude you need composer installed</error>');
+                $output->writeln('<error>You need composer installed either locally or globally: https://getcomposer.org/doc/00-intro.md</error>');
                 exit();
+            }
+
+            if ($result != 'false'){
+                $this->composer_global = true;
             }
         }
     }
@@ -92,21 +108,25 @@ EOL
     {
         chdir($this->target_dir);
 
-        $extensions = $input->getArgument('extension');
+        $string = 'composer require';
 
-        foreach ($extensions as $extension)
-        {
-            //@todo need to double check the syntax for composer require
-            $result = shell_exec(sprintf('composer require "%s"', $extension));
-
-            if ($result == false)
-            {
-                $output->writeln('<error>Warning Will Robinson warning');
-                exit();
-            }
+        if (!$this->composer_global){
+            $string = 'php composer.phar require';
         }
 
-        $output->writeln('<info>' . count($extensions) . ' dependencies installed');
+        foreach ($this->composer_extensions as $extension)
+        {
+            $process = new Process(sprintf('%s %s', $string, $extension));
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+
+            echo $process->getOutput();
+        }
+
+        $output->writeln('<info>' . count($this->composer_extensions) . ' dependencies installed');
     }
 
     public function install(InputInterface $input, OutputInterface $output)
