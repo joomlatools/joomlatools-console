@@ -10,12 +10,12 @@ namespace Joomlatools\Console\Command\Extension;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Joomlatools\Console\Command\Site\AbstractSite;
-
-use Joomlatools\Console\Joomla\Bootstrapper;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+
+use Joomlatools\Console\Command\Site\AbstractSite;
+use Joomlatools\Console\Joomla\Bootstrapper;
+
 
 class Install extends AbstractSite
 {
@@ -60,12 +60,11 @@ EOL
 
         //https://regex101.com/r/fHlWZZ/1
         $re = '/[a-zA-Z0-9_.-].*\/[a-zA-Z0-9_.-]*:[?:(a-z-_#)?:(\>=\<=~^)(0-9).\*]*/';
-        $matches = preg_grep($re, $extensions);
+        $composer_extensions = preg_grep($re, $extensions);
 
-        if(count($matches))
+        if (count($composer_extensions))
         {
-            $this->composer_extensions = $matches;
-            $this->composer_global = true;
+            $this->composer_extensions = $composer_extensions;
             $extensions = array_diff($extensions, $this->composer_extensions);
         }
 
@@ -92,7 +91,7 @@ EOL
         {
             $result = shell_exec('composer -v > /dev/null 2>&1 || { echo "false"; }');
 
-            if (trim($result) == 'false' && !file_exists($this->target_dir . '/composer.phars'))
+            if (trim($result) == 'false' && !file_exists($this->target_dir . '/composer.phar'))
             {
                 $output->writeln('<error>You need composer installed either locally or globally: https://getcomposer.org/doc/00-intro.md</error>');
                 exit();
@@ -125,8 +124,6 @@ EOL
 
             echo $process->getOutput();
         }
-
-        $output->writeln('<info>' . count($this->composer_extensions) . ' dependencies installed');
     }
 
     public function install(InputInterface $input, OutputInterface $output)
