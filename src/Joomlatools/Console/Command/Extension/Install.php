@@ -110,10 +110,7 @@ EOL
             $string = 'php composer.phar require';
         }
 
-
-        foreach ($this->composer_extensions as $extension) {
-            passthru(sprintf('%s %s', $string, $extension));
-        }
+        passthru(sprintf(sprintf('%s %s', $string, implode(' ',$this->composer_extensions))));
     }
 
     public function install(InputInterface $input, OutputInterface $output)
