@@ -53,7 +53,7 @@ EOL
     {
         parent::execute($input, $output);
 
-        $extensions = $input->getArgument('extension');
+        $extensions = (array) $input->getArgument('extension');
 
         //https://regex101.com/r/fHlWZZ/1
         $re = '/[a-zA-Z0-9_.-].*\/[a-zA-Z0-9_.-]*:[?:(a-z-_#)?:(\>=\<=~^)(0-9).\*]*/';
