@@ -10,12 +10,9 @@ namespace Joomlatools\Console\Command\Extension;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 use Joomlatools\Console\Command\Site\AbstractSite;
 use Joomlatools\Console\Joomla\Bootstrapper;
-
 
 class Install extends AbstractSite
 {
@@ -113,16 +110,9 @@ EOL
             $string = 'php composer.phar require';
         }
 
-        foreach ($this->composer_extensions as $extension)
-        {
-            $process = new Process(sprintf('%s %s', $string, $extension));
-            $process->run();
 
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
-
-            echo $process->getOutput();
+        foreach ($this->composer_extensions as $extension) {
+            passthru(sprintf('%s %s', $string, $extension));
         }
     }
 
