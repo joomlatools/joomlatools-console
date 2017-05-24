@@ -55,12 +55,13 @@ EOL
 
         $extensions = (array) $input->getArgument('extension');
 
-        $re = '/[a-zA-Z0-9_.-].*\/[a-zA-Z0-9_.-]*:[?:(a-z-_#)?:(\>=\<=~^)(0-9).\*]*/';
-        $composer_extensions = preg_grep($re, $extensions);
+        $this->composer_extensions = array_filter(array_map(function($x){
+            if(strpos($x, '/') !== false){
+                return $x;
+            }
+        }, $extensions));
 
-        if (count($composer_extensions))
-        {
-            $this->composer_extensions = $composer_extensions;
+        if(count($this->composer_extensions)) {
             $extensions = array_diff($extensions, $this->composer_extensions);
         }
 
