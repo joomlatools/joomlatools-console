@@ -1,3 +1,5 @@
+SET sql_mode="";
+
 INSERT INTO `j_users` (`id`, `name`, `username`, `email`, `password`, `block`, `sendEmail`, `registerDate`, `lastvisitDate`, `activation`, `params`, `lastResetTime`, `resetCount`)
 VALUES
 	(951, 'Super User', 'admin', 'admin@example.com', '871b1a6d54b378b5547a945ea1a8bd18:3UgsAngDFq7D0FRmyiWey4qgV8n5PpEJ', 0, 1, '2013-07-24 09:07:43', '2014-01-07 11:18:12', '0', '{\"admin_style\":\"\",\"admin_language\":\"\",\"language\":\"\",\"editor\":\"\",\"helpsite\":\"\",\"timezone\":\"\"}', '0000-00-00 00:00:00', 0),
