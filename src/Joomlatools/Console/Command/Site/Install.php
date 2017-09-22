@@ -200,7 +200,7 @@ class Install extends Database\AbstractDatabase
 
         $version = Util::getJoomlaVersion($this->target_dir);
 
-        if (version_compare($version, '3.2.0', '<')) {
+        if (version_compare($version->release, '3.2.0', '<')) {
             return;
         }
 

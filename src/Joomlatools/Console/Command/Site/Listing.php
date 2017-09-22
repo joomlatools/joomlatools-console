@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Database;
+use Joomlatools\Console\Joomla\Util;
 
 class Listing extends Database\AbstractDatabase
 {
@@ -52,66 +53,19 @@ class Listing extends Database\AbstractDatabase
         $dir = new \DirectoryIterator($docroot);
         $sites = array();
 
-        $canonical = function($version) {
-            if (isset($version->RELEASE)) {
-                return 'v' . $version->RELEASE . '.' . $version->DEV_LEVEL;
-            }
-
-            // Joomla 3.5 and up uses constants instead of properties in JVersion
-            $className = get_class($version);
-            if (defined("$className::RELEASE")) {
-                return 'v'. $version::RELEASE . '.' . $version::DEV_LEVEL;
-            }
-
-            return 'unknown';
-        };
-
         foreach ($dir as $fileinfo)
         {
-            $code = $application = null;
-
             if ($fileinfo->isDir() && !$fileinfo->isDot())
             {
-                $files = array(
-                    'joomla-cms'           => $fileinfo->getPathname() . '/libraries/cms/version/version.php',
-                    'joomla-cms-new'       => $fileinfo->getPathname() . '/libraries/src/Version.php', // 3.8+
-                    'joomlatools-platform' => $fileinfo->getPathname() . '/lib/libraries/cms/version/version.php',
-                    'joomla-1.5'           => $fileinfo->getPathname() . '/libraries/joomla/version.php'
-                );
+                $version = Util::getJoomlaVersion($fileinfo->getPathname());
 
-                foreach ($files as $type => $file)
+                if ($version !== false)
                 {
-                    if (file_exists($file))
-                    {
-                        $code        = $file;
-                        $application = $type;
-
-                        break;
-                    }
-                }
-
-                if (!is_null($code) && file_exists($code))
-                {
-                    $identifier = uniqid();
-
-                    $source = file_get_contents($code);
-                    $source = preg_replace('/<\?php/', '', $source, 1);
-
-                    $pattern     = $application == 'joomla-cms-new' ? '/class Version/i' : '/class JVersion/i';
-                    $replacement = $application == 'joomla-cms-new' ? 'class Version' . $identifier : 'class JVersion' . $identifier;
-
-                    $source = preg_replace($pattern, $replacement, $source);
-
-                    eval($source);
-
-                    $class   = $application == 'joomla-cms-new' ? '\\Joomla\\CMS\\Version'.$identifier : 'JVersion'.$identifier;
-                    $version = new $class();
-
                     $sites[] = (object) array(
                         'name'    => $fileinfo->getFilename(),
-                        'docroot' => $docroot . '/' . $fileinfo->getFilename() . '/' . ($application == 'joomlatools-platform' ? 'web' : ''),
-                        'type'    => $application == 'joomla-cms-new' ? 'joomla-cms' : $application,
-                        'version' => $canonical($version)
+                        'docroot' => $docroot . '/' . $fileinfo->getFilename() . '/' . ($version->type == 'joomlatools-platform' ? 'web' : ''),
+                        'type'    => $version->type == 'joomla-cms-new' ? 'joomla-cms' : $version->type,
+                        'version' => $version->release
                     );
                 }
             }
