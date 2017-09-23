@@ -209,7 +209,8 @@ EOF
             '--disable-ssl' => $input->getOption('disable-ssl'),
             '--ssl-crt'     => $input->getOption('ssl-crt'),
             '--ssl-key'     => $input->getOption('ssl-key'),
-            '--ssl-port'    => $input->getOption('ssl-port')
+            '--ssl-port'    => $input->getOption('ssl-port'),
+            '--www'         => $input->getOption('www')
         ));
 
         $command = new Vhost\Create();
