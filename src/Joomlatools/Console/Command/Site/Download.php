@@ -118,7 +118,7 @@ class Download extends AbstractSite
             }
 
             if ($isPlatform) {
-                `cd $this->target_dir; composer install -q`;
+                `cd $this->target_dir; composer --no-interaction install -q`;
             }
         }
     }

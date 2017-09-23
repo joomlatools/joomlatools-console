@@ -47,6 +47,6 @@ class Uninstall extends Command
             return;
         }
 
-        passthru("composer --working-dir=$path remove $package");
+        passthru("composer --no-interaction --working-dir=$path remove $package");
     }
 }
