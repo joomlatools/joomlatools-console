@@ -135,10 +135,10 @@ class Install extends AbstractDatabase
 
             $version = Util::getJoomlaVersion($this->target_dir);
 
-            if($version)
+            if($version !== false && $version->release)
             {
-                if (in_array($sample_data, array('testing', 'learn')) && version_compare($version, '3.0.0', '<')) {
-                    throw new \RuntimeException(sprintf('%s does not support sample data %s', $version, $sample_data));
+                if (in_array($sample_data, array('testing', 'learn')) && version_compare($version->release, '3.0.0', '<')) {
+                    throw new \RuntimeException(sprintf('%s does not support sample data %s', $version->release, $sample_data));
                 }
             }
         }
@@ -166,7 +166,7 @@ class Install extends AbstractDatabase
         if ($version !== false && !Util::isPlatform($this->target_dir))
         {
             $users = 'joomla3.users.sql';
-            if(is_numeric(substr($version, 0, 1)) && version_compare($version, '3.0.0', '<')) {
+            if(is_numeric(substr($version->release, 0, 1)) && version_compare($version->release, '3.0.0', '<')) {
                 $users = 'joomla2.users.sql';
             }
 

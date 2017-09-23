@@ -24,9 +24,43 @@ class Util
 
         if (!isset(self::$_versions[$key]))
         {
-            $code = self::buildTargetPath('/libraries/cms/version/version.php', $base);
+            $canonical = function($version) {
+                if (isset($version->RELEASE)) {
+                    return 'v' . $version->RELEASE . '.' . $version->DEV_LEVEL;
+                }
 
-            if (file_exists($code))
+                // Joomla 3.5 and up uses constants instead of properties in JVersion
+                $className = get_class($version);
+                if (defined("$className::RELEASE")) {
+                    return $version::RELEASE . '.' . $version::DEV_LEVEL;
+                }
+
+                return 'unknown';
+            };
+
+            $files = array(
+                'joomla-cms'           => '/libraries/cms/version/version.php',
+                'joomla-cms-new'       => '/libraries/src/Version.php', // 3.8+
+                'joomlatools-platform' => '/lib/libraries/cms/version/version.php',
+                'joomla-1.5'           => '/libraries/joomla/version.php'
+            );
+
+            $code        = false;
+            $application = false;
+            foreach ($files as $type => $file)
+            {
+                $path = $base . $file;
+
+                if (file_exists($path))
+                {
+                    $code        = $path;
+                    $application = $type;
+
+                    break;
+                }
+            }
+
+            if ($code !== false)
             {
                 if (!defined('JPATH_PLATFORM')) {
                     define('JPATH_PLATFORM', self::buildTargetPath('/libraries', $base));
@@ -40,28 +74,18 @@ class Util
 
                 $source = file_get_contents($code);
                 $source = preg_replace('/<\?php/', '', $source, 1);
-                $source = preg_replace('/class JVersion/i', 'class JVersion' . $identifier, $source);
+
+                $pattern     = $application == 'joomla-cms-new' ? '/class Version/i' : '/class JVersion/i';
+                $replacement = $application == 'joomla-cms-new' ? 'class Version' . $identifier : 'class JVersion' . $identifier;
+
+                $source = preg_replace($pattern, $replacement, $source);
 
                 eval($source);
 
-                $class   = 'JVersion'.$identifier;
+                $class   = $application == 'joomla-cms-new' ? '\\Joomla\\CMS\\Version'.$identifier : 'JVersion'.$identifier;
                 $version = new $class();
 
-                $canonical = function($version) {
-                    if (isset($version->RELEASE)) {
-                        return 'v' . $version->RELEASE . '.' . $version->DEV_LEVEL;
-                    }
-
-                    // Joomla 3.5 and up uses constants instead of properties in JVersion
-                    $className = get_class($version);
-                    if (defined("$className::RELEASE")) {
-                        return $version::RELEASE . '.' . $version::DEV_LEVEL;
-                    }
-
-                    return 'unknown';
-                };
-
-                self::$_versions[$key] = $canonical($version);
+                self::$_versions[$key] = (object) array('release' => $canonical($version), 'type' => $application);
             }
             else self::$_versions[$key] = false;
         }
