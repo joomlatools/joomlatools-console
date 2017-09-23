@@ -18,7 +18,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Fixed - SiteCreate command fails on 3.7 (#58)
 
 * 1.4.8 (2017-02-08)
- * Fixed - Update pahts in `site:token` command (#57)
+ * Fixed - Update paths in `site:token` command (#57)
  * Fixed - Update Joomlatools components and framework installers (#57)
 
 * 1.4.7 (2017-01-13)
