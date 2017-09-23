@@ -10,6 +10,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
 * 1.4.11 (2017-09-23)
  * Fixed - Add Joomla 3.8 compatibility (#65)
  * Fixed - Option --www does not work for vhost.conf (#42)
+ * Fixed - Run Composer with --no-interaction flag (#68)
 
 * 1.4.10 (2017-05-09)
  * Fixed - Joomla 3.7 installation error (#59)
