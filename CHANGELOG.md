@@ -7,6 +7,10 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.4.11 (2017-09-23)
+ * Fixed - Add Joomla 3.8 compatibility (#65)
+ * Fixed - Option --www does not work for vhost.conf (#42)
+
 * 1.4.10 (2017-05-09)
  * Fixed - Joomla 3.7 installation error (#59)
  
