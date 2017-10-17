@@ -70,7 +70,11 @@ class Create extends AbstractSite
         {
             $site = $input->getArgument('site');
             $port = $input->getOption('http-port');
-            $path = realpath(__DIR__.'/../../../../../bin/.files/');
+            if (false !== ($path = \Phar::running())) {
+            	$path .= '/.files';
+            } else {
+            	$path = Util::getPath() . '/bin/.files';
+            }
             $tmp  = '/tmp/vhost.tmp';
 
             $template     = file_get_contents($path.'/vhost.conf');

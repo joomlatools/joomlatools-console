@@ -30,6 +30,13 @@ class Download extends AbstractSite
      */
     protected $versions;
 
+	/**
+	 * Clone target repoistory
+	 *
+	 * @var bool
+	 */
+	protected $clone = true;
+
     protected function configure()
     {
         parent::configure();
@@ -62,6 +69,12 @@ class Download extends AbstractSite
                 InputOption::VALUE_REQUIRED,
                 'Alternative Git repository to clone. To use joomlatools/platform, use --repo=platform.'
             )
+	        ->addOption(
+	        	'clone',
+		        null,
+		        InputOption::VALUE_REQUIRED,
+		        'Clone git repository locally before attempting install'
+            )
         ;
     }
 
@@ -73,6 +86,10 @@ class Download extends AbstractSite
 
         $this->versions = new Versions();
 
+        if (null !== ($val = $input->getOption('clone'))) {
+            $arguments['--clone'] = $val;
+        }
+
         if ($input->getOption('repo')) {
             $this->versions->setRepository($input->getOption('repo'));
         }
@@ -83,6 +100,10 @@ class Download extends AbstractSite
 
         if ($input->getOption('clear-cache')) {
             $this->versions->clearcache($output);
+        }
+
+        if ($input->getOption('clone')) {
+            $this->clone = $val;
         }
 
         $this->setVersion($input->getOption('release'));
@@ -200,7 +221,7 @@ class Download extends AbstractSite
         // We can be certain that the joomla-cms repository is a public GitHub repository
         // so we can download the files straight over HTTP.
         // We have no clue about anything else, so we clone those locally and fall back on git-archive
-        if ($repository == 'https://github.com/joomla/joomla-cms.git')
+        if (!$this->clone || $repository == 'https://github.com/joomla/joomla-cms.git')
         {
             $output->writeln("<info>Downloading Joomla $this->version - this could take a few minutes...</info>");
 

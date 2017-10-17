@@ -190,4 +190,13 @@ class Util
 
         return false;
     }
+
+	/**
+	 * Return a portable path for Joomla
+	 *
+	 * @return string
+	 */
+    public static function getPath() {
+    	return sys_get_temp_dir() . '/.joomla';
+    }
 }

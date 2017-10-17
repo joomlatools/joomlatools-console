@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Helper\TableHelper;
+use Joomlatools\Console\Joomla\Util;
 
 class Versions extends Command
 {
@@ -33,7 +34,7 @@ class Versions extends Command
     protected function configure()
     {
         if (!self::$file) {
-            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
+            self::$file = Util::getPath() . '/cache/' . md5($this->repository) . '/.versions';
         }
 
         $this
@@ -95,7 +96,7 @@ class Versions extends Command
 
         $this->repository = $repository;
 
-        self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
+        self::$file = Util::getPath() . '/cache/' . md5($this->repository) . '/.versions';
     }
 
     public function getRepository()

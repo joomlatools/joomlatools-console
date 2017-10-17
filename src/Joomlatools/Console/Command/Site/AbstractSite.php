@@ -12,8 +12,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 use Symfony\Component\Console\Question;
+use Joomlatools\Console\Joomla\Util;
 
 abstract class AbstractSite extends Command
 {
@@ -27,7 +27,7 @@ abstract class AbstractSite extends Command
     protected function configure()
     {
         if (empty(self::$files)) {
-            self::$files = realpath(__DIR__.'/../../../../../bin/.files');
+            self::$files = Util::getPath() . '/bin/.files';
         }
 
         $this->addArgument(
