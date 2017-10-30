@@ -27,7 +27,7 @@ abstract class AbstractSite extends Command
     protected function configure()
     {
         if (empty(self::$files)) {
-            self::$files = Util::getPath() . '/bin/.files';
+            self::$files = Util::getTemplatePath() . '/bin/.files';
         }
 
         $this->addArgument(

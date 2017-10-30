@@ -75,8 +75,7 @@ class Install extends Database\AbstractDatabase
                 'e',
                 InputOption::VALUE_NONE,
                 'Do not check if database already exists or not.'
-            )
-            ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -228,7 +227,7 @@ class Install extends Database\AbstractDatabase
             return;
         }
 
-        $filename = self::$files.'/cache/'.basename($url);
+        $filename = Util::getWritablePath().'/cache/'.basename($url);
         if(!file_exists($filename))
         {
             $bytes = file_put_contents($filename, fopen($url, 'r'));

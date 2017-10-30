@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Deserializer;
 use Joomlatools\Console\Joomla\Util;
 use Joomlatools\Console\Command\Database\AbstractDatabase;
 
@@ -95,11 +96,7 @@ class Configure extends AbstractDatabase
         }
 
         if (null !== ($file = $input->getOption('options'))) {
-        	if (!file_exists($file)) {
-        		throw new \InvalidArgumentException((sprintf("Argument file `%s' not found", $file)));
-	        }
-	        $opt = file_get_contents($file);
-        	$this->_extra_options = unserialize($opt);
+        	$this->_extra_options = Deserializer::deserializeFile($file);
         }
 
         $this->check($input, $output);

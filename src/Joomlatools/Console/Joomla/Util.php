@@ -196,7 +196,22 @@ class Util
 	 *
 	 * @return string
 	 */
-    public static function getPath() {
-    	return sys_get_temp_dir() . '/.joomla';
+    public static function getWritablePath() {
+    	if ('' !== ($path = \Phar::running())) {
+    		return sys_get_temp_dir() . '/.joomla';
+    	}
+    	return self::getTemplatePath();
+    }
+
+    /**
+     * Get template file path
+     * @return string
+     */
+    public static function getTemplatePath() {
+    	if ('' !== ($path = \Phar::running())) {
+    		return $path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files';
+    	}
+    	return realpath(dirname(dirname(dirname(dirname($path)))) . DIRECTORY_SEPARATOR .
+		    'bin' . DIRECTORY_SEPARATOR . '.files');
     }
 }

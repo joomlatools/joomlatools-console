@@ -17,6 +17,9 @@ use Joomlatools\Console\Joomla\Util;
 
 class Versions extends Command
 {
+	const JOOMLATOOLS_REPO = 'git@github.com:joomlatools/joomlatools-platform.git';
+
+	const JOOMLA_REPO = 'https://github.com/joomla/joomla-cms.git';
     /**
      * Cache file
      *
@@ -29,12 +32,12 @@ class Versions extends Command
      *
      * @var string
      */
-    protected $repository = 'https://github.com/joomla/joomla-cms.git';
+    protected $repository = self::JOOMLA_REPO;
 
     protected function configure()
     {
         if (!self::$file) {
-            self::$file = Util::getPath() . '/cache/' . md5($this->repository) . '/.versions';
+            self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
         }
 
         $this
@@ -91,12 +94,12 @@ class Versions extends Command
     public function setRepository($repository)
     {
         if ($repository == 'platform') {
-            $repository = 'git@github.com:joomlatools/joomlatools-platform.git';
+            $repository = self::JOOMLATOOLS_REPO;
         }
 
         $this->repository = $repository;
 
-        self::$file = Util::getPath() . '/cache/' . md5($this->repository) . '/.versions';
+        self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
     }
 
     public function getRepository()
