@@ -44,7 +44,7 @@ To create a site with the latest Joomla version, run:
 
     <info>joomla site:create foobar</info>
 
-The newly installed site will be available at <comment>/var/www/foobar</comment> and <comment>foobar.dev</comment> after that. You can login into your fresh Joomla installation using these credentials: admin/admin.
+The newly installed site will be available at <comment>/var/www/foobar</comment> and <comment>foobar.test</comment> after that. You can login into your fresh Joomla installation using these credentials: admin/admin.
 By default, the web server root is set to <comment>/var/www</comment>. You can pass <comment>–www=/my/server/path</comment> to commands for custom values.
 
 The console can also install the Joomlatools Platform out of the box by adding the <comment>--repo=platform</comment> flag:
