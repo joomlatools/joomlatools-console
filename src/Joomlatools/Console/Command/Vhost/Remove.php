@@ -25,7 +25,7 @@ class Remove extends Command
             ->addArgument(
                 'site',
                 InputArgument::REQUIRED,
-                'Alphanumeric site name, used in the site URL with .dev domain'
+                'Alphanumeric site name, used in the site URL with .test domain'
             )
         ;
     }
