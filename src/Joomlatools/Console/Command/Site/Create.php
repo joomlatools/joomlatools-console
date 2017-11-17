@@ -99,7 +99,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTP port the virtual host should listen to',
-                (Util::isJoomlatoolsBox() ? 8080 : 80)
+                80
             )
             ->addOption(
                 'disable-ssl',
@@ -126,7 +126,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The port on which the server will listen for SSL requests',
-                '443'
+                443
             )
             ->addOption(
                 'interactive',
