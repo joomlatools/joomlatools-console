@@ -208,9 +208,7 @@ EOF
 				throw new \ArgumentError("--download requires --repo argument");
 		    }
 	    }
-
-	    var_dump(new ArrayInput($arguments));
-        die();
+        
         $command = new Download();
         $command->run(new ArrayInput($arguments), $output);
     }
