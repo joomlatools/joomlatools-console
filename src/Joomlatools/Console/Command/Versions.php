@@ -13,9 +13,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Helper\TableHelper;
+use Joomlatools\Console\Joomla\Util;
 
 class Versions extends Command
 {
+	const JOOMLATOOLS_REPO = 'git@github.com:joomlatools/joomlatools-platform.git';
+
+	const JOOMLA_REPO = 'https://github.com/joomla/joomla-cms.git';
     /**
      * Cache file
      *
@@ -28,12 +32,12 @@ class Versions extends Command
      *
      * @var string
      */
-    protected $repository = 'https://github.com/joomla/joomla-cms.git';
+    protected $repository = self::JOOMLA_REPO;
 
     protected function configure()
     {
         if (!self::$file) {
-            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
+            self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
         }
 
         $this
@@ -90,12 +94,12 @@ class Versions extends Command
     public function setRepository($repository)
     {
         if ($repository == 'platform') {
-            $repository = 'https://github.com/joomlatools/joomlatools-platform.git';
+            $repository = self::JOOMLATOOLS_REPO;
         }
 
         $this->repository = $repository;
 
-        self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
+        self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
     }
 
     public function getRepository()

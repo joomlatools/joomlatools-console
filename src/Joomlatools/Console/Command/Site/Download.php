@@ -30,6 +30,13 @@ class Download extends AbstractSite
      */
     protected $versions;
 
+	/**
+	 * Download release instead of cloning repo locally
+	 *
+	 * @var bool
+	 */
+	protected $download = false;
+
     protected function configure()
     {
         parent::configure();
@@ -60,7 +67,13 @@ class Download extends AbstractSite
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. To use joomlatools/platform, use --repo=platform.'
+                'Alternative Git repository to clone. To use joomlatools/platform, use --repo=platform'
+            )
+	        ->addOption(
+				'download',
+		        null,
+		        InputOption::VALUE_NONE,
+		        'Download release from repo instead of cloning non-github repo (requires --repo)'
             )
         ;
     }
@@ -73,6 +86,13 @@ class Download extends AbstractSite
 
         $this->versions = new Versions();
 
+        if (false !== ($val = $input->getOption('download'))) {
+			if (null === $input->getOption('repo')) {
+				throw new \InvalidArgumentException("--download requires --repo to be set");
+	        }
+	        $this->download = true;
+        }
+
         if ($input->getOption('repo')) {
             $this->versions->setRepository($input->getOption('repo'));
         }
@@ -83,6 +103,10 @@ class Download extends AbstractSite
 
         if ($input->getOption('clear-cache')) {
             $this->versions->clearcache($output);
+        }
+
+        if ($input->getOption('download')) {
+            $this->download = true;
         }
 
         $this->setVersion($input->getOption('release'));
@@ -99,7 +123,6 @@ class Download extends AbstractSite
 
                 throw new \RuntimeException(sprintf('Downloaded tarball "%s" could not be verified. A common cause is an interrupted download: check your internet connection and try again.', basename($tarball)));
             }
-
             if (!file_exists($this->target_dir)) {
                 `mkdir -p $this->target_dir`;
             }
@@ -196,11 +219,10 @@ class Download extends AbstractSite
         }
 
         $repository = $this->versions->getRepository();
-
         // We can be certain that the joomla-cms repository is a public GitHub repository
         // so we can download the files straight over HTTP.
         // We have no clue about anything else, so we clone those locally and fall back on git-archive
-        if ($repository == 'https://github.com/joomla/joomla-cms.git')
+        if ($this->download || $repository == 'https://github.com/joomla/joomla-cms.git')
         {
             $output->writeln("<info>Downloading Joomla $this->version - this could take a few minutes...</info>");
 
@@ -217,7 +239,7 @@ class Download extends AbstractSite
             {
                 $output->writeln("<info>Cloning $repository - this could take a few minutes...</info>");
 
-                `git clone --bare --mirror "$repository" "$clone"`;
+                `git clone --bare --depth 1 --mirror "$repository" "$clone"`;
             }
 
             if ($this->versions->isBranch($this->version))
@@ -241,17 +263,18 @@ class Download extends AbstractSite
      */
     protected function _downloadJoomlaCMS($target)
     {
+		$base = $this->versions->getRepository();
+		if ($base === Versions::JOOMLATOOLS_REPO || $base === Versions::JOOMLA_REPO) {
+			// non-mirror
+			$base = 'http://github.com/joomla/joomla-cms';
+		}
+
         if ($this->versions->isBranch($this->version)) {
-            $url = 'http://github.com/joomla/joomla-cms/tarball/'.$this->version;
+            $url = $base . '/tarball/' . $this->version;
         }
-        else $url = 'https://github.com/joomla/joomla-cms/archive/'.$this->version.'.tar.gz';
-
+        else $url = $base . '/archive/'.$this->version.'.tar.gz';
         $bytes = file_put_contents($target, fopen($url, 'r'));
-        if ($bytes === false || $bytes == 0) {
-            return false;
-        }
-
-        return true;
+        return (bool)$bytes;
     }
 
     /**

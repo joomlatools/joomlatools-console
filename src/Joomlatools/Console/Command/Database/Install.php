@@ -169,8 +169,9 @@ class Install extends AbstractDatabase
             if(is_numeric(substr($version->release, 0, 1)) && version_compare($version->release, '3.0.0', '<')) {
                 $users = 'joomla2.users.sql';
             }
+            $path = Util::getTemplatePath();
 
-            $imports[] = self::$files.'/'.$users;
+            $imports[] = $path.'/'.$users;
         }
 
         foreach ($imports as $import)
