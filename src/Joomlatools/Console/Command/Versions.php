@@ -90,7 +90,7 @@ class Versions extends Command
     public function setRepository($repository)
     {
         if ($repository == 'platform') {
-            $repository = 'git@github.com:joomlatools/joomlatools-platform.git';
+            $repository = 'https://github.com/joomlatools/joomlatools-platform.git';
         }
 
         $this->repository = $repository;
