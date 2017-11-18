@@ -93,6 +93,10 @@ class Versions extends Command
 
     public function setRepository($repository)
     {
+        if ($repository == 'platform') {
+            $repository = Versions::REPO_JOOMLATOOLS_PLATFORM;
+        }
+
         $this->repository = $repository;
 
         self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
@@ -101,6 +105,19 @@ class Versions extends Command
     public function getRepository()
     {
         return $this->repository;
+    }
+
+    /**
+     * Check if the repository is a valid Git repository.
+     *
+     * @return bool
+     */
+    public function isGitRepository()
+    {
+        $cmd = "GIT_SSH_COMMAND=\"ssh -oBatchMode=yes\" GIT_ASKPASS=/bin/echo git ls-remote $this->repository 2>&1";
+        exec($cmd, $output, $returnVal);
+
+        return $returnVal === 0;
     }
 
     public function getCacheDirectory()
@@ -128,19 +145,20 @@ class Versions extends Command
 
     public function refresh()
     {
-        if(file_exists(self::$file)) {
+        if (file_exists(self::$file)) {
             unlink(self::$file);
         }
 
-        $cmd = "GIT_SSH_COMMAND=\"ssh -oBatchMode=yes\" GIT_ASKPASS=/bin/echo git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'";
+        $cmd = "GIT_SSH_COMMAND=\"ssh -oBatchMode=yes\" GIT_ASKPASS=/bin/echo git ls-remote $this->repository 2>&1 | grep -E 'refs/(tags|heads)' | grep -v '{}'";
         exec($cmd, $refs, $returnVal);
 
         if ($returnVal != 0) {
-            throw new \RuntimeException(sprintf('Failed to connect to repository %s. Check the repository URL and your internet connection and try again.', $this->repository));
+            $refs = array();
         }
 
-        $versions = array();
+        $versions = array('tags' => array(), 'heads' => array());
         $pattern  = '/^[a-z0-9]+\s+refs\/(heads|tags)\/([a-z0-9\.\-_\/]+)$/im';
+
         foreach($refs as $ref)
         {
             if(preg_match($pattern, $ref, $matches))
@@ -168,7 +186,7 @@ class Versions extends Command
 
     protected function _getVersions()
     {
-        if(!file_exists(self::$file)) {
+        if (!file_exists(self::$file)) {
             $this->refresh();
         }
 
@@ -188,6 +206,11 @@ class Versions extends Command
     public function getLatestRelease($prefix = null)
     {
         $latest   = '0.0.0';
+
+        if (!$this->isGitRepository()) {
+            return 'current';
+        }
+
         $versions = $this->_getVersions();
 
         if (!isset($versions['tags'])) {

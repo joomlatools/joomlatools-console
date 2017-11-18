@@ -112,7 +112,7 @@ class Download extends AbstractSite
                     unlink($tarball);
                 }
 
-                throw new \RuntimeException(sprintf('Downloaded tarball "%s" could not be verified. A common cause is an interrupted download: check your internet connection and try again.', basename($tarball)));
+                throw new \RuntimeException(sprintf('Downloaded tar archive "%s" could not be verified. A common cause is an interrupted download: check your internet connection and try again.', basename($tarball)));
             }
 
             if (!file_exists($this->target_dir)) {
@@ -147,6 +147,12 @@ class Download extends AbstractSite
 
     public function setVersion($version)
     {
+        if (!$this->versions->isGitRepository())
+        {
+            $this->version = 'current';
+            return;
+        }
+
         if ($version == 'none')
         {
             $this->version = $version;
@@ -206,27 +212,27 @@ class Download extends AbstractSite
 
         $cache = $this->versions->getCacheDirectory().'/'.$tar;
 
-        if (file_exists($cache) && !$this->versions->isBranch($this->version)) {
-            return $cache;
-        }
-
         $repository = $this->versions->getRepository();
 
-        if ($this->_isGitRepository($repository))
+        if ($this->versions->isGitRepository())
         {
+            if (file_exists($cache) && !$this->versions->isBranch($this->version)) {
+                return $cache;
+            }
+
             $scheme    = strtolower(parse_url($repository, PHP_URL_SCHEME));
             $isGitHub  = strtolower(parse_url($repository, PHP_URL_HOST)) == 'github.com';
             $extension = substr($repository, -4);
 
             if (in_array($scheme, array('http', 'https')) && $isGitHub && $extension != '.git') {
-                $this->_downloadFromGitHub($cache);
+                $result = $this->_downloadFromGitHub($cache);
             }
             else $result = $this->_clone($cache);
         }
         else $result = $this->_download($cache);
 
         if (!$result) {
-            throw new \RuntimeException(sprintf('Failed to download Joomla %s', $this->version));
+            throw new \RuntimeException(sprintf('Failed to download source files for Joomla %s', $this->version));
         }
 
         return $cache;
@@ -247,6 +253,8 @@ class Download extends AbstractSite
         }
         else $url .= '/archive/'.$this->version.'.tar.gz';
 
+        $this->output->writeln("<info>Downloading $url - this could take a few minutes ..</info>");
+
         $bytes = file_put_contents($target, fopen($url, 'r'));
 
         return (bool) $bytes;
@@ -261,6 +269,8 @@ class Download extends AbstractSite
     protected function _download($target)
     {
         $url  = $this->versions->getRepository();
+
+        $this->output->writeln("<info>Downloading $url - this could take a few minutes ..</info>");
 
         $bytes = file_put_contents($target, fopen($url, 'r'));
 
@@ -280,35 +290,23 @@ class Download extends AbstractSite
 
         if (!file_exists($clone))
         {
-            $this->output->writeln("<info>Cloning $repository - this could take a few minutes...</info>");
+            $this->output->writeln("<info>Cloning $repository - this could take a few minutes ..</info>");
 
-            `git clone --bare --depth 1 --mirror "$repository" "$clone"`;
+            `git clone --bare --mirror "$repository" "$clone"`;
         }
 
         if ($this->versions->isBranch($this->version))
         {
-            $this->output->writeln("<info>Fetching latest changes from $repository - this could take a few minutes...</info>");
+            $this->output->writeln("<info>Fetching latest changes from $repository - this could take a few minutes ..</info>");
 
             `git --git-dir "$clone" --bare fetch`;
         }
 
+        $this->output->writeln("<info>Creating $this->version archive for $repository ..</info>");
+
         `git --git-dir "$clone" archive --prefix=base/ $this->version | gzip >"$target"`;
 
         return (bool) @filesize($target);
-    }
-
-    /**
-     * Check if the given URL is a valid Git Repositury.
-     *
-     * @param $url
-     * @return bool
-     */
-    protected function _isGitRepository($url)
-    {
-        $cmd = "GIT_SSH_COMMAND=\"ssh -oBatchMode=yes\" GIT_ASKPASS=/bin/echo git ls-remote $url | grep -E 'refs/(tags|heads)' | grep -v '{}'";
-        exec($cmd, $output, $returnVal);
-
-        return $returnVal === 0;
     }
 
     /**
