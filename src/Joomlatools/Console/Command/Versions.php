@@ -17,9 +17,9 @@ use Joomlatools\Console\Joomla\Util;
 
 class Versions extends Command
 {
-	const JOOMLATOOLS_REPO = 'git@github.com:joomlatools/joomlatools-platform.git';
+	const REPO_JOOMLATOOLS_PLATFORM = 'https://github.com/joomlatools/joomlatools-platform';
+	const REPO_JOOMLA_CMS           = 'https://github.com/joomla/joomla-cms';
 
-	const JOOMLA_REPO = 'https://github.com/joomla/joomla-cms.git';
     /**
      * Cache file
      *
@@ -32,7 +32,7 @@ class Versions extends Command
      *
      * @var string
      */
-    protected $repository = self::JOOMLA_REPO;
+    protected $repository = self::REPO_JOOMLA_CMS;
 
     protected function configure()
     {
@@ -93,10 +93,6 @@ class Versions extends Command
 
     public function setRepository($repository)
     {
-        if ($repository == 'platform') {
-            $repository = self::JOOMLATOOLS_REPO;
-        }
-
         $this->repository = $repository;
 
         self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
@@ -136,7 +132,7 @@ class Versions extends Command
             unlink(self::$file);
         }
 
-        $cmd = "git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'";
+        $cmd = "GIT_SSH_COMMAND=\"ssh -oBatchMode=yes\" GIT_ASKPASS=/bin/echo git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'";
         exec($cmd, $refs, $returnVal);
 
         if ($returnVal != 0) {

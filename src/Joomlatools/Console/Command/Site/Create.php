@@ -81,12 +81,6 @@ EOF
                 InputOption::VALUE_REQUIRED,
                 'Alternative Git repository to use. To use joomlatools/platform, use --repo=platform.'
             )
-	        ->addOption(
-		        'download',
-		        null,
-		        InputOption::VALUE_NONE,
-		        "Do not clone repository locally before downloading release. Requires --repo."
-	        )
             ->addOption(
                 'clear-cache',
                 null,
@@ -202,13 +196,6 @@ EOF
             $arguments['--repo'] = $repo;
         }
 
-	    if (null !== ($val = $input->getOption('download'))) {
-		    $arguments['--download'] = '';
-		    if (empty($repo)) {
-				throw new \ArgumentError("--download requires --repo argument");
-		    }
-	    }
-        
         $command = new Download();
         $command->run(new ArrayInput($arguments), $output);
     }
