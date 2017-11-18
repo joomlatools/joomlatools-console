@@ -192,26 +192,36 @@ class Util
     }
 
 	/**
-	 * Return a portable path for Joomla
+	 * Return a writable path
 	 *
 	 * @return string
 	 */
-    public static function getWritablePath() {
-    	if ('' !== ($path = \Phar::running())) {
+    public static function getWritablePath()
+    {
+        $path = \Phar::running();
+
+    	if (!empty($path)) {
     		return sys_get_temp_dir() . '/.joomla';
     	}
+
     	return self::getTemplatePath();
     }
 
     /**
-     * Get template file path
+     * Get template directory path
+     *
      * @return string
      */
-    public static function getTemplatePath() {
-    	if ('' !== ($path = \Phar::running())) {
+    public static function getTemplatePath()
+    {
+        $path = \Phar::running();
+
+    	if (!empty($path)) {
     		return $path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files';
     	}
-    	return realpath(dirname(dirname(dirname(dirname($path)))) . DIRECTORY_SEPARATOR .
-		    'bin' . DIRECTORY_SEPARATOR . '.files');
+
+    	$root = dirname(dirname(dirname(dirname(__DIR__))));
+
+    	return realpath($root .DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files');
     }
 }
