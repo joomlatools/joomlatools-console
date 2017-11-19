@@ -21,7 +21,7 @@ class Remove extends Command
 
         $this
             ->setName('vhost:remove')
-            ->setDescription('Removes an Apache2 virtual host')
+            ->setDescription('Removes the Apache2 and/or Nginx virtual host')
             ->addArgument(
                 'site',
                 InputArgument::REQUIRED,

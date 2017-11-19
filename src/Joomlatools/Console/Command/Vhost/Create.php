@@ -24,7 +24,7 @@ class Create extends AbstractSite
 
         $this
             ->setName('vhost:create')
-            ->setDescription('Creates a new Apache2 virtual host')
+            ->setDescription('Creates a new Apache2 and/or Nginx virtual host')
             ->addOption(
                 'http-port',
                 null,
@@ -59,6 +59,13 @@ class Create extends AbstractSite
                 'The port on which the server will listen for SSL requests',
                 443
             )
+            ->addOption(
+                'php-fpm-address',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'PHP-FPM address or path to Unix socket file, set as value for fastcgi_pass in Nginx config',
+                'unix:/opt/php/php-fpm.sock'
+            )
         ;
     }
 
@@ -66,14 +73,14 @@ class Create extends AbstractSite
     {
         parent::execute($input, $output);
 
+        $site = $input->getArgument('site');
+        $port = $input->getOption('http-port');
+        $path = realpath(__DIR__.'/../../../../../bin/.files/');
+        $tmp  = '/tmp/vhost.tmp';
+
         if (is_dir('/etc/apache2/sites-available'))
         {
-            $site = $input->getArgument('site');
-            $port = $input->getOption('http-port');
-            $path = realpath(__DIR__.'/../../../../../bin/.files/');
-            $tmp  = '/tmp/vhost.tmp';
-
-            $template     = file_get_contents($path.'/vhost.conf');
+            $template     = file_get_contents($path.'/apache.vhost.conf');
             $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
             file_put_contents($tmp, sprintf($template, $site, $documentroot, $port));
@@ -86,7 +93,7 @@ class Create extends AbstractSite
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
-                    $template = "\n\n" . file_get_contents($path.'/vhost.ssl.conf');
+                    $template = "\n\n" . file_get_contents($path.'/apache.vhost.ssl.conf');
                     file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
                 else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
@@ -95,6 +102,44 @@ class Create extends AbstractSite
             `sudo tee /etc/apache2/sites-available/1-$site.conf < $tmp`;
             `sudo a2ensite 1-$site.conf`;
             `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+
+            @unlink($tmp);
+        }
+
+        if (is_dir('/etc/nginx/sites-available'))
+        {
+            $socket = $input->getOption('php-fpm-address');
+
+            if (Util::isJoomlatoolsBox() && $port == 80) {
+                $port = 81;
+            }
+
+            $template     = file_get_contents($path.'/nginx.vhost.conf');
+            $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
+
+            file_put_contents($tmp, sprintf($template, $site, $documentroot, $port, $socket));
+
+            if (!$input->getOption('disable-ssl'))
+            {
+                $ssl_crt  = $input->getOption('ssl-crt');
+                $ssl_key  = $input->getOption('ssl-key');
+                $ssl_port = $input->getOption('ssl-port');
+
+                if (Util::isJoomlatoolsBox() && $ssl_port == 443) {
+                    $ssl_port = 444;
+                }
+
+                if (file_exists($ssl_crt) && file_exists($ssl_key))
+                {
+                    $template = "\n\n" . file_get_contents($path.'/nginx.vhost.ssl.conf');
+                    file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $socket, $ssl_crt, $ssl_key), FILE_APPEND);
+                }
+                else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
+            }
+
+            `sudo tee /etc/nginx/sites-available/1-$site.conf < $tmp`;
+            `sudo ln -fs /etc/nginx/sites-available/1-$site.conf /etc/nginx/sites-enabled/1-$site.conf`;
+            `sudo /etc/init.d/nginx restart > /dev/null 2>&1`;
 
             @unlink($tmp);
         }
