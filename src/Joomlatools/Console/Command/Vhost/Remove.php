@@ -41,5 +41,14 @@ class Remove extends Command
             `sudo rm $file`;
             `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
         }
+
+        $file = '/etc/nginx/sites-available/1-' . $site . '.conf';
+
+        if (is_file($file))
+        {
+            `sudo rm -f $file`;
+            `sudo rm -f /etc/nginx/sites-enabled/1-$site.conf`;
+            `sudo /etc/init.d/nginx restart > /dev/null 2>&1`;
+        }
     }
 }
