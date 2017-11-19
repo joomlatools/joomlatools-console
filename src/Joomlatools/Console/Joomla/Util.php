@@ -190,4 +190,38 @@ class Util
 
         return false;
     }
+
+	/**
+	 * Return a writable path
+	 *
+	 * @return string
+	 */
+    public static function getWritablePath()
+    {
+        $path = \Phar::running();
+
+    	if (!empty($path)) {
+    		return sys_get_temp_dir() . '/.joomla';
+    	}
+
+    	return self::getTemplatePath();
+    }
+
+    /**
+     * Get template directory path
+     *
+     * @return string
+     */
+    public static function getTemplatePath()
+    {
+        $path = \Phar::running();
+
+    	if (!empty($path)) {
+    		return $path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files';
+    	}
+
+    	$root = dirname(dirname(dirname(dirname(__DIR__))));
+
+    	return realpath($root .DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files');
+    }
 }
