@@ -7,15 +7,19 @@
  */
 
 $dirs = explode(DIRECTORY_SEPARATOR, __DIR__);
-for ($i = count($dirs); $i >= 0; $i--) {
+for ($i = count($dirs); $i >= 0; $i--)
+{
 	$dir = implode(DIRECTORY_SEPARATOR, array_slice($dirs, 0, $i));
 	$autoload = $dir . DIRECTORY_SEPARATOR . 'autoload.php';
-	$vendored = $dir . DIRECTORY_SEPARATOR . 'vendor' .
-		DIRECTORY_SEPARATOR . 'autoload.php';
-	if (file_exists($vendored)) {
+	$vendored = $dir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
+	if (file_exists($vendored))
+	{
 		require $vendored;
 		break;
-	} else if (file_exists($autoload)) {
+	}
+	else if (file_exists($autoload))
+	{
 		require $autoload;
 		break;
 	}

@@ -116,9 +116,12 @@ abstract class AbstractCache extends AbstractSite
     {
         $template   = Util::getTemplatePath() . '/console-cache.php-tpl';
         $autoloader = dirname(dirname(dirname($template)) . '/vendor/autoload.php');
+
         $contents = file_get_contents($template);
         $contents = sprintf($contents, $autoloader, $this->target_dir, $task, $client, implode(',', $group), $hash);
+
         $target = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web' : $this->target_dir;
+
         file_put_contents($target.'/console-cache.php', $contents);
 
         return $target;
