@@ -10,7 +10,9 @@ namespace Joomlatools\Console\Command\Site;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 
+use Joomlatools\Console\Joomla\Deserializer;
 use Joomlatools\Console\Joomla\Util;
 use Joomlatools\Console\Command\Database\AbstractDatabase;
 
@@ -31,6 +33,13 @@ class Configure extends AbstractDatabase
      */
     protected $_default_values = array();
 
+	/**
+	 * Additional options read from file
+	 *
+	 * @var array
+	 */
+    protected $_extra_options = array();
+
     protected function configure()
     {
         parent::configure();
@@ -50,6 +59,12 @@ class Configure extends AbstractDatabase
                 InputOption::VALUE_NONE,
                 'Prompt for configuration details'
             )
+	        ->addOption(
+	        	'options',
+		        null,
+		        InputOption::VALUE_REQUIRED,
+		        "A YAML file consisting of serialized parameters to override JConfig"
+	        )
         ;
     }
 
@@ -81,6 +96,23 @@ class Configure extends AbstractDatabase
             $this->_promptDetails($input, $output);
         }
 
+        $options = $input->getOption('options');
+        if ($options !== null)
+        {
+            if (!file_exists($options)) {
+                throw new Exception(sprintf('Additional option file \'%s\' does not exist', $options));
+            }
+
+            $contents = file_get_contents($options);
+
+            try {
+                $this->_extra_options = Yaml::parse($contents);
+            }
+            catch (Exception $ex) {
+                throw new Exception(sprintf('Unable to parse YAML file %s', $options));
+            }
+        }
+
         $this->check($input, $output);
 
         if (Util::isPlatform($this->target_dir)) {
@@ -101,7 +133,7 @@ class Configure extends AbstractDatabase
 
         $contents = file_get_contents($source);
         $replace  = function($name, $value, &$contents) {
-            $pattern = sprintf("#%s\s+= '.*?'#", $name);
+            $pattern = sprintf('#\$%s\s*=\s*(["\']).*?(?<!\\\\)\1#', $name);
             $match   = preg_match($pattern, $contents);
 
             if(!$match)
@@ -109,12 +141,12 @@ class Configure extends AbstractDatabase
                 $pattern 	 = "/^\s?(\})\s?$/m";
                 $replacement = sprintf("\tpublic \$%s = '%s';\n}", $name, $value);
             }
-            else $replacement = sprintf("%s = '%s'", $name, $value);
+            else $replacement = sprintf("\$%s = '%s'", $name, $value);
 
             $contents = preg_replace($pattern, $replacement, $contents);
         };
         $remove   = function($name, &$contents) {
-            $pattern  = sprintf("#public \$%s = '.*?'#", $name);
+            $pattern  = sprintf('#public\s+\$%s\s*=\s*(["\']).*?(?<!\\\\)\1#', $name);
             $contents = preg_replace($pattern, '', $contents);
         };
 
@@ -122,7 +154,7 @@ class Configure extends AbstractDatabase
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
-            'host'      => $this->mysql->host.':'.$this->mysql->port,
+            'host'      => $this->mysql->host,
             'dbprefix'  => 'j_',
             'dbtype'    => $this->mysql->driver,
 
@@ -150,7 +182,12 @@ class Configure extends AbstractDatabase
             'secret'    => $this->_default_values['key']
         );
 
-        foreach($replacements as $key => $value) {
+	    if ($this->mysql->port != $this->getDefaultPort()) {
+	    	$replacements['host'] .= ':' . $this->mysql->port;
+        }
+
+        $configuration = array_merge($replacements, $this->_extra_options);
+        foreach($configuration as $key => $value) {
             $replace($key, $value, $contents);
         }
 
@@ -170,7 +207,7 @@ class Configure extends AbstractDatabase
             'JOOMLA_DB_NAME' => $this->target_db,
             'JOOMLA_DB_USER' => $this->mysql->user,
             'JOOMLA_DB_PASS' => $this->mysql->password,
-            'JOOMLA_DB_HOST' => $this->mysql->host.':'.$this->mysql->port,
+            'JOOMLA_DB_HOST' => $this->mysql->host,
             'JOOMLA_DB_TYPE' => $this->mysql->driver,
 
             'JOOMLA_LOG_PATH' => $this->_default_values['log_path'],
@@ -180,6 +217,10 @@ class Configure extends AbstractDatabase
             'JOOMLA_ENV' => $this->_default_values['env']
         );
 
+        if ($this->mysql->port != $this->getDefaultPort()) {
+        	$config['JOOMLA_DB_HOST'] .= ':' . $this->mysql->port;
+        }
+
         $fp = fopen($this->target_dir.'/.env', 'w');
 
         foreach ($config as $key => $val) {
@@ -187,6 +228,24 @@ class Configure extends AbstractDatabase
         }
 
         fclose($fp);
+    }
+
+	/**
+	 * Get default port for MySQL
+	 *
+	 * @return string
+	 */
+    protected function getDefaultPort()
+    {
+	    $driver = $this->mysql->driver;
+	    $key    = $driver . '.default_port';
+	    $port   = ini_get($key);
+
+	    if ($port) {
+	    	return $port;
+	    }
+
+	    return ini_get('mysqli.default_port');
     }
 
     public function check(InputInterface $input, OutputInterface $output)

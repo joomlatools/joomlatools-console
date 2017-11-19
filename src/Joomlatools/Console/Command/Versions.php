@@ -13,9 +13,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Helper\TableHelper;
+use Joomlatools\Console\Joomla\Util;
 
 class Versions extends Command
 {
+	const REPO_JOOMLATOOLS_PLATFORM = 'https://github.com/joomlatools/joomlatools-platform';
+	const REPO_JOOMLA_CMS           = 'https://github.com/joomla/joomla-cms';
+
     /**
      * Cache file
      *
@@ -28,12 +32,12 @@ class Versions extends Command
      *
      * @var string
      */
-    protected $repository = 'https://github.com/joomla/joomla-cms.git';
+    protected $repository = self::REPO_JOOMLA_CMS;
 
     protected function configure()
     {
         if (!self::$file) {
-            self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
+            self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
         }
 
         $this
@@ -55,7 +59,7 @@ class Versions extends Command
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. To use joomlatools/platform, use --repo=platform.',
+                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform.',
                 $this->repository
             );
     }
@@ -90,17 +94,30 @@ class Versions extends Command
     public function setRepository($repository)
     {
         if ($repository == 'platform') {
-            $repository = 'https://github.com/joomlatools/joomlatools-platform.git';
+            $repository = Versions::REPO_JOOMLATOOLS_PLATFORM;
         }
 
         $this->repository = $repository;
 
-        self::$file = realpath(__DIR__.'/../../../../bin/.files/cache').'/' . md5($this->repository) . '/.versions';
+        self::$file = Util::getWritablePath() . '/cache/' . md5($this->repository) . '/.versions';
     }
 
     public function getRepository()
     {
         return $this->repository;
+    }
+
+    /**
+     * Check if the repository is a valid Git repository.
+     *
+     * @return bool
+     */
+    public function isGitRepository()
+    {
+        $cmd = "GIT_SSH_COMMAND=\"ssh -oBatchMode=yes\" GIT_ASKPASS=/bin/echo git ls-remote $this->repository 2>&1";
+        exec($cmd, $output, $returnVal);
+
+        return $returnVal === 0;
     }
 
     public function getCacheDirectory()
@@ -128,19 +145,20 @@ class Versions extends Command
 
     public function refresh()
     {
-        if(file_exists(self::$file)) {
+        if (file_exists(self::$file)) {
             unlink(self::$file);
         }
 
-        $cmd = "git ls-remote $this->repository | grep -E 'refs/(tags|heads)' | grep -v '{}'";
+        $cmd = "GIT_SSH_COMMAND=\"ssh -oBatchMode=yes\" GIT_ASKPASS=/bin/echo git ls-remote $this->repository 2>&1 | grep -E 'refs/(tags|heads)' | grep -v '{}'";
         exec($cmd, $refs, $returnVal);
 
         if ($returnVal != 0) {
-            throw new \RuntimeException(sprintf('Failed to connect to repository %s. Check the repository URL and your internet connection and try again.', $this->repository));
+            $refs = array();
         }
 
-        $versions = array();
+        $versions = array('tags' => array(), 'heads' => array());
         $pattern  = '/^[a-z0-9]+\s+refs\/(heads|tags)\/([a-z0-9\.\-_\/]+)$/im';
+
         foreach($refs as $ref)
         {
             if(preg_match($pattern, $ref, $matches))
@@ -168,7 +186,7 @@ class Versions extends Command
 
     protected function _getVersions()
     {
-        if(!file_exists(self::$file)) {
+        if (!file_exists(self::$file)) {
             $this->refresh();
         }
 
@@ -188,6 +206,11 @@ class Versions extends Command
     public function getLatestRelease($prefix = null)
     {
         $latest   = '0.0.0';
+
+        if (!$this->isGitRepository()) {
+            return 'current';
+        }
+
         $versions = $this->_getVersions();
 
         if (!isset($versions['tags'])) {
