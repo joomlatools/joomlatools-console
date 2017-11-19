@@ -133,6 +133,12 @@ EOF
                 null,
                 InputOption::VALUE_NONE,
                 'Prompt for configuration details'
+            )
+            ->addOption(
+                'options',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "A YAML file consisting of serialized parameters to override JConfig."
             );
     }
 
@@ -159,7 +165,7 @@ EOF
                 '--www'  => $this->www
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);

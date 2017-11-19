@@ -10,6 +10,7 @@ namespace Joomlatools\Console\Command\Site;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 
 use Joomlatools\Console\Joomla\Deserializer;
 use Joomlatools\Console\Joomla\Util;
@@ -62,7 +63,7 @@ class Configure extends AbstractDatabase
 	        	'options',
 		        null,
 		        InputOption::VALUE_REQUIRED,
-		        "A file consisting of serialized parameters to override JConfig"
+		        "A YAML file consisting of serialized parameters to override JConfig"
 	        )
         ;
     }
@@ -95,8 +96,21 @@ class Configure extends AbstractDatabase
             $this->_promptDetails($input, $output);
         }
 
-        if (null !== ($file = $input->getOption('options'))) {
-        	$this->_extra_options = Deserializer::deserializeFile($file);
+        $options = $input->getOption('options');
+        if ($options !== null)
+        {
+            if (!file_exists($options)) {
+                throw new Exception(sprintf('Additional option file \'%s\' does not exist', $options));
+            }
+
+            $contents = file_get_contents($options);
+
+            try {
+                $this->_extra_options = Yaml::parse($contents);
+            }
+            catch (Exception $ex) {
+                throw new Exception(sprintf('Unable to parse YAML file %s', $options));
+            }
         }
 
         $this->check($input, $output);
@@ -172,7 +186,8 @@ class Configure extends AbstractDatabase
 	    	$replacements['host'] .= ':' . $this->mysql->port;
         }
 
-        foreach(array_merge($replacements, $this->_extra_options) as $key => $value) {
+        $configuration = array_merge($replacements, $this->_extra_options);
+        foreach($configuration as $key => $value) {
             $replace($key, $value, $contents);
         }
 
@@ -220,13 +235,16 @@ class Configure extends AbstractDatabase
 	 *
 	 * @return string
 	 */
-    protected function getDefaultPort() {
+    protected function getDefaultPort()
+    {
 	    $driver = $this->mysql->driver;
-	    $key = $driver . '.default_port';
-	    $port = ini_get($key);
+	    $key    = $driver . '.default_port';
+	    $port   = ini_get($key);
+
 	    if ($port) {
 	    	return $port;
 	    }
+
 	    return ini_get('mysqli.default_port');
     }
 

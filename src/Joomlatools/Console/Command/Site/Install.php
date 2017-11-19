@@ -75,6 +75,12 @@ class Install extends Database\AbstractDatabase
                 'e',
                 InputOption::VALUE_NONE,
                 'Do not check if database already exists or not.'
+            )
+            ->addOption(
+                'options',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "A YAML file consisting of serialized parameters to override JConfig."
             );
     }
 
@@ -149,7 +155,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive');
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive', 'options');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
