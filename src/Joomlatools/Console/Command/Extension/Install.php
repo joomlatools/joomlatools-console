@@ -102,15 +102,19 @@ EOL
 
     public function composer_install(InputInterface $input, OutputInterface $output)
     {
-        chdir($this->target_dir);
-
         $string = 'composer require';
 
         if (!$this->composer_global){
             $string = 'php composer.phar require';
         }
 
-        passthru(sprintf(sprintf('%s %s', $string, implode(' ',$this->composer_extensions))));
+        $string = sprintf(sprintf('%s %s', $string, implode(' ',$this->composer_extensions))) . ' --working-dir=' . $this->target_dir;
+
+        passthru($string, $result);
+
+        if (!$result){
+            die();
+        }
     }
 
     public function install(InputInterface $input, OutputInterface $output)
