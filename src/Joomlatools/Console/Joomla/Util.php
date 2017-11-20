@@ -89,6 +89,10 @@ class Util
             }
             else self::$_versions[$key] = false;
         }
+
+        if (!self::$_versions[$key] && self::isKodekitPlatform($base)) {
+            self::$_versions[$key] = (object) array('type' => 'kodekit-platform', 'release' => 'n/a');
+        }
         
         return self::$_versions[$key];
     }
@@ -109,6 +113,29 @@ class Util
             $package  = json_decode($contents);
 
             if ($package->name == 'joomlatools/platform') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if we are dealing with timble/kodekit-platform or not
+     *
+     * @param string $base Base path for the Kodekit Platform installation
+     * @return boolean
+     */
+    public static function isKodekitPlatform($base)
+    {
+        $manifest = realpath($base . '/composer.json');
+
+        if (file_exists($manifest))
+        {
+            $contents = file_get_contents($manifest);
+            $package  = json_decode($contents);
+
+            if ($package->name == 'timble/kodekit-platform') {
                 return true;
             }
         }

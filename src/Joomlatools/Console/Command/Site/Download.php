@@ -65,7 +65,7 @@ class Download extends AbstractSite
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform'
+                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform. For Kodekit Platform, use --repo=kodekit-platform.'
             )
         ;
     }
@@ -84,10 +84,6 @@ class Download extends AbstractSite
 
         if (empty($repo)) {
             $repo = Versions::REPO_JOOMLA_CMS;
-        }
-
-        if ($repo == 'platform') {
-            $repo = Versions::REPO_JOOMLATOOLS_PLATFORM;
         }
 
         $this->versions->setRepository($repo);
@@ -132,7 +128,7 @@ class Download extends AbstractSite
                 `cp $directory/htaccess.txt $directory/.htaccess`;
             }
 
-            if ($isPlatform) {
+            if ($isPlatform || Util::isKodekitPlatform($this->target_dir)) {
                 `cd $this->target_dir; composer --no-interaction install -q`;
             }
         }
@@ -285,6 +281,10 @@ class Download extends AbstractSite
      */
     protected function _clone($target)
     {
+        if (substr($target, -3) == '.gz') {
+            $target = substr($target, 0, -3);
+        }
+
         $clone      = $this->versions->getCacheDirectory() . '/source';
         $repository = $this->versions->getRepository();
 
@@ -292,21 +292,43 @@ class Download extends AbstractSite
         {
             $this->output->writeln("<info>Cloning $repository - this could take a few minutes ..</info>");
 
-            `git clone --bare --mirror "$repository" "$clone"`;
+            `git clone --recursive "$repository" "$clone"`;
         }
 
         if ($this->versions->isBranch($this->version))
         {
             $this->output->writeln("<info>Fetching latest changes from $repository - this could take a few minutes ..</info>");
 
-            `git --git-dir "$clone" --bare fetch`;
+            `git --git-dir "$clone/.git" fetch`;
         }
 
         $this->output->writeln("<info>Creating $this->version archive for $repository ..</info>");
 
-        `git --git-dir "$clone" archive --prefix=base/ $this->version | gzip >"$target"`;
+        `git --git-dir "$clone/.git" archive --prefix=base/ $this->version >"$target"`;
 
-        return (bool) @filesize($target);
+        // Make sure to include submodules
+        if (file_exists("$clone/.gitmodules"))
+        {
+            exec("cd $clone && (git submodule foreach) | while read entering path; do echo \$path; done", $output, $return_var);
+
+            if (is_array($output))
+            {
+                foreach ($output as $module)
+                {
+                    $module = trim($module, "'");
+                    $path   = "$clone/$module";
+
+                    $cmd = "cd $path && git archive --prefix=base/$module/ HEAD > /tmp/$module.tar && tar --concatenate --file=\"$target\" /tmp/$module.tar";
+                    exec($cmd);
+
+                    @unlink("/tmp/$module.tar");
+                }
+            }
+        }
+
+        `gzip $target`;
+
+        return (bool) @filesize("$target.gz");
     }
 
     /**

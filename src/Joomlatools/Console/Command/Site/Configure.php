@@ -116,7 +116,9 @@ class Configure extends AbstractDatabase
         $this->check($input, $output);
 
         if (Util::isPlatform($this->target_dir)) {
-            $this->_configureJoomlaPlatform();
+            $this->_configureJoomlatoolsPlatform();
+        } else if (Util::isKodekitPlatform($this->target_dir)) {
+            $this->_configureKodekitPlatform();
         } else {
             $this->_configureJoomlaCMS();
         }
@@ -201,7 +203,7 @@ class Configure extends AbstractDatabase
         }
     }
 
-    protected function _configureJoomlaPlatform()
+    protected function _configureJoomlatoolsPlatform()
     {
         $config = array(
             'JOOMLA_DB_NAME' => $this->target_db,
@@ -223,11 +225,54 @@ class Configure extends AbstractDatabase
 
         $fp = fopen($this->target_dir.'/.env', 'w');
 
-        foreach ($config as $key => $val) {
+        foreach (array_merge($config, $this->_extra_options) as $key => $val) {
             fwrite($fp, $key . '=' . $val . PHP_EOL);
         }
 
         fclose($fp);
+    }
+
+    protected function _configureKodekitPlatform()
+    {
+        $config = require $this->target_dir.'/config/bootstrapper.php-empty';
+
+        $dbidentifier = 'database.driver.'.$this->mysql->driver;
+        $dbhost       = $this->mysql->host;
+
+        if ($this->mysql->port != $this->getDefaultPort()) {
+            $dbhost .= ':' . $this->mysql->port;
+        }
+
+        $settings =  array(
+            'identifiers' => array(
+                'application'  => array(
+                    'title'    => $this->_default_values['sitename'],
+                    'sendmail' => '/usr/bin/env catchmail',
+                    'mailer'    => 'smtp',
+                    'mailfrom'  => 'admin@example.com',
+                    'fromname'  => $this->site,
+                    'sendmail'  => '/usr/bin/env catchmail',
+                    'smtphost'  => 'localhost',
+                    'smtpport'  => 1025,
+                    'debug'     => 1
+                ),
+                $dbidentifier => array(
+                    'auto_connect' => true,
+                    'database'     => $this->target_db,
+                    'host'         => $dbhost,
+                    'username'     => $this->mysql->user,
+                    'password'     => $this->mysql->password,
+                )
+            )
+        );
+
+        $config = array_replace_recursive($config, $settings);
+        $config = array_replace_recursive($config, $this->_extra_options);
+
+        $export       = '<?php ' . PHP_EOL . 'return ' . var_export($config, true) . ';';
+        $bootstrapper = $this->target_dir.'/config/bootstrapper.php';
+
+        file_put_contents($bootstrapper, $export);
     }
 
 	/**
