@@ -78,7 +78,7 @@ class Create extends AbstractSite
 
         if (is_dir('/etc/apache2/sites-available'))
         {
-            $template     = file_get_contents($path.'/apache.vhost.conf');
+            $template     = file_get_contents($path.'/vhosts/apache.conf');
             $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
             file_put_contents($tmp, sprintf($template, $site, $documentroot, $port));
@@ -91,7 +91,7 @@ class Create extends AbstractSite
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
-                    $template = "\n\n" . file_get_contents($path.'/apache.vhost.ssl.conf');
+                    $template = "\n\n" . file_get_contents($path.'/vhosts/apache.ssl.conf');
                     file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
                 else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
@@ -112,9 +112,9 @@ class Create extends AbstractSite
                 $port = 81;
             }
 
-            $file = Util::isKodekitPlatform($this->target_dir) ? 'nginx.vhost-kodekit.conf' : 'nginx.vhost.conf';
+            $file = Util::isKodekitPlatform($this->target_dir) ? 'nginx.kodekit.conf' : 'nginx.conf';
 
-            $template     = file_get_contents($path.'/'.$file);
+            $template     = file_get_contents($path.'/vhosts/'.$file);
             $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
             file_put_contents($tmp, sprintf($template, $site, $documentroot, $port, $socket));
@@ -131,7 +131,7 @@ class Create extends AbstractSite
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
-                    $template = "\n\n" . file_get_contents($path.'/nginx.vhost.ssl.conf');
+                    $template = "\n\n" . file_get_contents($path.'/vhosts/nginx.kodekit.ssl.conf');
                     file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $socket, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
                 else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
