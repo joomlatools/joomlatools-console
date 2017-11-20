@@ -7,8 +7,6 @@
 
 namespace Joomlatools\Console\Command\Vhost;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -114,7 +112,9 @@ class Create extends AbstractSite
                 $port = 81;
             }
 
-            $template     = file_get_contents($path.'/nginx.vhost.conf');
+            $file = Util::isKodekitPlatform($this->target_dir) ? 'nginx.vhost-kodekit.conf' : 'nginx.vhost.conf';
+
+            $template     = file_get_contents($path.'/'.$file);
             $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
             file_put_contents($tmp, sprintf($template, $site, $documentroot, $port, $socket));

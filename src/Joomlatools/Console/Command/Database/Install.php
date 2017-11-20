@@ -188,7 +188,7 @@ class Install extends AbstractDatabase
     {
         $files = array();
 
-        if (Util::isPlatform($this->target_dir))
+        if (Util::isPlatform($this->target_dir) || Util::isKodekitPlatform($this->target_dir))
         {
             $path = $this->target_dir .'/install/mysql/';
 

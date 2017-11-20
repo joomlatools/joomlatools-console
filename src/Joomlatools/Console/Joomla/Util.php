@@ -117,6 +117,29 @@ class Util
     }
 
     /**
+     * Checks if we are dealing with timble/kodekit-platform or not
+     *
+     * @param string $base Base path for the Kodekit Platform installation
+     * @return boolean
+     */
+    public static function isKodekitPlatform($base)
+    {
+        $manifest = realpath($base . '/composer.json');
+
+        if (file_exists($manifest))
+        {
+            $contents = file_get_contents($manifest);
+            $package  = json_decode($contents);
+
+            if ($package->name == 'timble/kodekit-platform') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Builds the full path for a given path inside a Joomla project.
      * If base is a Joomla Platform installation, the path will be
      * translated into the correct path in platform.
