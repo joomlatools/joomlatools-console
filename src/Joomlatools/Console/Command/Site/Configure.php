@@ -236,7 +236,9 @@ class Configure extends AbstractDatabase
     {
         $config = require $this->target_dir.'/config/bootstrapper.php-empty';
 
-        $dbhost = $this->mysql->host;
+        $dbidentifier = 'database.driver.'.$this->mysql->driver;
+        $dbhost       = $this->mysql->host;
+
         if ($this->mysql->port != $this->getDefaultPort()) {
             $dbhost .= ':' . $this->mysql->port;
         }
@@ -254,7 +256,7 @@ class Configure extends AbstractDatabase
                     'smtpport'  => 1025,
                     'debug'     => 1
                 ),
-                'lib:database.adapter.mysql' => array(
+                $dbidentifier => array(
                     'auto_connect' => true,
                     'database'     => $this->target_db,
                     'host'         => $dbhost,

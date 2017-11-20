@@ -89,6 +89,10 @@ class Util
             }
             else self::$_versions[$key] = false;
         }
+
+        if (!self::$_versions[$key] && self::isKodekitPlatform($base)) {
+            self::$_versions[$key] = (object) array('type' => 'kodekit-platform', 'release' => 'n/a');
+        }
         
         return self::$_versions[$key];
     }
