@@ -225,7 +225,7 @@ class Configure extends AbstractDatabase
 
         $fp = fopen($this->target_dir.'/.env', 'w');
 
-        foreach ($config as $key => $val) {
+        foreach (array_merge($config, $this->_extra_options) as $key => $val) {
             fwrite($fp, $key . '=' . $val . PHP_EOL);
         }
 
@@ -265,6 +265,7 @@ class Configure extends AbstractDatabase
         );
 
         $config = array_replace_recursive($config, $settings);
+        $config = array_replace_recursive($config, $this->_extra_options);
 
         $export       = '<?php ' . PHP_EOL . 'return ' . var_export($config, true) . ';';
         $bootstrapper = $this->target_dir.'/config/bootstrapper.php';
