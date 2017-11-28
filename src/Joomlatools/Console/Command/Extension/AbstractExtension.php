@@ -62,7 +62,7 @@ abstract class AbstractExtension extends Command
         $this->addArgument(
                 'site',
                 InputArgument::REQUIRED,
-                'Alphanumeric site name. Also used in the site URL with .dev domain'
+                'Alphanumeric site name. Also used in the site URL with .test domain'
             )->addArgument(
                 'extension',
                 InputArgument::REQUIRED,

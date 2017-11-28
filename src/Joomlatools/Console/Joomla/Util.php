@@ -13,10 +13,12 @@ class Util
 
     /**
      * Retrieve the Joomla version.
+     *
+     * Returns an object with properties type and release.
      * Returns FALSE if unable to find correct version.
      *
      * @param string $base Base path for the Joomla installation
-     * @return string|boolean
+     * @return stdclass|boolean
      */
     public static function getJoomlaVersion($base)
     {
@@ -24,9 +26,43 @@ class Util
 
         if (!isset(self::$_versions[$key]))
         {
-            $code = self::buildTargetPath('/libraries/cms/version/version.php', $base);
+            $canonical = function($version) {
+                if (isset($version->RELEASE)) {
+                    return 'v' . $version->RELEASE . '.' . $version->DEV_LEVEL;
+                }
 
-            if (file_exists($code))
+                // Joomla 3.5 and up uses constants instead of properties in JVersion
+                $className = get_class($version);
+                if (defined("$className::RELEASE")) {
+                    return $version::RELEASE . '.' . $version::DEV_LEVEL;
+                }
+
+                return 'unknown';
+            };
+
+            $files = array(
+                'joomla-cms'           => '/libraries/cms/version/version.php',
+                'joomla-cms-new'       => '/libraries/src/Version.php', // 3.8+
+                'joomlatools-platform' => '/lib/libraries/cms/version/version.php',
+                'joomla-1.5'           => '/libraries/joomla/version.php'
+            );
+
+            $code        = false;
+            $application = false;
+            foreach ($files as $type => $file)
+            {
+                $path = $base . $file;
+
+                if (file_exists($path))
+                {
+                    $code        = $path;
+                    $application = $type;
+
+                    break;
+                }
+            }
+
+            if ($code !== false)
             {
                 if (!defined('JPATH_PLATFORM')) {
                     define('JPATH_PLATFORM', self::buildTargetPath('/libraries', $base));
@@ -40,30 +76,24 @@ class Util
 
                 $source = file_get_contents($code);
                 $source = preg_replace('/<\?php/', '', $source, 1);
-                $source = preg_replace('/class JVersion/i', 'class JVersion' . $identifier, $source);
+
+                $pattern     = $application == 'joomla-cms-new' ? '/class Version/i' : '/class JVersion/i';
+                $replacement = $application == 'joomla-cms-new' ? 'class Version' . $identifier : 'class JVersion' . $identifier;
+
+                $source = preg_replace($pattern, $replacement, $source);
 
                 eval($source);
 
-                $class   = 'JVersion'.$identifier;
+                $class   = $application == 'joomla-cms-new' ? '\\Joomla\\CMS\\Version'.$identifier : 'JVersion'.$identifier;
                 $version = new $class();
 
-                $canonical = function($version) {
-                    if (isset($version->RELEASE)) {
-                        return 'v' . $version->RELEASE . '.' . $version->DEV_LEVEL;
-                    }
-
-                    // Joomla 3.5 and up uses constants instead of properties in JVersion
-                    $className = get_class($version);
-                    if (defined("$className::RELEASE")) {
-                        return $version::RELEASE . '.' . $version::DEV_LEVEL;
-                    }
-
-                    return 'unknown';
-                };
-
-                self::$_versions[$key] = $canonical($version);
+                self::$_versions[$key] = (object) array('release' => $canonical($version), 'type' => $application);
             }
             else self::$_versions[$key] = false;
+        }
+
+        if (!self::$_versions[$key] && self::isKodekitPlatform($base)) {
+            self::$_versions[$key] = (object) array('type' => 'kodekit-platform', 'release' => 'n/a');
         }
         
         return self::$_versions[$key];
@@ -85,6 +115,29 @@ class Util
             $package  = json_decode($contents);
 
             if ($package->name == 'joomlatools/platform') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if we are dealing with timble/kodekit-platform or not
+     *
+     * @param string $base Base path for the Kodekit Platform installation
+     * @return boolean
+     */
+    public static function isKodekitPlatform($base)
+    {
+        $manifest = realpath($base . '/composer.json');
+
+        if (file_exists($manifest))
+        {
+            $contents = file_get_contents($manifest);
+            $package  = json_decode($contents);
+
+            if ($package->name == 'timble/kodekit-platform') {
                 return true;
             }
         }
@@ -165,5 +218,39 @@ class Util
         }
 
         return false;
+    }
+
+	/**
+	 * Return a writable path
+	 *
+	 * @return string
+	 */
+    public static function getWritablePath()
+    {
+        $path = \Phar::running();
+
+    	if (!empty($path)) {
+    		return sys_get_temp_dir() . '/.joomla';
+    	}
+
+    	return self::getTemplatePath();
+    }
+
+    /**
+     * Get template directory path
+     *
+     * @return string
+     */
+    public static function getTemplatePath()
+    {
+        $path = \Phar::running();
+
+    	if (!empty($path)) {
+    		return $path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files';
+    	}
+
+    	$root = dirname(dirname(dirname(dirname(__DIR__))));
+
+    	return realpath($root .DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files');
     }
 }

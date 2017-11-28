@@ -44,7 +44,7 @@ To create a site with the latest Joomla version, run:
 
     <info>joomla site:create foobar</info>
 
-The newly installed site will be available at <comment>/var/www/foobar</comment> and <comment>foobar.dev</comment> after that. You can login into your fresh Joomla installation using these credentials: admin/admin.
+The newly installed site will be available at <comment>/var/www/foobar</comment> and <comment>foobar.test</comment> after that. You can login into your fresh Joomla installation using these credentials: admin/admin.
 By default, the web server root is set to <comment>/var/www</comment>. You can pass <comment>–www=/my/server/path</comment> to commands for custom values.
 
 The console can also install the Joomlatools Platform out of the box by adding the <comment>--repo=platform</comment> flag:
@@ -79,7 +79,7 @@ EOF
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. To use joomlatools/platform, use --repo=platform.'
+                'Alternative Git repository to use. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform. For Kodekit Platform, use --repo=kodekit-platform.'
             )
             ->addOption(
                 'clear-cache',
@@ -99,7 +99,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTP port the virtual host should listen to',
-                (Util::isJoomlatoolsBox() ? 8080 : 80)
+                80
             )
             ->addOption(
                 'disable-ssl',
@@ -126,13 +126,19 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The port on which the server will listen for SSL requests',
-                '443'
+                443
             )
             ->addOption(
                 'interactive',
                 null,
                 InputOption::VALUE_NONE,
                 'Prompt for configuration details'
+            )
+            ->addOption(
+                'options',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "A YAML file consisting of serialized parameters to override JConfig."
             );
     }
 
@@ -159,7 +165,7 @@ EOF
                 '--www'  => $this->www
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);
@@ -209,7 +215,8 @@ EOF
             '--disable-ssl' => $input->getOption('disable-ssl'),
             '--ssl-crt'     => $input->getOption('ssl-crt'),
             '--ssl-key'     => $input->getOption('ssl-key'),
-            '--ssl-port'    => $input->getOption('ssl-port')
+            '--ssl-port'    => $input->getOption('ssl-port'),
+            '--www'         => $input->getOption('www')
         ));
 
         $command = new Vhost\Create();

@@ -63,7 +63,7 @@ EOF
         }
         else list($name, $version) = explode(':', $package);
 
-        exec("composer show --all $name $version 2>&1", $result, $code);
+        exec("composer show --no-interaction --all $name $version 2>&1", $result, $code);
 
         if ($code === 1)
         {
@@ -95,6 +95,6 @@ EOF
             return;
         }
 
-        passthru("composer --no-progress --working-dir=$plugin_path require $package");
+        passthru("composer --no-interaction --no-progress --working-dir=$plugin_path require $package");
     }
 }

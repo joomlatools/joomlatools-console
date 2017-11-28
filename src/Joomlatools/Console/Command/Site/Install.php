@@ -76,7 +76,12 @@ class Install extends Database\AbstractDatabase
                 InputOption::VALUE_NONE,
                 'Do not check if database already exists or not.'
             )
-            ;
+            ->addOption(
+                'options',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "A YAML file consisting of serialized parameters to override JConfig."
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -150,7 +155,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive');
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive', 'options');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
@@ -200,7 +205,7 @@ class Install extends Database\AbstractDatabase
 
         $version = Util::getJoomlaVersion($this->target_dir);
 
-        if (version_compare($version, '3.2.0', '<')) {
+        if (version_compare($version->release, '3.2.0', '<')) {
             return;
         }
 
@@ -228,7 +233,7 @@ class Install extends Database\AbstractDatabase
             return;
         }
 
-        $filename = self::$files.'/cache/'.basename($url);
+        $filename = Util::getWritablePath().'/cache/'.basename($url);
         if(!file_exists($filename))
         {
             $bytes = file_put_contents($filename, fopen($url, 'r'));

@@ -21,11 +21,11 @@ class Remove extends Command
 
         $this
             ->setName('vhost:remove')
-            ->setDescription('Removes an Apache2 virtual host')
+            ->setDescription('Removes the Apache2 and/or Nginx virtual host')
             ->addArgument(
                 'site',
                 InputArgument::REQUIRED,
-                'Alphanumeric site name, used in the site URL with .dev domain'
+                'Alphanumeric site name, used in the site URL with .test domain'
             )
         ;
     }
@@ -40,6 +40,15 @@ class Remove extends Command
             `sudo a2dissite 1-$site.conf`;
             `sudo rm $file`;
             `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+        }
+
+        $file = '/etc/nginx/sites-available/1-' . $site . '.conf';
+
+        if (is_file($file))
+        {
+            `sudo rm -f $file`;
+            `sudo rm -f /etc/nginx/sites-enabled/1-$site.conf`;
+            `sudo /etc/init.d/nginx restart > /dev/null 2>&1`;
         }
     }
 }

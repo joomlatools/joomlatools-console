@@ -7,6 +7,11 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.4.11 (2017-09-23)
+ * Fixed - Add Joomla 3.8 compatibility (#65)
+ * Fixed - Option --www does not work for vhost.conf (#42)
+ * Fixed - Run Composer with --no-interaction flag (#68)
+
 * 1.4.10 (2017-05-09)
  * Fixed - Joomla 3.7 installation error (#59)
  
@@ -14,7 +19,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Fixed - SiteCreate command fails on 3.7 (#58)
 
 * 1.4.8 (2017-02-08)
- * Fixed - Update pahts in `site:token` command (#57)
+ * Fixed - Update paths in `site:token` command (#57)
  * Fixed - Update Joomlatools components and framework installers (#57)
 
 * 1.4.7 (2017-01-13)
