@@ -39,7 +39,7 @@ The extension argument should match the element name (<comment>com_foobar</comme
 
 For more information about Joomla's discover method, refer to the official documentation: https://docs.joomla.org/Help34:Extensions_Extension_Manager_Discover
 
-Alternatively simply pass in the composer dependancies you would like to install; provide these in the format (vendor/package:[commit || [operator version]) 
+Alternatively simply pass in the composer dependencies you would like to install; provide these in the format (vendor/package:[commit || [operator version]) 
 EOL
             )
             ->addArgument(
