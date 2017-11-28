@@ -75,6 +75,8 @@ class Install extends AbstractDatabase
     {
         parent::execute($input, $output);
 
+        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
+
         $this->drop        = $input->getOption('drop');
         $this->skip_check  = $input->getOption('skip-exists-check');
 
@@ -100,13 +102,38 @@ class Install extends AbstractDatabase
 
             file_put_contents($tmp, $contents);
 
-            $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
             $result = exec(sprintf("mysql --host=%s --port=%u --user='%s' %s %s < %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $tmp));
 
             unlink($tmp);
 
             if (!empty($result)) {
                 throw new \RuntimeException(sprintf('Cannot import database "%s". Error: %s', basename($import), $result));
+            }
+        }
+
+        // Fix the #__schemas table for Joomla CMS 2.5+
+        $path = $this->target_dir . '/administrator/components/com_admin/sql/updates/mysql/';
+        if (is_dir($path))
+        {
+            $updates = glob("$path/*.sql");
+
+            if (count($updates))
+            {
+                natsort($updates);
+
+                $schema = substr(basename(array_pop($updates)), 0, -4);
+                $schema = preg_replace('/[^a-z0-9\.\-\_]/i', '', $schema);
+
+                $version = Util::getJoomlaVersion($this->target_dir);
+
+                $executeQuery = function ($sql) use ($password) {
+                    $command = sprintf("mysql --host=%s --port=%u --user='%s' %s %s -e %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, escapeshellarg($sql));
+
+                    exec ($command);
+                };
+
+                $executeQuery("REPLACE INTO j_schemas (extension_id, version_id) VALUES (700, '$schema');");
+                $executeQuery("UPDATE j_extensions SET manifest_cache = '{\"version\": \"$version->release\"}' WHERE manifest_cache = '';");
             }
         }
     }

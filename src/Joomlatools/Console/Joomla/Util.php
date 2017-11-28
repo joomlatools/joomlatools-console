@@ -13,10 +13,12 @@ class Util
 
     /**
      * Retrieve the Joomla version.
+     *
+     * Returns an object with properties type and release.
      * Returns FALSE if unable to find correct version.
      *
      * @param string $base Base path for the Joomla installation
-     * @return string|boolean
+     * @return stdclass|boolean
      */
     public static function getJoomlaVersion($base)
     {
