@@ -99,7 +99,8 @@ EOL
             $output->writeln("Installing Composer packages ..");
         }
 
-        $command = sprintf('composer --no-interaction --no-progress require %s --working-dir=%s', escapeshellarg(implode(' ',$this->composer_extensions)), escapeshellarg($this->target_dir));
+        $packages = array_map('escapeshellarg', $this->composer_extensions);
+        $command  = sprintf('composer --no-interaction --no-progress require %s --working-dir=%s', implode(' ', $packages), escapeshellarg($this->target_dir));
 
         passthru($command, $result);
 
