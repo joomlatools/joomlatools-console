@@ -78,6 +78,11 @@ EOL
         $model = new \InstallerModelDiscover();
         $model->discover();
 
+        // Trigger the populateState() method in the model
+        $model->getState('list.limit');
+        // then override the default limit to 999
+        $model->setState('list.limit', 999);
+
         $results = $model->getItems();
 
         ob_end_clean();
