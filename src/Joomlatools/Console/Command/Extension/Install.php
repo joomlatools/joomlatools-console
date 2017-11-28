@@ -14,7 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Joomlatools\Console\Command\Site\AbstractSite;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
-use Joomlatools\Console\Joomla\Util;
 
 class Install extends AbstractSite
 {

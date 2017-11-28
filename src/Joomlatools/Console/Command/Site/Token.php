@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Bootstrapper;
 use Joomlatools\Console\Joomla\Util;
 
 class Token extends AbstractSite
@@ -37,6 +38,8 @@ class Token extends AbstractSite
         parent::execute($input, $output);
 
         $this->check($input, $output);
+
+        Bootstrapper::getApplication($this->target_dir);
 
         require_once Util::buildTargetPath('libraries/joomlatools/library/koowa.php', $this->target_dir);
         require_once Util::buildTargetPath('configuration.php', $this->target_dir);
