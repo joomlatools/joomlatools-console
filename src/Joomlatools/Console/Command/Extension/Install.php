@@ -16,11 +16,8 @@ use Joomlatools\Console\Joomla\Bootstrapper;
 
 class Install extends AbstractSite
 {
-    protected $extensions = array();
-
+    protected $extensions          = array();
     protected $composer_extensions = array();
-
-    protected $composer_global = false;
 
     protected function configure()
     {
@@ -69,12 +66,12 @@ EOL
 
         $this->check($input, $output);
 
-        if (count($this->composer_extensions)) {
-            $this->composer_install($input, $output);
+        if (count($this->extensions)) {
+            $this->installFiles($input, $output);
         }
 
-        if (count($this->extensions)) {
-            $this->install($input, $output);
+        if (count($this->composer_extensions)) {
+            $this->installPackages($input, $output);
         }
     }
 
@@ -88,36 +85,30 @@ EOL
         {
             $result = shell_exec('composer -v > /dev/null 2>&1 || { echo "false"; }');
 
-            if (trim($result) == 'false' && !file_exists($this->target_dir . '/composer.phar'))
+            if (trim($result) == 'false')
             {
                 $output->writeln('<error>You need composer installed either locally or globally: https://getcomposer.org/doc/00-intro.md</error>');
                 exit();
             }
-
-            if ($result != 'false'){
-                $this->composer_global = true;
-            }
         }
     }
 
-    public function composer_install(InputInterface $input, OutputInterface $output)
+    public function installPackages(InputInterface $input, OutputInterface $output)
     {
-        $string = 'composer require';
-
-        if (!$this->composer_global){
-            $string = 'php composer.phar require';
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln("Installing Composer packages ..");
         }
 
-        $string = sprintf(sprintf('%s %s', $string, implode(' ',$this->composer_extensions))) . ' --working-dir=' . $this->target_dir;
+        $command = sprintf('composer --no-interaction --no-progress require %s --working-dir=%s', escapeshellarg(implode(' ',$this->composer_extensions)), escapeshellarg($this->target_dir));
 
-        passthru($string, $result);
+        passthru($command, $result);
 
-        if (!$result){
-            die();
+        if ((int) $result) {
+            throw new \RuntimeException('Failed to install Composer packages');
         }
     }
 
-    public function install(InputInterface $input, OutputInterface $output)
+    public function installFiles(InputInterface $input, OutputInterface $output)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
         $db  = \JFactory::getDbo();
