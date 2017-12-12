@@ -112,9 +112,13 @@ class Create extends AbstractSite
                 $port = 81;
             }
 
-            $file = Util::isKodekitPlatform($this->target_dir) ? 'nginx.kodekit.conf' : 'nginx.conf';
+            // @TODO add legacy vhost support
+            if (Util::isKodekitPlatform($this->target_dir)) {
+                $file = $this->target_dir . '/install/nginx/nginx.conf';
+            }
+            else $file = $path.'/vhosts/nginx.conf';
 
-            $template     = file_get_contents($path.'/vhosts/'.$file);
+            $template     = file_get_contents($file);
             $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
 
             file_put_contents($tmp, sprintf($template, $site, $documentroot, $port, $socket));
@@ -131,8 +135,8 @@ class Create extends AbstractSite
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
-                    $template = "\n\n" . file_get_contents($path.'/vhosts/nginx.kodekit.ssl.conf');
-                    file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $socket, $ssl_crt, $ssl_key), FILE_APPEND);
+                    // $template = "\n\n" . file_get_contents($path.'/vhosts/nginx.kodekit.ssl.conf');
+                    //file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $socket, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
                 else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
             }
