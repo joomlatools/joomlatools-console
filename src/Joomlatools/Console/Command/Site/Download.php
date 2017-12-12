@@ -75,8 +75,8 @@ class Download extends AbstractSite
             ->addOption(
                 'clone',
                 null,
-                InputOption::VALUE_NONE,
-                'Clone the Git repository instead of creating a copy in the target directory.'
+                InputOption::VALUE_OPTIONAL,
+                'Clone the Git repository instead of creating a copy in the target directory. Use --clone=shallow for a shallow clone or leave empty.'
             )
         ;
     }
@@ -227,9 +227,7 @@ class Download extends AbstractSite
             throw new \RuntimeException(sprintf('The --clone flag requires a valid Git repository'));
         }
 
-        $repository = $this->versions->getRepository();
-
-        $this->_clone();
+        $this->_clone($this->target_dir, $this->version);
     }
 
     protected function _getTarball()
@@ -315,10 +313,11 @@ class Download extends AbstractSite
     /**
      * Clone Git repository to $target directory
      *
-     * @param $target
+     * @param $target Target directory
+     * @param $tag    Tag or branch to check out
      * @return bool
      */
-    protected function _clone($directory)
+    protected function _clone($directory, $tag = false)
     {
         $repository = $this->versions->getRepository();
 
@@ -326,7 +325,16 @@ class Download extends AbstractSite
         {
             $this->output->writeln("<info>Cloning $repository - this could take a few minutes ..</info>");
 
-            exec(sprintf("git clone --recursive %s %s", escapeshellarg($repository), escapeshellarg($directory)), $result, $exit_code);
+            $option = strtolower($this->input->getOption('clone'));
+            $args   = $option == 'shallow' ? '--depth 1' : '';
+
+            if (is_string($tag)) {
+                $args .= sprintf(' --branch %s', escapeshellarg($tag));
+            }
+
+            $command = sprintf("git clone %s --recursive %s %s", $args, escapeshellarg($repository), escapeshellarg($directory));
+            
+            exec($command, $result, $exit_code);
 
             if ($exit_code > 0) {
                 return false;

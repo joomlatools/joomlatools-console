@@ -143,8 +143,9 @@ EOF
             ->addOption(
                 'clone',
                 null,
-                InputOption::VALUE_NONE,
-                'Clone the Git repository instead of creating a copy in the target directory.'
+                InputOption::VALUE_OPTIONAL,
+                'Clone the Git repository instead of creating a copy in the target directory. Use --clone=shallow for a shallow clone or leave empty.',
+                true
             );
     }
 
