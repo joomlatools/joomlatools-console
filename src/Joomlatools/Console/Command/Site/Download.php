@@ -35,6 +35,11 @@ class Download extends AbstractSite
      */
     protected $output = null;
 
+    /**
+     * @var InputInterface
+     */
+    protected $input = null;
+
     protected function configure()
     {
         parent::configure();
@@ -67,12 +72,19 @@ class Download extends AbstractSite
                 InputOption::VALUE_REQUIRED,
                 'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform. For Kodekit Platform, use --repo=kodekit-platform.'
             )
+            ->addOption(
+                'clone',
+                null,
+                InputOption::VALUE_NONE,
+                'Clone the Git repository instead of creating a copy in the target directory.'
+            )
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->output = $output;
+        $this->input  = $input;
 
         parent::execute($input, $output);
 
@@ -98,39 +110,24 @@ class Download extends AbstractSite
 
         $this->setVersion($input->getOption('release'));
 
-        if ($this->version != 'none')
-        {
-            $tarball = $this->_getTarball($output);
+        if (strtolower($this->version) == 'none') {
+            return;
+        }
 
-            if (!$this->_isValidTarball($tarball))
-            {
-                if (file_exists($tarball)) {
-                    unlink($tarball);
-                }
+        if ($input->getOption('clone')) {
+            $this->_setupClone();
+        }
+        else $this->_setupCopy();
 
-                throw new \RuntimeException(sprintf('Downloaded tar archive "%s" could not be verified. A common cause is an interrupted download: check your internet connection and try again.', basename($tarball)));
-            }
+        $isPlatform = Util::isPlatform($this->target_dir);
 
-            if (!file_exists($this->target_dir)) {
-                `mkdir -p $this->target_dir`;
-            }
+        $directory = $this->target_dir. ($isPlatform ? '/web' : '');
+        if (file_exists($directory.'/htaccess.txt')) {
+            `cp $directory/htaccess.txt $directory/.htaccess`;
+        }
 
-            `cd $this->target_dir; tar xzf $tarball --strip 1`;
-
-            if ($this->versions->isBranch($this->version)) {
-                unlink($tarball);
-            }
-
-            $isPlatform = Util::isPlatform($this->target_dir);
-
-            $directory = $this->target_dir. ($isPlatform ? '/web' : '');
-            if (file_exists($directory.'/htaccess.txt')) {
-                `cp $directory/htaccess.txt $directory/.htaccess`;
-            }
-
-            if ($isPlatform || Util::isKodekitPlatform($this->target_dir)) {
-                `cd $this->target_dir; composer --no-interaction install -q`;
-            }
+        if ($isPlatform || Util::isKodekitPlatform($this->target_dir)) {
+            `cd $this->target_dir; composer --no-interaction install -q`;
         }
     }
 
@@ -200,7 +197,42 @@ class Download extends AbstractSite
         $this->version = $result;
     }
 
-    protected function _getTarball(OutputInterface $output)
+    protected function _setupCopy()
+    {
+        $tarball = $this->_getTarball();
+
+        if (!$this->_isValidTarball($tarball))
+        {
+            if (file_exists($tarball)) {
+                unlink($tarball);
+            }
+
+            throw new \RuntimeException(sprintf('Downloaded tar archive "%s" could not be verified. A common cause is an interrupted download: check your internet connection and try again.', basename($tarball)));
+        }
+
+        if (!file_exists($this->target_dir)) {
+            `mkdir -p $this->target_dir`;
+        }
+
+        `cd $this->target_dir; tar xzf $tarball --strip 1`;
+
+        if ($this->versions->isBranch($this->version)) {
+            unlink($tarball);
+        }
+    }
+
+    protected function _setupClone()
+    {
+        if (!$this->versions->isGitRepository()) {
+            throw new \RuntimeException(sprintf('The --clone flag requires a valid Git repository'));
+        }
+
+        $repository = $this->versions->getRepository();
+
+        $this->_clone();
+    }
+
+    protected function _getTarball()
     {
         $tar   = $this->version.'.tar.gz';
         // Replace forward slashes with a dash, otherwise the path looks like it contains more subdirectories
@@ -223,7 +255,14 @@ class Download extends AbstractSite
             if (in_array($scheme, array('http', 'https')) && $isGitHub && $extension != '.git') {
                 $result = $this->_downloadFromGitHub($cache);
             }
-            else $result = $this->_clone($cache);
+            else
+            {
+                $directory = $this->versions->getCacheDirectory() . '/source';
+
+                if ($this->_clone($directory)) {
+                    $result = $this->_archive($directory, $cache);
+                }
+            }
         }
         else $result = $this->_download($cache);
 
@@ -274,51 +313,72 @@ class Download extends AbstractSite
     }
 
     /**
-     * Clone Git repository and create tarball
+     * Clone Git repository to $target directory
      *
      * @param $target
      * @return bool
      */
-    protected function _clone($target)
+    protected function _clone($directory)
     {
-        if (substr($target, -3) == '.gz') {
-            $target = substr($target, 0, -3);
-        }
-
-        $clone      = $this->versions->getCacheDirectory() . '/source';
         $repository = $this->versions->getRepository();
 
-        if (!file_exists($clone))
+        if (!file_exists($directory))
         {
             $this->output->writeln("<info>Cloning $repository - this could take a few minutes ..</info>");
 
-            `git clone --recursive "$repository" "$clone"`;
+            exec(sprintf("git clone --recursive %s %s", escapeshellarg($repository), escapeshellarg($directory)), $result, $exit_code);
+
+            if ($exit_code > 0) {
+                return false;
+            }
         }
 
         if ($this->versions->isBranch($this->version))
         {
             $this->output->writeln("<info>Fetching latest changes from $repository - this could take a few minutes ..</info>");
 
-            `git --git-dir "$clone/.git" fetch`;
+            exec(sprintf("git --git-dir %s fetch", escapeshellarg("$directory/.git")), $result, $exit_code);
+
+            if ($exit_code > 0) {
+                return false;
+            }
         }
+        
+        return true;
+    }
+
+    /**
+     * Create tarball from cloned Git repository.
+     *
+     * @param $source   Git repository
+     * @param $filename Output filename
+     * @return bool
+     */
+    protected function _archive($source, $filename)
+    {
+        $repository = $this->versions->getRepository();
 
         $this->output->writeln("<info>Creating $this->version archive for $repository ..</info>");
 
-        `git --git-dir "$clone/.git" archive --prefix=base/ $this->version >"$target"`;
+        if (substr($filename, -3) == '.gz') {
+            $filename = substr($filename, 0, -3);
+        }
+
+        `git --git-dir "$source/.git" archive --prefix=base/ $this->version >"$filename"`;
 
         // Make sure to include submodules
-        if (file_exists("$clone/.gitmodules"))
+        if (file_exists("$source/.gitmodules"))
         {
-            exec("cd $clone && (git submodule foreach) | while read entering path; do echo \$path; done", $output, $return_var);
+            exec("cd $source && (git submodule foreach) | while read entering path; do echo \$path; done", $result, $return_var);
 
-            if (is_array($output))
+            if (is_array($result))
             {
-                foreach ($output as $module)
+                foreach ($result as $module)
                 {
                     $module = trim($module, "'");
-                    $path   = "$clone/$module";
+                    $path   = "$source/$module";
 
-                    $cmd = "cd $path && git archive --prefix=base/$module/ HEAD > /tmp/$module.tar && tar --concatenate --file=\"$target\" /tmp/$module.tar";
+                    $cmd = "cd $path && git archive --prefix=base/$module/ HEAD > /tmp/$module.tar && tar --concatenate --file=\"$filename\" /tmp/$module.tar";
                     exec($cmd);
 
                     @unlink("/tmp/$module.tar");
@@ -326,9 +386,9 @@ class Download extends AbstractSite
             }
         }
 
-        `gzip $target`;
+        `gzip $filename`;
 
-        return (bool) @filesize("$target.gz");
+        return (bool) @filesize("$filename.gz");
     }
 
     /**
@@ -350,7 +410,7 @@ class Download extends AbstractSite
 
         foreach ($commands as $command)
         {
-            exec($command, $output, $returnVal);
+            exec($command, $result, $returnVal);
 
             if ($returnVal != 0) {
                 return false;
