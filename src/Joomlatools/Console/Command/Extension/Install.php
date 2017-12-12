@@ -12,12 +12,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Site\AbstractSite;
-
 use Joomlatools\Console\Joomla\Bootstrapper;
 
 class Install extends AbstractSite
 {
-    protected $extensions = array();
+    protected $extensions          = array();
+    protected $composer_extensions = array();
 
     protected function configure()
     {
@@ -35,6 +35,8 @@ have Joomla automatically find the extension files and install it:
 The extension argument should match the element name (<comment>com_foobar</comment>) as defined in your extension XML manifest.
 
 For more information about Joomla's discover method, refer to the official documentation: https://docs.joomla.org/Help34:Extensions_Extension_Manager_Discover
+
+Alternatively simply pass in the Composer packages you would like to install: provide these in the format (vendor/package:[commit || [operator version]) 
 EOL
             )
             ->addArgument(
@@ -48,10 +50,29 @@ EOL
     {
         parent::execute($input, $output);
 
-        $this->extensions = (array) $input->getArgument('extension');
+        $extensions = (array) $input->getArgument('extension');
+
+        $this->composer_extensions = array_filter(array_map(function($x){
+            if(strpos($x, '/') !== false){
+                return $x;
+            }
+        }, $extensions));
+
+        if(count($this->composer_extensions)) {
+            $extensions = array_diff($extensions, $this->composer_extensions);
+        }
+
+        $this->extensions = $extensions;
 
         $this->check($input, $output);
-        $this->install($input, $output);
+
+        if (count($this->extensions)) {
+            $this->installFiles($input, $output);
+        }
+
+        if (count($this->composer_extensions)) {
+            $this->installPackages($input, $output);
+        }
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -59,9 +80,36 @@ EOL
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
+
+        if (count($this->composer_extensions))
+        {
+            $result = shell_exec('composer -v > /dev/null 2>&1 || { echo "false"; }');
+
+            if (trim($result) == 'false')
+            {
+                $output->writeln('<error>You need Composer installed globally. See: https://getcomposer.org/doc/00-intro.md#globally</error>');
+                exit();
+            }
+        }
     }
 
-    public function install(InputInterface $input, OutputInterface $output)
+    public function installPackages(InputInterface $input, OutputInterface $output)
+    {
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln("Installing Composer packages ..");
+        }
+
+        $packages = array_map('escapeshellarg', $this->composer_extensions);
+        $command  = sprintf('composer --no-interaction --no-progress require %s --working-dir=%s', implode(' ', $packages), escapeshellarg($this->target_dir));
+
+        passthru($command, $result);
+
+        if ((int) $result) {
+            throw new \RuntimeException('Failed to install Composer packages');
+        }
+    }
+
+    public function installFiles(InputInterface $input, OutputInterface $output)
     {
         $app = Bootstrapper::getApplication($this->target_dir);
         $db  = \JFactory::getDbo();
