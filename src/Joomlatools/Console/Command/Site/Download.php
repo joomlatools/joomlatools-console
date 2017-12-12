@@ -76,8 +76,9 @@ class Download extends AbstractSite
                 'clone',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Clone the Git repository instead of creating a copy in the target directory. Use --clone=shallow for a shallow clone or leave empty.'
-            )
+                'Clone the Git repository instead of creating a copy in the target directory. Use --clone=shallow for a shallow clone or leave empty.',
+                true
+            );
         ;
     }
 
@@ -114,7 +115,7 @@ class Download extends AbstractSite
             return;
         }
 
-        if ($input->getOption('clone')) {
+        if ($input->hasParameterOption('--clone')) {
             $this->_setupClone();
         }
         else $this->_setupCopy();
@@ -333,7 +334,7 @@ class Download extends AbstractSite
             }
 
             $command = sprintf("git clone %s --recursive %s %s", $args, escapeshellarg($repository), escapeshellarg($directory));
-            
+
             exec($command, $result, $exit_code);
 
             if ($exit_code > 0) {

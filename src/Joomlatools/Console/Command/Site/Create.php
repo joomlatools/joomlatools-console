@@ -201,9 +201,12 @@ EOF
             'site'          => $this->site,
             '--release'     => $input->getOption('release'),
             '--clear-cache' => $input->getOption('clear-cache'),
-            '--www'         => $this->www,
-            '--clone'       => $input->getOption('clone')
+            '--www'         => $this->www
         );
+
+        if ($input->hasParameterOption('--clone')) {
+            $arguments['--clone'] = $input->getOption('clone');
+        }
 
         $repo = $input->getOption('repo');
         if (!empty($repo)) {
