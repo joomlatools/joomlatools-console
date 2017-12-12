@@ -139,6 +139,13 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 "A YAML file consisting of serialized parameters to override JConfig."
+            )
+            ->addOption(
+                'clone',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Clone the Git repository instead of creating a copy in the target directory. Use --clone=shallow for a shallow clone or leave empty.',
+                true
             );
     }
 
@@ -192,10 +199,14 @@ EOF
         $arguments = array(
             'site:download',
             'site'          => $this->site,
-            '--release'      => $input->getOption('release'),
+            '--release'     => $input->getOption('release'),
             '--clear-cache' => $input->getOption('clear-cache'),
             '--www'         => $this->www
         );
+
+        if ($input->hasParameterOption('--clone')) {
+            $arguments['--clone'] = $input->getOption('clone');
+        }
 
         $repo = $input->getOption('repo');
         if (!empty($repo)) {
