@@ -150,8 +150,9 @@ class Create extends AbstractSite
             if (Util::isJoomlatoolsBox() && Util::isKodekitPlatform($this->target_dir))
             {
                 $copy = '/etc/varnish/default.vcl-original';
+                $vcl  = $this->target_dir . '/component/varnish/resources/varnish/kodekit.vcl';
 
-                if (!file_exists($copy))
+                if (file_exists($vcl) && !file_exists($copy))
                 {
                     if (!is_writable('/etc/varnish/')) {
                         `sudo chown vagrant:vagrant /etc/varnish`;
@@ -159,7 +160,7 @@ class Create extends AbstractSite
 
                     `cp /etc/varnish/default.vcl $copy`;
 
-                    $template = file_get_contents($this->target_dir . '/component/varnish/resources/varnish/kodekit.vcl');
+                    $template = file_get_contents($vcl);
 
                     file_put_contents('/etc/varnish/default.vcl', sprintf($template, $port));
                     `sudo service varnish restart > /dev/null 2>&1`;
