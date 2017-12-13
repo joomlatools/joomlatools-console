@@ -43,6 +43,14 @@ class Application extends \Symfony\Component\Console\Application
     protected $_plugins;
 
     /**
+     * @inheritdoc
+     */
+    public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN')
+    {
+        parent::__construct(self::NAME, self::VERSION);
+    }
+
+    /**
      * Runs the current application.
      *
      * @param InputInterface  $input  An Input instance
