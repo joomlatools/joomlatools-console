@@ -51,7 +51,7 @@ EOF
         $plugin_path = $this->getApplication()->getPluginPath();
 
         if (!file_exists($plugin_path)) {
-            `mkdir $plugin_path`;
+            `mkdir -p $plugin_path`;
         }
 
         $package = $input->getArgument('package');
