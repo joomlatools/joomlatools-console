@@ -112,7 +112,6 @@ class Create extends AbstractSite
                 $port = 81;
             }
 
-            // @TODO add legacy vhost support
             if (Util::isKodekitPlatform($this->target_dir)) {
                 $file = $this->target_dir . '/install/nginx/nginx.conf';
             }
@@ -123,7 +122,7 @@ class Create extends AbstractSite
 
             file_put_contents($tmp, sprintf($template, $site, $documentroot, $port, $socket));
 
-            if (!$input->getOption('disable-ssl'))
+            if (!$input->getOption('disable-ssl') && !Util::isKodekitPlatform($this->target_dir))
             {
                 $ssl_crt  = $input->getOption('ssl-crt');
                 $ssl_key  = $input->getOption('ssl-key');
@@ -135,8 +134,8 @@ class Create extends AbstractSite
 
                 if (file_exists($ssl_crt) && file_exists($ssl_key))
                 {
-                    // $template = "\n\n" . file_get_contents($path.'/vhosts/nginx.kodekit.ssl.conf');
-                    //file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $socket, $ssl_crt, $ssl_key), FILE_APPEND);
+                    $template = "\n\n" . file_get_contents($path.'/vhosts/nginx.kodekit.ssl.conf');
+                    file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $socket, $ssl_crt, $ssl_key), FILE_APPEND);
                 }
                 else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
             }
@@ -146,6 +145,26 @@ class Create extends AbstractSite
             `sudo /etc/init.d/nginx restart > /dev/null 2>&1`;
 
             @unlink($tmp);
+
+            // Also set up the Varnish config on the box for Kodekit Platform
+            if (Util::isJoomlatoolsBox() && Util::isKodekitPlatform($this->target_dir))
+            {
+                $copy = '/etc/varnish/default.vcl-original';
+
+                if (!file_exists($copy))
+                {
+                    if (!is_writable('/etc/varnish/')) {
+                        `sudo chown vagrant:vagrant /etc/varnish`;
+                    }
+
+                    `cp /etc/varnish/default.vcl $copy`;
+
+                    $template = file_get_contents($this->target_dir . '/component/varnish/resources/varnish/kodekit.vcl');
+
+                    file_put_contents('/etc/varnish/default.vcl', sprintf($template, $port));
+                    `sudo service varnish restart > /dev/null 2>&1`;
+                }
+            }
         }
     }
 }
