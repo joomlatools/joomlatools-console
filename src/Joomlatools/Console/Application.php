@@ -89,7 +89,7 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function getConsoleHome()
     {
-        return rtrim(getenv('HOME'), '/') . '/.joomlatools-console';
+        return rtrim(getenv('HOME'), '/') . '/.joomlatools/console';
     }
 
     /**
