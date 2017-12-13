@@ -110,9 +110,25 @@ class Install extends Database\AbstractDatabase
 
         $this->_enableWebInstaller($input, $output);
 
-        $name = Util::isPlatform($this->target_dir) ? 'Joomla Platform application' : 'Joomla site';
-        $output->writeln("Your new $name has been configured.");
-        $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
+        $name  = 'Joomla site';
+        $login = '<info>admin</info>/<info>admin</info>';
+
+        if (Util::isPlatform($this->target_dir)) {
+            $name = 'Joomlatools Platform application';
+        }
+        elseif (Util::isKodekitPlatform($this->target_dir))
+        {
+            $name  = 'Kodekit Platform application';
+            $login = '<info>admin@localhost.home</info>/<info>admin</info>';
+        }
+
+        $output->writeln("\nYour new $name has been configured.");
+        $output->writeln("You can login using the following username and password combination: $login.");
+
+        if (Util::isJoomlatoolsBox() && Util::isKodekitPlatform($this->target_dir))
+        {
+            $output->writeln("Add $this->site.test to your /etc/hosts file and connect via <info>http://$this->site.test:81</info> (Nginx) or <info>http://$this->site:8080</info> (Varnish)");
+        }
     }
 
     public function check(InputInterface $input, OutputInterface $output)
