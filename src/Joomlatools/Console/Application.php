@@ -67,21 +67,18 @@ class Application extends \Symfony\Component\Console\Application
 
         $this->configureIO($this->_input, $this->_output);
 
-        if (!file_exists($this->getConsoleHome()))
-        {
-            $result = @mkdir($this->getConsoleHome(), 0775, true);
-
-            if (!$result)
-            {
-                $output->writeln(sprintf('<error>Unable to write to home directory: %s. Please check write permissions.</error>', getenv('HOME')));
-            }
-        }
+        $this->_setup();
 
         $this->_loadPlugins();
 
         parent::run($this->_input, $this->_output);
     }
 
+    /**
+     * Get the home directory path
+     *
+     * @return string Path to the Joomlatools Console home directory
+     */
     public function getConsoleHome()
     {
         return rtrim(getenv('HOME'), '/') . '/.joomlatools-console';
@@ -202,6 +199,35 @@ class Application extends \Symfony\Component\Console\Application
         }
 
         return $this->_plugins;
+    }
+
+    /**
+     * Set up environment
+     */
+    protected function _setup()
+    {
+        if (!file_exists($this->getConsoleHome()))
+        {
+            $result = @mkdir($this->getConsoleHome(), 0775, true);
+
+            if (!$result) {
+                $this->_output->writeln(sprintf('<error>Unable to write to home directory: %s. Please check write permissions.</error>', getenv('HOME')));
+            }
+        }
+
+        // Handle legacy plugin directory
+        if (is_writable($this->getConsoleHome()) && !file_exists($this->getPluginPath()))
+        {
+            $old = realpath(dirname(__FILE__) . '/../../../plugins/');
+
+            if (file_exists($old))
+            {
+                $this->_output->writeln('<comment>Moving legacy plugin directory to ~/.joomlatools-console/plugins.</comment>');
+
+                $cmd = sprintf('mv %s %s', escapeshellarg($old), escapeshellarg($this->getPluginPath()));
+                exec($cmd);
+            }
+        }
     }
 
     /**
