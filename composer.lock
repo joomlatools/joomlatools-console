@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b7d40d19bbc3730b515b1e9c22cac94",
+    "content-hash": "731533d3f86f42a5fe630b594ee65db9",
     "packages": [
         {
             "name": "psr/log",
@@ -51,20 +51,20 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2016-10-10 12:19:37"
+            "time": "2016-10-10T12:19:37+00:00"
         },
         {
             "name": "symfony/console",
-            "version": "v2.8.28",
+            "version": "v2.8.33",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "f81549d2c5fdee8d711c9ab3c7e7362353ea5853"
+                "reference": "a4bd0f02ea156cf7b5138774a7ba0ab44d8da4fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/f81549d2c5fdee8d711c9ab3c7e7362353ea5853",
-                "reference": "f81549d2c5fdee8d711c9ab3c7e7362353ea5853",
+                "url": "https://api.github.com/repos/symfony/console/zipball/a4bd0f02ea156cf7b5138774a7ba0ab44d8da4fe",
+                "reference": "a4bd0f02ea156cf7b5138774a7ba0ab44d8da4fe",
                 "shasum": ""
             },
             "require": {
@@ -112,7 +112,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2017-10-01T21:00:16+00:00"
+            "time": "2018-01-03T07:36:31+00:00"
         },
         {
             "name": "symfony/debug",
@@ -232,16 +232,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.3.10",
+            "version": "v3.3.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "8c7bf1e7d5d6b05a690b715729cb4cd0c0a99c46"
+                "reference": "7c80d81b5805589be151b85b0df785f0dc3269cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/8c7bf1e7d5d6b05a690b715729cb4cd0c0a99c46",
-                "reference": "8c7bf1e7d5d6b05a690b715729cb4cd0c0a99c46",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/7c80d81b5805589be151b85b0df785f0dc3269cf",
+                "reference": "7c80d81b5805589be151b85b0df785f0dc3269cf",
                 "shasum": ""
             },
             "require": {
@@ -283,7 +283,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2017-10-05T14:43:42+00:00"
+            "time": "2018-01-03T07:37:11+00:00"
         }
     ],
     "packages-dev": [],
@@ -292,6 +292,8 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=5.6"
+    },
     "platform-dev": []
 }
