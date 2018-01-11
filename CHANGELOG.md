@@ -18,6 +18,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Fixed - extension:install bug when using discover install [#61](https://github.com/joomlatools/joomlatools-console/issues/61)
  * Improved - Replace .dev with .test tld [#64](https://github.com/joomlatools/joomlatools-console/issues/64)
  * Improved - Allow non-Git repositories as source, fixed configuration.php regexes, add --options parameter, better MySQL port handling [#70](https://github.com/joomlatools/joomlatools-console/pull/70)
+ * Improved - Store plugins outside of Composer directory [#62](https://github.com/joomlatools/joomlatools-console/issues/62)
  
 * 1.4.11 (2017-09-23)
  * Fixed - Add Joomla 3.8 compatibility [#65](https://github.com/joomlatools/joomlatools-console/issues/65)
@@ -47,7 +48,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Added - Support for different folder structures for Joomlatools Framework components
 
 * 1.4.4 (2015-11-30)
- * Added - Add `--mysql-port` configuration option ()#8
+ * Added - Add `--mysql-port` configuration option (#8)
  * Improved - Renamed package to `joomlatools/console`, moved repository to `joomlatools/joomlatools-console`.
  * Improved - Renamed `joomlatools/joomla-platform` package to `joomlatools/platform`.
 
