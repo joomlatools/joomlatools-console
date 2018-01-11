@@ -7,7 +7,7 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
-* 1.5.0 (2017-12-14)
+* 1.5.0 (2018-01-11)
  * Added - Install Composer packages via extension:install [#14](https://github.com/joomlatools/joomlatools-console/issues/14)
  * Added - Add support for Nginx [#75](https://github.com/joomlatools/joomlatools-console/issues/75)
  * Added - Add --clone argument [#36](https://github.com/joomlatools/joomlatools-console/issues/36)
