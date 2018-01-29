@@ -135,20 +135,21 @@ class Configure extends AbstractDatabase
 
         $contents = file_get_contents($source);
         $replace  = function($name, $value, &$contents) {
-            $pattern = sprintf('#\$%s\s*=\s*(["\']).*?(?<!\\\\)\1#', $name);
+            $pattern = sprintf('#\$%s\s*=\s*(["\']?).*?\1(?=[;\1])#', $name);
             $match   = preg_match($pattern, $contents);
+            $value   = ctype_digit($value) ? $value : "'" . str_replace("'", "\\'", $value) . "'";
 
             if(!$match)
             {
-                $pattern 	 = "/^\s?(\})\s?$/m";
-                $replacement = sprintf("\tpublic \$%s = '%s';\n}", $name, $value);
+                $pattern 	 = "/^\s*}\s*$/m";
+                $replacement = sprintf("\tpublic \$%s = %s;\n}", $name, $value);
             }
-            else $replacement = sprintf("\$%s = '%s'", $name, $value);
+            else $replacement = sprintf("\$%s = %s", $name, $value);
 
             $contents = preg_replace($pattern, $replacement, $contents);
         };
         $remove   = function($name, &$contents) {
-            $pattern  = sprintf('#public\s+\$%s\s*=\s*(["\']).*?(?<!\\\\)\1#', $name);
+            $pattern  = sprintf('#public\s+\$%s\s*=\s*(["\']?).*?\1(?=[;\1])\s*;#', $name);
             $contents = preg_replace($pattern, '', $contents);
         };
 
