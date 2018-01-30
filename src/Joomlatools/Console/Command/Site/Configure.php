@@ -137,7 +137,7 @@ class Configure extends AbstractDatabase
         $replace  = function($name, $value, &$contents) {
             $pattern = sprintf('#\$%s\s*=\s*(["\']?).*?\1(?=[;\1])#', $name);
             $match   = preg_match($pattern, $contents);
-            $value   = ctype_digit($value) ? $value : "'" . str_replace("'", "\\'", $value) . "'";
+            $value   = is_numeric($value) ? $value : "'" . str_replace("'", "\\'", $value) . "'";
 
             if(!$match)
             {
