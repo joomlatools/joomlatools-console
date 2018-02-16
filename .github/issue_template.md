@@ -1,5 +1,5 @@
 <!--
-### Step 1: Are you in the right place?
+### Are you in the right place?
 
 * Do you have a feature request?
 * Do you have general technical questions?
@@ -10,15 +10,16 @@ Then join us in our Gitter chat (http://gitter.im/joomlatools/dev) or on the mai
 * Did we discuss your idea or feature requests and agree to create a ticket for it?
 
 Please go ahead.
+-->
 
-### Step 2: Describe your environment
+### Describe your environment
 
   * OS: _____
   * Joomla version: _____
   * Joomlatools Console version: _____
   * Are you working on the Joomlatools Vagrant box: yes/no
 
-### Step 3: Describe the problem:
+### Describe the problem:
 
 #### Steps to reproduce:
 
@@ -38,4 +39,3 @@ Please go ahead.
   ```
   // TODO(you): code here to reproduce the problem
   ```
--->
