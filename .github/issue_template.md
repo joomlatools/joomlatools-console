@@ -1,4 +1,4 @@
-<--
+<!--
 ### Step 1: Are you in the right place?
 
 * Do you have a feature request?
