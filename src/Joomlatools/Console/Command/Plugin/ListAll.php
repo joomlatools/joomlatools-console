@@ -8,6 +8,7 @@
 namespace Joomlatools\Console\Command\Plugin;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -34,8 +35,9 @@ class ListAll extends Command
 
         $headers = array('Plugin package', 'Version');
 
-        $this->getHelperSet()->get('table')
-            ->setHeaders($headers)
+        $table = new Table($output);
+
+        $table->setHeaders($headers)
             ->setRows($rows)
             ->render($output);
     }
