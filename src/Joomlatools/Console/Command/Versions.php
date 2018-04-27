@@ -8,6 +8,7 @@
 namespace Joomlatools\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -84,10 +85,11 @@ class Versions extends Command
             $chunks = array_chunk($versions, 4);
             $header = $ref === 'heads' ? "Branches" : "Releases";
 
-            $this->getHelperSet()->get('table')
-                ->setHeaders(array($header))
+            $table = new Table($output);
+
+            $table->setHeaders(array($header))
                 ->setRows($chunks)
-                ->setLayout(TableHelper::LAYOUT_COMPACT)
+                ->setStyle('compact')
                 ->render($output);
         }
     }
