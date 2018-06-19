@@ -7,6 +7,10 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.5.1 (2018-06-19)
+ * Improved - Upgrade to symfony/console 4.x [#86](https://github.com/joomlatools/joomlatools-console/issues/86)
+ * Added - Add --mysql-db-prefix option, deprecating --mysql_db_prefix [#84](https://github.com/joomlatools/joomlatools-console/issues/84)
+
 * 1.5.0 (2018-01-11)
  * Added - Install Composer packages via extension:install [#14](https://github.com/joomlatools/joomlatools-console/issues/14)
  * Added - Add support for Nginx [#75](https://github.com/joomlatools/joomlatools-console/issues/75)
