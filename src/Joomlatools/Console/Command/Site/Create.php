@@ -172,7 +172,7 @@ EOF
                 '--www'  => $this->www
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);
