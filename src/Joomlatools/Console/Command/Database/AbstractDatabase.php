@@ -46,17 +46,17 @@ abstract class AbstractDatabase extends AbstractSite
             3306
         )
         ->addOption(
-            'mysql_db_prefix',
+            'mysql-db-prefix',
             null,
             InputOption::VALUE_REQUIRED,
-            "MySQL database prefix",
+            sprintf("MySQL database name prefix. Defaults to `%s`", $this->target_db_prefix),
             $this->target_db_prefix
         )
         ->addOption(
             'mysql-database',
             'db',
             InputOption::VALUE_REQUIRED,
-            "MySQL database name. If set, the --mysql_db_prefix option will be ignored."
+            "MySQL database name. If set, the --mysql-db-prefix option will be ignored."
         )
         ->addOption(
             'mysql-driver',
@@ -64,6 +64,13 @@ abstract class AbstractDatabase extends AbstractSite
             InputOption::VALUE_REQUIRED,
             "MySQL driver",
             'mysqli'
+        )
+        ->addOption(
+        // @TODO To be removed in 1.6
+            'mysql_db_prefix',
+            null,
+            InputOption::VALUE_REQUIRED,
+            "[DEPRECATED] MySQL database prefix"
         )
         ;
     }
@@ -75,7 +82,7 @@ abstract class AbstractDatabase extends AbstractSite
         $db_name = $input->getOption('mysql-database');
         if (empty($db_name))
         {
-            $this->target_db_prefix = $input->getOption('mysql_db_prefix');
+            $this->target_db_prefix = $input->getOption('mysql_db_prefix') ?: $input->getOption('mysql-db-prefix');
             $this->target_db        = $this->target_db_prefix.$this->site;
         }
         else
@@ -83,7 +90,7 @@ abstract class AbstractDatabase extends AbstractSite
             $this->target_db_prefix = '';
             $this->target_db        = $db_name;
         }
-
+        
         $credentials = explode(':', $input->getOption('mysql-login'), 2);
 
         $this->mysql = (object) array(
