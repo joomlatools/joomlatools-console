@@ -6,6 +6,11 @@
  * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
 
+if (version_compare(PHP_VERSION, '7.1.3', '<')) {
+	echo "This command requires at least PHP version 7.1.3 to run";
+	die();
+} 
+
 $dirs = explode(DIRECTORY_SEPARATOR, __DIR__);
 for ($i = count($dirs); $i >= 0; $i--)
 {
