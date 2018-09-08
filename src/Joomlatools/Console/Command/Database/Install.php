@@ -36,6 +36,14 @@ class Install extends AbstractDatabase
      */
     protected $skip_check = false;
 
+
+    /**
+     * Flag to use an already existent database
+     *
+     * @var boolean
+     */
+    protected $existent_db = false;
+
     protected function configure()
     {
         parent::configure();
@@ -68,6 +76,12 @@ class Install extends AbstractDatabase
                 InputOption::VALUE_NONE,
                 'Do not check if database already exists or not.'
             )
+            ->addOption(
+                'use-existent-db',
+                null,
+                InputOption::VALUE_NONE,
+                'Use an already existent database'
+            )
         ;
     }
 
@@ -79,6 +93,7 @@ class Install extends AbstractDatabase
 
         $this->drop        = $input->getOption('drop');
         $this->skip_check  = $input->getOption('skip-exists-check');
+        $this->existent_db = $input->getOption('use-existent-db');
 
         $this->check($input, $output);
 
@@ -86,11 +101,13 @@ class Install extends AbstractDatabase
             $this->_executeSQL(sprintf("DROP DATABASE IF EXISTS `%s`", $this->target_db));
         }
 
-        $result = $this->_executeSQL(sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8", $this->target_db));
-
-        if (!empty($result)) {
-            throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
+        if (!$this->existent_db) {
+            $result = $this->_executeSQL(sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8", $this->target_db));
+            if (!empty($result)) {
+                throw new \RuntimeException(sprintf('Cannot create database %s. Error: %s', $this->target_db, $result));
+            }
         }
+
 
         $imports = $this->_getSQLFiles($input, $output);
 
@@ -144,7 +161,7 @@ class Install extends AbstractDatabase
             throw new \RuntimeException(sprintf('Site %s not found', $this->site));
         }
 
-        if ($this->drop === false && $this->skip_check === false)
+        if ($this->drop === false && !($this->skip_check === true || $this->existent_db === true ))
         {
             $result = $this->_executeSQL(sprintf("SHOW DATABASES LIKE \"%s\"", $this->target_db));
 
