@@ -157,6 +157,7 @@ class Install extends AbstractDatabase
 
     public function check(InputInterface $input, OutputInterface $output)
     {
+        echo "TARGET DIR ".$this->target_dir;
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site %s not found', $this->site));
         }
