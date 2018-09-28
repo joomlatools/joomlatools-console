@@ -77,7 +77,7 @@ class Install extends Database\AbstractDatabase
                 'Do not check if database already exists or not.'
             )
             ->addOption(
-                'use-existent-db',
+                'skip-create-statement',
                 null,
                 InputOption::VALUE_NONE,
                 'Use an already existent database'
@@ -136,7 +136,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'skip-exists-check', 'use-existent-db', 'www', 'use-webroot-dir');
+        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'skip-exists-check', 'skip-create-statement', 'www', 'use-webroot-dir');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);

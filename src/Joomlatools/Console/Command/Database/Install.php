@@ -77,7 +77,7 @@ class Install extends AbstractDatabase
                 'Do not check if database already exists or not.'
             )
             ->addOption(
-                'use-existent-db',
+                'skip-create-statement',
                 null,
                 InputOption::VALUE_NONE,
                 'Use an already existent database'
@@ -93,7 +93,7 @@ class Install extends AbstractDatabase
 
         $this->drop        = $input->getOption('drop');
         $this->skip_check  = $input->getOption('skip-exists-check');
-        $this->existent_db = $input->getOption('use-existent-db');
+        $this->existent_db = $input->getOption('skip-create-statement');
 
         $this->check($input, $output);
 
