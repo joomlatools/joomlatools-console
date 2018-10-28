@@ -80,7 +80,7 @@ class Install extends Database\AbstractDatabase
                 'skip-create-statement',
                 null,
                 InputOption::VALUE_NONE,
-                'Use an already existent database'
+                'Do not run the "CREATE IF NOT EXISTS <db>" query. Use this if the user does not have CREATE privileges on the database.'
             )
             ->addOption(
                 'options',
