@@ -146,6 +146,12 @@ EOF
                 InputOption::VALUE_OPTIONAL,
                 'Clone the Git repository instead of creating a copy in the target directory. Use --clone=shallow for a shallow clone or leave empty.',
                 true
+            )
+            ->addOption(
+                'skip-create-statement',
+                null,
+                InputOption::VALUE_NONE,
+                'Do not run the "CREATE IF NOT EXISTS <db>" query. Use this if the user does not have CREATE privileges on the database.'
             );
     }
 
@@ -172,7 +178,7 @@ EOF
                 '--www'  => $this->www
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options', 'skip-create-statement');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);
