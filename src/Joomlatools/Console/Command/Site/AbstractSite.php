@@ -41,6 +41,12 @@ abstract class AbstractSite extends Command
             "Web server root",
             '/var/www'
         )
+        ->addOption(
+            'use-webroot-dir',
+            null,
+            InputOption::VALUE_NONE,
+            "Uses directory specified with --www as the site install dir"
+         )
         ;
     }
 
@@ -48,7 +54,11 @@ abstract class AbstractSite extends Command
     {
         $this->site       = $input->getArgument('site');
         $this->www        = $input->getOption('www');
-        $this->target_dir = $this->www.'/'.$this->site;
+        if ($input->getOption('use-webroot-dir')) {
+            $this->target_dir = $this->www;
+        } else {
+            $this->target_dir = $this->www.'/'.$this->site;
+        }
     }
 
     /**

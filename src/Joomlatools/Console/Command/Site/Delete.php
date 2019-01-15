@@ -51,7 +51,7 @@ class Delete extends Database\AbstractDatabase
 
     public function check(InputInterface $input, OutputInterface $output)
     {
-        if ((strpos(getcwd(), $this->target_dir) === 0) && (getcwd() !== $this->www)) {
+        if (getcwd() === $this->target_dir && getcwd() !== $this->www) {
             throw new \RuntimeException('You are currently in the directory you are trying to delete. Aborting');
         }
 
@@ -76,7 +76,7 @@ class Delete extends Database\AbstractDatabase
             'site' => $this->site
         );
 
-        $optionalArgs = array('mysql-login', 'mysql_db_prefix', 'mysql-host', 'mysql-port', 'mysql-database');
+        $optionalArgs = array('mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);

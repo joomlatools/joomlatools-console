@@ -7,26 +7,43 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.5.1 (2018-06-19)
+ * Improved - Upgrade to symfony/console 4.x [#86](https://github.com/joomlatools/joomlatools-console/issues/86)
+ * Added - Add --mysql-db-prefix option, deprecating --mysql_db_prefix [#84](https://github.com/joomlatools/joomlatools-console/issues/84)
+
+* 1.5.0 (2018-01-11)
+ * Added - Install Composer packages via extension:install [#14](https://github.com/joomlatools/joomlatools-console/issues/14)
+ * Added - Add support for Nginx [#75](https://github.com/joomlatools/joomlatools-console/issues/75)
+ * Added - Add --clone argument [#36](https://github.com/joomlatools/joomlatools-console/issues/36)
+ * Fixed - Update the `#__schema` and `#__extensions` tables after installation [#22](https://github.com/joomlatools/joomlatools-console/issues/22)
+ * Fixed - Fix site:token on Joomlatools Platform [#35](https://github.com/joomlatools/joomlatools-console/issues/35)
+ * Fixed - Fix default port on Joomlatools Vagrant box [#72](https://github.com/joomlatools/joomlatools-console/issues/72)
+ * Fixed - Fix Git URL for platform [#73](https://github.com/joomlatools/joomlatools-console/issues/73)
+ * Fixed - extension:install bug when using discover install [#61](https://github.com/joomlatools/joomlatools-console/issues/61)
+ * Improved - Replace .dev with .test tld [#64](https://github.com/joomlatools/joomlatools-console/issues/64)
+ * Improved - Allow non-Git repositories as source, fixed configuration.php regexes, add --options parameter, better MySQL port handling [#70](https://github.com/joomlatools/joomlatools-console/pull/70)
+ * Improved - Store plugins outside of Composer directory [#62](https://github.com/joomlatools/joomlatools-console/issues/62)
+ 
 * 1.4.11 (2017-09-23)
- * Fixed - Add Joomla 3.8 compatibility (#65)
- * Fixed - Option --www does not work for vhost.conf (#42)
- * Fixed - Run Composer with --no-interaction flag (#68)
+ * Fixed - Add Joomla 3.8 compatibility [#65](https://github.com/joomlatools/joomlatools-console/issues/65)
+ * Fixed - Option --www does not work for vhost.conf [#42](https://github.com/joomlatools/joomlatools-console/issues/42)
+ * Fixed - Run Composer with --no-interaction flag [#68](https://github.com/joomlatools/joomlatools-console/issues/68)
 
 * 1.4.10 (2017-05-09)
- * Fixed - Joomla 3.7 installation error (#59)
+ * Fixed - Joomla 3.7 installation error [#59](https://github.com/joomlatools/joomlatools-console/issues/59)
  
 * 1.4.9 (2017-03-07)
- * Fixed - SiteCreate command fails on 3.7 (#58)
+ * Fixed - SiteCreate command fails on 3.7 [#58](https://github.com/joomlatools/joomlatools-console/issues/58)
 
 * 1.4.8 (2017-02-08)
- * Fixed - Update paths in `site:token` command (#57)
- * Fixed - Update Joomlatools components and framework installers (#57)
+ * Fixed - Update paths in `site:token` command [#57](https://github.com/joomlatools/joomlatools-console/issues/57)
+ * Fixed - Update Joomlatools components and framework installers [#57](https://github.com/joomlatools/joomlatools-console/issues/57)
 
 * 1.4.7 (2017-01-13)
- * Added - `site:list` command with JSON output (#17)
- * Fixed - Support recent versions of Composer in `plugin:install` (#41)
- * Fixed - Autoload path for custom composer vendor-dir (#44)
- * Fixed - Allow version 'none' to pass branch check (#11)
+ * Added - `site:list` command with JSON output [#17](https://github.com/joomlatools/joomlatools-console/issues/17)
+ * Fixed - Support recent versions of Composer in `plugin:install` [#41](https://github.com/joomlatools/joomlatools-console/issues/41)
+ * Fixed - Autoload path for custom composer vendor-dir [#44](https://github.com/joomlatools/joomlatools-console/issues/44)
+ * Fixed - Allow version 'none' to pass branch check [#11](https://github.com/joomlatools/joomlatools-console/issues/11)
 
 * 1.4.6 (2016-04-01)
  * Fixed - Media folder handling in Joomlatools Framework component symlinking script
@@ -35,7 +52,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Added - Support for different folder structures for Joomlatools Framework components
 
 * 1.4.4 (2015-11-30)
- * Added - Add `--mysql-port` configuration option #8
+ * Added - Add `--mysql-port` configuration option (#8)
  * Improved - Renamed package to `joomlatools/console`, moved repository to `joomlatools/joomlatools-console`.
  * Improved - Renamed `joomlatools/joomla-platform` package to `joomlatools/platform`.
 
@@ -66,7 +83,7 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
  * Added - `extension:enable`, `extension:disable`: ability to enable and/or disable extensions
  * Added - Interactive mode (prompts for configuration details)
  * Improved - Implemented support for [Joomlatools Platform](http://github.com/joomlatools/joomlatools-platform)
- * Improved - Decoupled the various installation steps into separate commands (#5)
+ * Improved - Decoupled the various installation steps into separate commands [#5](https://github.com/joomlatools/joomlatools-console/issues/5)
  * Improved - Symlinker logic is now extendible using plugins.
  * Improved - Ability to install from a different repository instead of the joomla/joomla-cms
  * Improved - Renamed the --joomla version flag to --release
