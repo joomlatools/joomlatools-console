@@ -11,7 +11,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @var string
      */
-    const VERSION = '1.5.2';
+    const VERSION = '1.5.3';
 
     /**
      * Application name
