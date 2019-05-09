@@ -164,7 +164,6 @@ class Configure extends AbstractDatabase
             'mailer'   => 'smtp',
             'mailfrom' => 'admin@example.com',
             'fromname' => $this->site,
-            'sendmail' => '/usr/bin/env catchmail',
             'smtpauth' => '0',
             'smtpuser' => '',
             'smtppass' => '',
