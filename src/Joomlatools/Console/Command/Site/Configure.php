@@ -247,11 +247,9 @@ class Configure extends AbstractDatabase
             'identifiers' => array(
                 'application'  => array(
                     'title'    => $this->_default_values['sitename'],
-                    'sendmail' => '/usr/bin/env catchmail',
                     'mailer'    => 'smtp',
                     'mailfrom'  => 'admin@example.com',
                     'fromname'  => $this->site,
-                    'sendmail'  => '/usr/bin/env catchmail',
                     'smtphost'  => 'localhost',
                     'smtpport'  => 1025,
                     'debug'     => 1
