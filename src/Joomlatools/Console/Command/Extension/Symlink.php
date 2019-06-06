@@ -21,9 +21,9 @@ class Symlink extends AbstractSite
     protected $symlink  = array();
     protected $projects = array();
 
-    protected static $_symlinkers = array();
-
+    protected static $_symlinkers   = array();
     protected static $_dependencies = array();
+    protected static $_relative_to  = false;
 
     public static function registerDependencies($project, array $dependencies)
     {
@@ -70,6 +70,12 @@ EOL
                 InputOption::VALUE_REQUIRED,
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
+            )
+            ->addOption(
+                'relative',
+                'r',
+                InputOption::VALUE_NONE,
+                'Use relative paths to the site root instead of absolute paths.'
             );
     }
 
@@ -109,6 +115,8 @@ EOL
             $this->projects[] = $symlink;
             $this->projects   = array_unique(array_merge($this->projects, $this->_getDependencies($symlink)));
         }
+
+        static::$_relative_to = $input->getOption('relative') ? $this->target_dir : false;
 
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
@@ -209,5 +217,31 @@ EOL
         }
 
         return $projects;
+    }
+
+    public static function buildSymlinkPath($target)
+    {
+        $target = realpath($target);
+
+        if (is_string(static::$_relative_to) && $from = realpath(static::$_relative_to))
+        {
+            $separator = DIRECTORY_SEPARATOR;
+
+            $partsFrom = explode($separator, rtrim($from, $separator));
+            $partsTo   = explode($separator, rtrim($target, $separator));
+
+            while(count($partsFrom) && count($partsTo) && ($partsFrom[0] == $partsTo[0]))
+            {
+                array_shift($partsFrom);
+                array_shift($partsTo);
+            }
+
+            $prefix = str_repeat(sprintf('..%s', $separator), count($partsFrom));
+            $suffix = implode($separator, $partsTo);
+
+            $target = $prefix . $suffix;
+        }
+
+        return $target;
     }
 }
