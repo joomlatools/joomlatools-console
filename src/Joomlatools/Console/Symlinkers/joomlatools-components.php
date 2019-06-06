@@ -51,7 +51,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     if (!file_exists($code_destination))
     {
-        $project = Extension\Symlink::buildSymlinkPath($project, $target);
+        $project = Extension\Symlink::buildSymlinkPath($project, $code_destination);
 
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $output->writeln(" * creating link `$code_destination` -> $project");
