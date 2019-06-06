@@ -23,7 +23,7 @@ class Symlink extends AbstractSite
 
     protected static $_symlinkers   = array();
     protected static $_dependencies = array();
-    protected static $_relative_to  = false;
+    protected static $_relative     = false;
 
     public static function registerDependencies($project, array $dependencies)
     {
@@ -116,7 +116,7 @@ EOL
             $this->projects   = array_unique(array_merge($this->projects, $this->_getDependencies($symlink)));
         }
 
-        static::$_relative_to = $input->getOption('relative') ? $this->target_dir : false;
+        static::$_relative = $input->getOption('relative') === true;
 
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
@@ -219,16 +219,17 @@ EOL
         return $projects;
     }
 
-    public static function buildSymlinkPath($target)
+    public static function buildSymlinkPath($source, $target)
     {
-        $target = realpath($target);
+        $source = realpath($source);
 
-        if (is_string(static::$_relative_to) && $from = realpath(static::$_relative_to))
+        if (static::$_relative === true)
         {
             $separator = DIRECTORY_SEPARATOR;
+            $from      = is_dir($target) ? $target : dirname($target);
 
             $partsFrom = explode($separator, rtrim($from, $separator));
-            $partsTo   = explode($separator, rtrim($target, $separator));
+            $partsTo   = explode($separator, rtrim($source, $separator));
 
             while(count($partsFrom) && count($partsTo) && ($partsFrom[0] == $partsTo[0]))
             {
@@ -239,9 +240,9 @@ EOL
             $prefix = str_repeat(sprintf('..%s', $separator), count($partsFrom));
             $suffix = implode($separator, $partsTo);
 
-            $target = $prefix . $suffix;
+            $source = $prefix . $suffix;
         }
 
-        return $target;
+        return $source;
     }
 }

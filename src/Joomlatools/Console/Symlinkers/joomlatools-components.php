@@ -51,6 +51,8 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     if (!file_exists($code_destination))
     {
+        $project = Extension\Symlink::buildSymlinkPath($project, $target);
+
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $output->writeln(" * creating link `$code_destination` -> $project");
         }
@@ -69,6 +71,8 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
 
     if (is_dir($media) && !file_exists($target))
     {
+        $media = Extension\Symlink::buildSymlinkPath($media, $target);
+
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
             $output->writeln(" * creating link `$target` -> $media");
         }

@@ -53,6 +53,8 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
     {
         if (is_dir($from) && !file_exists($to))
         {
+            $from = Extension\Symlink::buildSymlinkPath($from, $to);
+
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $output->writeln(" * creating link `$to` -> $from");
             }
