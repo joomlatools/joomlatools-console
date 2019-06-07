@@ -228,6 +228,12 @@ EOL
             $separator = DIRECTORY_SEPARATOR;
             $from      = is_dir($target) ? $target : dirname($target);
 
+            // In some cases a path that has been concatenated from
+            // different strings contains double forward slashes.
+            // Make sure to replace these so we don't get incorrect paths:
+            $from   = str_replace($separator.$separator, $separator, $from);
+            $source = str_replace($separator.$separator, $separator, $source);
+
             $partsFrom = explode($separator, rtrim($from, $separator));
             $partsTo   = explode($separator, rtrim($source, $separator));
 
