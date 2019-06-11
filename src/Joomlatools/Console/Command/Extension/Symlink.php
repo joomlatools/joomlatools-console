@@ -21,9 +21,9 @@ class Symlink extends AbstractSite
     protected $symlink  = array();
     protected $projects = array();
 
-    protected static $_symlinkers = array();
-
+    protected static $_symlinkers   = array();
     protected static $_dependencies = array();
+    protected static $_relative     = false;
 
     public static function registerDependencies($project, array $dependencies)
     {
@@ -70,6 +70,12 @@ EOL
                 InputOption::VALUE_REQUIRED,
                 'Directory where your custom projects reside',
                 sprintf('%s/Projects', trim(`echo ~`))
+            )
+            ->addOption(
+                'relative',
+                'r',
+                InputOption::VALUE_NONE,
+                'Use relative paths to the site root instead of absolute paths.'
             );
     }
 
@@ -109,6 +115,8 @@ EOL
             $this->projects[] = $symlink;
             $this->projects   = array_unique(array_merge($this->projects, $this->_getDependencies($symlink)));
         }
+
+        static::$_relative = $input->getOption('relative') === true;
 
         $this->check($input, $output);
         $this->symlinkProjects($input, $output);
@@ -209,5 +217,38 @@ EOL
         }
 
         return $projects;
+    }
+
+    public static function buildSymlinkPath($source, $target)
+    {
+        $source = realpath($source);
+
+        if (static::$_relative === true)
+        {
+            $separator = DIRECTORY_SEPARATOR;
+            $from      = is_dir($target) ? $target : dirname($target);
+
+            // In some cases a path that has been concatenated from
+            // different strings contains double forward slashes.
+            // Make sure to replace these so we don't get incorrect paths:
+            $from   = str_replace($separator.$separator, $separator, $from);
+            $source = str_replace($separator.$separator, $separator, $source);
+
+            $partsFrom = explode($separator, rtrim($from, $separator));
+            $partsTo   = explode($separator, rtrim($source, $separator));
+
+            while(count($partsFrom) && count($partsTo) && ($partsFrom[0] == $partsTo[0]))
+            {
+                array_shift($partsFrom);
+                array_shift($partsTo);
+            }
+
+            $prefix = str_repeat(sprintf('..%s', $separator), count($partsFrom));
+            $suffix = implode($separator, $partsTo);
+
+            $source = $prefix . $suffix;
+        }
+
+        return $source;
     }
 }

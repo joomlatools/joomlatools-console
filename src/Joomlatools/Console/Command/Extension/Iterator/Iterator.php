@@ -7,6 +7,7 @@
 
 namespace Joomlatools\Console\Command\Extension\Iterator;
 
+use Joomlatools\Console\Command\Extension\Symlink;
 use Joomlatools\Console\Joomla\Util;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -59,6 +60,8 @@ class Iterator extends \RecursiveIteratorIterator
     {
         if (!file_exists($target))
         {
+            $source = Symlink::buildSymlinkPath($source, $target);
+
             if (!is_null($this->_output) && $this->_output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $this->_output->writeln(" * creating link: `$target` -> `$source`");
             }
