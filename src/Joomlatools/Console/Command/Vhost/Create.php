@@ -64,7 +64,20 @@ class Create extends AbstractSite
                 'PHP-FPM address or path to Unix socket file, set as value for fastcgi_pass in Nginx config',
                 'unix:/opt/php/php-fpm.sock'
             )
-            
+            ->addOption(
+                'apache-template',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Custom file to use as the Apache vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
+                null
+            )
+            ->addOption(
+                'nginx-template',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Custom file to use as the Nginx vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
+                null
+            )
         ;
     }
 
@@ -142,6 +155,14 @@ class Create extends AbstractSite
     {
         $path = realpath(__DIR__.'/../../../../../bin/.files/vhosts');
 
+        if ($template = $input->getOption(sprintf('%s-template', $application)))
+        {
+            if (file_exists($template)) {
+                return file_get_contents($template);
+            }
+            else throw new \Exception(sprintf('Template file %s does not exist.', $template));
+        }
+
         switch($application)
         {
             case 'nginx':
@@ -163,7 +184,7 @@ class Create extends AbstractSite
 
                 $template .= "\n\n" . file_get_contents(sprintf('%s/%s', $path, $file));
             }
-            else throw new Exception('Unable to enable SSL for the site: one or more certificate files are missing.');
+            else throw new \Exception('Unable to enable SSL for the site: one or more certificate files are missing.');
         }
 
         return $template;
