@@ -72,6 +72,11 @@ class Create extends AbstractSite
         parent::execute($input, $output);
 
         $site = $input->getArgument('site');
+
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+        }
+
         $port = $input->getOption('http-port');
         $path = realpath(__DIR__.'/../../../../../bin/.files/');
         $tmp  = '/tmp/vhost.tmp';
