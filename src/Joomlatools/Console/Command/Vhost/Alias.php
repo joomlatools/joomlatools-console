@@ -28,6 +28,12 @@ class Alias extends AbstractSite
                 InputArgument::REQUIRED,
                 'Virtual host alias'
             )
+            ->addOption(
+                'delete',
+                'D',
+                InputOption::VALUE_NONE,
+                'Delete the alias if it exists.'
+            )
         ;
     }
 
@@ -39,10 +45,11 @@ class Alias extends AbstractSite
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
-        $site  = $this->site;
-        $alias = $input->getArgument('alias');
-        $file  = sprintf('/etc/apache2/sites-available/1-%s.conf', $site);
+        $site   = $this->site;
+        $alias  = $input->getArgument('alias');
+        $delete = $input->getOption('delete');
 
+        $file    = sprintf('/etc/apache2/sites-available/1-%s.conf', $site);
         $lines   = file($file);
         $changed = false;
 
@@ -57,16 +64,21 @@ class Alias extends AbstractSite
                 array_shift($parts);
 
                 $parts = array_filter($parts);
+                $key   = array_search($alias, $parts);
 
-                if (!in_array($alias, $parts))
+                if ($key === false)
                 {
                     $parts[] = $alias;
-
-                    $line = sprintf('%sServerAlias %s%s', str_pad(' ', $whitespaces), implode(' ', $parts), PHP_EOL);
-                    $lines[$i] = $line;
-
                     $changed = true;
                 }
+                elseif ($delete)
+                {
+                    unset($parts[$key]);
+                    $changed = true;
+                }
+
+                $line = sprintf('%sServerAlias %s%s', str_pad(' ', $whitespaces), implode(' ', $parts), PHP_EOL);
+                $lines[$i] = $line;
             }
         }
 
