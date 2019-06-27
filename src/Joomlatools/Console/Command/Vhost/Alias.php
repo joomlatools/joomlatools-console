@@ -7,6 +7,7 @@
 
 namespace Joomlatools\Console\Command\Vhost;
 
+use Joomlatools\Console\Joomla\Util;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -49,35 +50,68 @@ class Alias extends AbstractSite
         $alias  = $input->getArgument('alias');
         $delete = $input->getOption('delete');
 
-        $file    = sprintf('/etc/apache2/sites-available/1-%s.conf', $site);
+        $changed = $this->_updateAliases($site, $alias, $delete, 'apache');
+        $changed = $this->_updateAliases($site, $alias, $delete, 'nginx') || $changed;
+
+        if ($changed && Util::isJoomlatoolsBox())
+        {
+            `box server:restart apache nginx`;
+        }
+    }
+
+    protected function _updateAliases($site, $alias, $delete = false, $application)
+    {
+        switch ($application)
+        {
+            case 'nginx':
+                $keyword = 'server_name';
+                $file    = sprintf('/etc/nginx/sites-available/1-%s.conf', $site);
+                break;
+            case 'apache':
+            default:
+                $keyword = 'ServerAlias';
+                $file    = sprintf('/etc/apache2/sites-available/1-%s.conf', $site);
+                break;
+        };
+
         $lines   = file($file);
         $changed = false;
 
         foreach ($lines as $i => $line)
         {
-            if ($directive = stristr($line, 'ServerAlias '))
+            if ($directive = stristr($line, sprintf('%s ', $keyword)))
             {
                 $whitespaces = strlen($line) - strlen(ltrim($directive));
 
-                $parts = explode(' ', trim($directive));
+                $directive = trim($directive);
+
+                if (substr($directive, -1, 1) == ';')
+                {
+                    $suffix = ';';
+                    $directive = substr($directive, 0, -1);
+                }
+                else $suffix = '';
+
+                $parts = explode(' ', $directive);
 
                 array_shift($parts);
 
                 $parts = array_filter($parts);
                 $key   = array_search($alias, $parts);
-
-                if ($key === false)
+;
+                if ($key === false && !$delete)
                 {
                     $parts[] = $alias;
                     $changed = true;
                 }
-                elseif ($delete)
+
+                if ($key !== false && $delete)
                 {
                     unset($parts[$key]);
                     $changed = true;
                 }
 
-                $line = sprintf('%sServerAlias %s%s', str_pad(' ', $whitespaces), implode(' ', $parts), PHP_EOL);
+                $line = sprintf('%s%s %s%s%s', str_pad(' ', $whitespaces), $keyword, implode(' ', $parts), $suffix, PHP_EOL);
                 $lines[$i] = $line;
             }
         }
@@ -86,14 +120,17 @@ class Alias extends AbstractSite
         {
             $tmp  = '/tmp/vhost.alias.tmp';
 
-            `sudo cp /etc/apache2/sites-available/1-$site.conf /etc/apache2/sites-available/1-$site.conf.bak`;
+            `sudo cp $file $file.bak`;
 
             file_put_contents($tmp, implode('', $lines));
 
-            `sudo tee /etc/apache2/sites-available/1-$site.conf < $tmp`;
-            `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+            `sudo tee $file < $tmp`;
 
             unlink($tmp);
+
+            return true;
         }
+
+        return false;
     }
 }
