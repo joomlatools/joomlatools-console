@@ -64,6 +64,20 @@ class Create extends AbstractSite
                 'PHP-FPM address or path to Unix socket file, set as value for fastcgi_pass in Nginx config',
                 'unix:/opt/php/php-fpm.sock'
             )
+            ->addOption(
+                'apache-template',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Custom file to use as the Apache vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
+                null
+            )
+            ->addOption(
+                'nginx-template',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Custom file to use as the Nginx vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
+                null
+            )
         ;
     }
 
@@ -72,30 +86,16 @@ class Create extends AbstractSite
         parent::execute($input, $output);
 
         $site = $input->getArgument('site');
-        $port = $input->getOption('http-port');
-        $path = realpath(__DIR__.'/../../../../../bin/.files/');
         $tmp  = '/tmp/vhost.tmp';
+
+        $variables = $this->_getVariables($input);
 
         if (is_dir('/etc/apache2/sites-available'))
         {
-            $template     = file_get_contents($path.'/vhosts/apache.conf');
-            $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
+            $template = $this->_getTemplate($input, 'apache');
+            $template = str_replace(array_keys($variables), array_values($variables), $template);
 
-            file_put_contents($tmp, sprintf($template, $site, $documentroot, $port));
-
-            if (!$input->getOption('disable-ssl'))
-            {
-                $ssl_crt  = $input->getOption('ssl-crt');
-                $ssl_key  = $input->getOption('ssl-key');
-                $ssl_port = $input->getOption('ssl-port');
-
-                if (file_exists($ssl_crt) && file_exists($ssl_key))
-                {
-                    $template = "\n\n" . file_get_contents($path.'/vhosts/apache.ssl.conf');
-                    file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $ssl_crt, $ssl_key), FILE_APPEND);
-                }
-                else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
-            }
+            file_put_contents($tmp, $template);
 
             `sudo tee /etc/apache2/sites-available/1-$site.conf < $tmp`;
             `sudo a2ensite 1-$site.conf`;
@@ -106,36 +106,19 @@ class Create extends AbstractSite
 
         if (is_dir('/etc/nginx/sites-available'))
         {
-            $socket = $input->getOption('php-fpm-address');
-
-            if (Util::isJoomlatoolsBox() && $port == 80) {
-                $port = 81;
+            if (Util::isJoomlatoolsBox() && $variables['%http_port%'] == 80) {
+                $variables['%http_port%'] = 81;
             }
 
-            $file = Util::isKodekitPlatform($this->target_dir) ? 'nginx.kodekit.conf' : 'nginx.conf';
+            $template = $this->_getTemplate($input, 'nginx');
 
-            $template     = file_get_contents($path.'/vhosts/'.$file);
-            $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
-
-            file_put_contents($tmp, sprintf($template, $site, $documentroot, $port, $socket));
-
-            if (!$input->getOption('disable-ssl'))
-            {
-                $ssl_crt  = $input->getOption('ssl-crt');
-                $ssl_key  = $input->getOption('ssl-key');
-                $ssl_port = $input->getOption('ssl-port');
-
-                if (Util::isJoomlatoolsBox() && $ssl_port == 443) {
-                    $ssl_port = 444;
-                }
-
-                if (file_exists($ssl_crt) && file_exists($ssl_key))
-                {
-                    $template = "\n\n" . file_get_contents($path.'/vhosts/nginx.kodekit.ssl.conf');
-                    file_put_contents($tmp, sprintf($template, $site, $documentroot, $ssl_port, $socket, $ssl_crt, $ssl_key), FILE_APPEND);
-                }
-                else $output->writeln('<comment>SSL was not enabled for the site. One or more certificate files are missing.</comment>');
+            if (!$input->getOption('disable-ssl') && Util::isJoomlatoolsBox() && $variables['%ssl_port%'] == 443) {
+                $variables['%ssl_port%'] = 444;
             }
+
+            $vhost = str_replace(array_keys($variables), array_values($variables), $template);
+
+            file_put_contents($tmp, $vhost);
 
             `sudo tee /etc/nginx/sites-available/1-$site.conf < $tmp`;
             `sudo ln -fs /etc/nginx/sites-available/1-$site.conf /etc/nginx/sites-enabled/1-$site.conf`;
@@ -143,5 +126,67 @@ class Create extends AbstractSite
 
             @unlink($tmp);
         }
+    }
+
+    protected function _getVariables(InputInterface $input)
+    {
+        $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
+
+        $variables = array(
+            '%site%'       => $input->getArgument('site'),
+            '%root%'       => $documentroot,
+            '%http_port%'  => $input->getOption('http-port'),
+            '%php_fpm%'    => $input->getOption('php-fpm-address')
+        );
+
+        if (!$input->getOption('disable-ssl'))
+        {
+            $variables = array_merge($variables, array(
+                '%ssl_port%'    => $input->getOption('ssl-port'),
+                '%certificate%' => $input->getOption('ssl-crt'),
+                '%key%'         => $input->getOption('ssl-key')
+            ));
+        }
+
+        return $variables;
+    }
+
+    protected function _getTemplate(InputInterface $input, $application = 'apache')
+    {
+        $path = realpath(__DIR__.'/../../../../../bin/.files/vhosts');
+
+        if ($template = $input->getOption(sprintf('%s-template', $application)))
+        {
+            if (file_exists($template)) {
+                return file_get_contents($template);
+            }
+            else throw new \Exception(sprintf('Template file %s does not exist.', $template));
+        }
+
+        switch($application)
+        {
+            case 'nginx':
+                $file = Util::isKodekitPlatform($this->target_dir) ? 'nginx.kodekit.conf' : 'nginx.conf';
+                break;
+            case 'apache':
+            default:
+                $file = 'apache.conf';
+                break;
+        }
+
+        $template = file_get_contents(sprintf('%s/%s', $path, $file));
+
+        if (!$input->getOption('disable-ssl'))
+        {
+            if (file_exists($input->getOption('ssl-crt')) && file_exists($input->getOption('ssl-key')))
+            {
+                $file = str_replace('.conf', '.ssl.conf', $file);
+
+                $template .= "\n\n" . file_get_contents(sprintf('%s/%s', $path, $file));
+            }
+            else throw new \Exception('Unable to enable SSL for the site: one or more certificate files are missing.');
+        }
+
+        return $template;
     }
 }
