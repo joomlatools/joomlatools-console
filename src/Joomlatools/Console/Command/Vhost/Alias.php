@@ -98,7 +98,7 @@ class Alias extends AbstractSite
 
                 $parts = array_filter($parts);
                 $key   = array_search($alias, $parts);
-;
+
                 if ($key === false && !$delete)
                 {
                     $parts[] = $alias;
