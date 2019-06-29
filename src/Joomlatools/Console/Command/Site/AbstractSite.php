@@ -54,6 +54,7 @@ abstract class AbstractSite extends Command
     {
         $this->site       = $input->getArgument('site');
         $this->www        = $input->getOption('www');
+
         if ($input->getOption('use-webroot-dir')) {
             $this->target_dir = $this->www;
         } else {

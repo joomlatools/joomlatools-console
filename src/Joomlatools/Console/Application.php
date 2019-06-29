@@ -148,6 +148,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Site\Listing(),
             new Command\Site\Token(),
 
+            new Command\Vhost\Alias(),
             new Command\Vhost\Create(),
             new Command\Vhost\Remove(),
 
