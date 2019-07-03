@@ -91,9 +91,6 @@ class Create extends AbstractSite
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
-        $port = $input->getOption('http-port');
-        $path = realpath(__DIR__.'/../../../../../bin/.files/');
-
         $tmp  = '/tmp/vhost.tmp';
 
         $variables = $this->_getVariables($input);
@@ -107,7 +104,8 @@ class Create extends AbstractSite
 
             `sudo tee /etc/apache2/sites-available/1-$site.conf < $tmp`;
             `sudo a2ensite 1-$site.conf`;
-            `sudo /etc/init.d/apache2 restart > /dev/null 2>&1`;
+
+            $restart[] = 'apache';
 
             @unlink($tmp);
         }
@@ -130,9 +128,17 @@ class Create extends AbstractSite
 
             `sudo tee /etc/nginx/sites-available/1-$site.conf < $tmp`;
             `sudo ln -fs /etc/nginx/sites-available/1-$site.conf /etc/nginx/sites-enabled/1-$site.conf`;
-            `sudo /etc/init.d/nginx restart > /dev/null 2>&1`;
+
+            $restart[] = 'nginx';
 
             @unlink($tmp);
+        }
+
+        if (Util::isJoomlatoolsBox() && $restart)
+        {
+            $arguments = implode(' ', $restart);
+
+            `box server:restart $arguments`;
         }
     }
 
