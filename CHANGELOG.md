@@ -7,6 +7,13 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.5.4 (2019-07-12)
+    * Added - Add vhost:alias command [#102](https://github.com/joomlatools/joomlatools-console/issues/102)
+    * Added - Create relative symlinks [#103](https://github.com/joomlatools/joomlatools-console/issues/103)
+    * Improved - Only execute service restarts on box [#109](https://github.com/joomlatools/joomlatools-console/issues/109)
+    * Improved - Allow another template file to be used for vhost:create [#105](https://github.com/joomlatools/joomlatools-console/issues/105)
+    * Fixed - Prevent 'Incorrect datetime value' MySQL error [#108](https://github.com/joomlatools/joomlatools-console/pull/108)
+
 * 1.5.3 (2019-03-27)
     * Added - Add option to use existing database [#95](https://github.com/joomlatools/joomlatools-console/pull/95)
     * Fixed - Remove redundant library imports [#99](https://github.com/joomlatools/joomlatools-console/issues/99)
