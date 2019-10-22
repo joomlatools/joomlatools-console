@@ -195,7 +195,7 @@ EOF
 
     public function check(InputInterface $input, OutputInterface $output)
     {
-        if (file_exists($this->target_dir)) {
+        if (file_exists($this->target_dir) && count(scandir($this->target_dir)) > 2) {
             throw new \RuntimeException(sprintf('A site with name %s already exists', $this->site));
         }
     }
