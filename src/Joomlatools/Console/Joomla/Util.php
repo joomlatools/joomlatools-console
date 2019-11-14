@@ -137,7 +137,7 @@ class Util
             $contents = file_get_contents($manifest);
             $package  = json_decode($contents);
 
-            if ($package->name == 'timble/kodekit-platform') {
+            if (property_exists($package, 'name') && $package->name == 'timble/kodekit-platform') {
                 return true;
             }
         }
