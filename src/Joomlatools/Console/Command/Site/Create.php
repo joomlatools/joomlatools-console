@@ -195,8 +195,12 @@ EOF
 
     public function check(InputInterface $input, OutputInterface $output)
     {
-        if (file_exists($this->target_dir) && count(scandir($this->target_dir)) > 2) {
+        if (file_exists($this->target_dir) && !is_dir($this->target_dir)) {
             throw new \RuntimeException(sprintf('A site with name %s already exists', $this->site));
+        }
+
+        if (is_dir($this->target_dir) && count(scandir($this->target_dir)) > 2) {
+            throw new \RuntimeException(sprintf('Site directory \'%s\' is not empty.', $this->target_dir));
         }
     }
 
