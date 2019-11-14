@@ -55,7 +55,7 @@ class Delete extends Database\AbstractDatabase
             throw new \RuntimeException('You are currently in the directory you are trying to delete. Aborting');
         }
 
-        if (!file_exists($this->target_dir)) {
+        if (!is_dir($this->target_dir)) {
             throw new \RuntimeException(sprintf('The site %s does not exist!', $this->site));
         }
     }
