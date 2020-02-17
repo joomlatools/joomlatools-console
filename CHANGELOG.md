@@ -7,6 +7,9 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 1.5.5 (2020-02-17)
+    * Fixed - Fix version number
+
 * 1.5.4 (2019-07-12)
     * Added - Add vhost:alias command [#102](https://github.com/joomlatools/joomlatools-console/issues/102)
     * Added - Create relative symlinks [#103](https://github.com/joomlatools/joomlatools-console/issues/103)
