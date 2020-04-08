@@ -16,9 +16,9 @@ Installation
 
  `$ export PATH="$PATH:~/.composer/vendor/bin"`
  
- For ubuntu 19+ you may find you should use:
+ For Ubuntu 19+ you may find you should use:
 
-`echo 'export PATH="$PATH:$HOME/.config/composer/vendor/bin"' >> ~/.bashrc`
+`export PATH="$PATH:$HOME/.config/composer/vendor/bin"`
 
 1. Verify the installation
 
