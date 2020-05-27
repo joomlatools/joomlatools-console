@@ -178,7 +178,7 @@ EOF
                 '--www'  => $this->www
             );
 
-            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options', 'skip-create-statement');
+            $optionalArgs = array('sample-data', 'symlink', 'projects-dir', 'interactive', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'options', 'skip-create-statement', 'use-webroot-dir');
             foreach ($optionalArgs as $optionalArg)
             {
                 $value = $input->getOption($optionalArg);
@@ -211,7 +211,8 @@ EOF
             'site'          => $this->site,
             '--release'     => $input->getOption('release'),
             '--clear-cache' => $input->getOption('clear-cache'),
-            '--www'         => $this->www
+            '--www'         => $this->www,
+            '--use-webroot-dir' => $input->getOption('use-webroot-dir')
         );
 
         if ($input->hasParameterOption('--clone')) {
@@ -237,7 +238,8 @@ EOF
             '--ssl-crt'     => $input->getOption('ssl-crt'),
             '--ssl-key'     => $input->getOption('ssl-key'),
             '--ssl-port'    => $input->getOption('ssl-port'),
-            '--www'         => $input->getOption('www')
+            '--www'         => $input->getOption('www'),
+            '--use-webroot-dir' => $input->getOption('use-webroot-dir')
         ));
 
         $command = new Vhost\Create();
