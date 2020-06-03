@@ -89,7 +89,14 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function getConsoleHome()
     {
-        return rtrim(getenv('HOME'), '/') . '/.joomlatools/console';
+        $home       = getenv('HOME');
+        $customHome = getenv('JOOMLATOOLS_CONSOLE_HOME');
+
+        if (!empty($customHome)) {
+            $home = $customHome;
+        }
+
+        return rtrim($home, '/') . '/.joomlatools/console';
     }
 
     /**
@@ -215,17 +222,19 @@ class Application extends \Symfony\Component\Console\Application
      */
     protected function _setup()
     {
-        if (!file_exists($this->getConsoleHome()))
+        $home = $this->getConsoleHome();
+
+        if (!file_exists($home))
         {
-            $result = @mkdir($this->getConsoleHome(), 0775, true);
+            $result = @mkdir($home, 0775, true);
 
             if (!$result) {
-                $this->_output->writeln(sprintf('<error>Unable to write to home directory: %s. Please check write permissions.</error>', getenv('HOME')));
+                $this->_output->writeln(sprintf('<error>Unable to create home directory: %s. Please check write permissions.</error>', $home));
             }
         }
 
         // Handle legacy plugin directory
-        if (is_writable($this->getConsoleHome()) && !file_exists($this->getPluginPath()))
+        if (is_writable($home) && !file_exists($this->getPluginPath()))
         {
             $old = realpath(dirname(__FILE__) . '/../../../plugins/');
 
