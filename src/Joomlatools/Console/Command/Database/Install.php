@@ -87,7 +87,6 @@ class Install extends AbstractDatabase
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
-
         $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
 
         $this->drop                  = $input->getOption('drop');
@@ -115,7 +114,7 @@ class Install extends AbstractDatabase
         {
             $tmp      = tempnam('/tmp', 'dump');
             $contents = file_get_contents($import);
-            $contents = str_replace('#__', 'j_', $contents);
+            $contents = str_replace('#__',  $this->target_db_prefix, $contents);
 
             file_put_contents($tmp, $contents);
 
@@ -149,8 +148,8 @@ class Install extends AbstractDatabase
                     exec ($command);
                 };
 
-                $executeQuery("REPLACE INTO j_schemas (extension_id, version_id) VALUES (700, '$schema');");
-                $executeQuery("UPDATE j_extensions SET manifest_cache = '{\"version\": \"$version->release\"}' WHERE manifest_cache = '';");
+                $executeQuery("REPLACE INTO ".$this->target_db_prefix."schemas (extension_id, version_id) VALUES (700, '$schema');");
+                $executeQuery("UPDATE ".$this->target_db_prefix."extensions SET manifest_cache = '{\"version\": \"$version->release\"}' WHERE manifest_cache = '';");
             }
         }
     }
