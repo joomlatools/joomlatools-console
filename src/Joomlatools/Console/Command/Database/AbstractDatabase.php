@@ -87,7 +87,7 @@ abstract class AbstractDatabase extends AbstractSite
         }
         else
         {
-            $this->target_db_prefix = '';
+            $this->target_db_prefix = $input->getOption('mysql_db_prefix') ?: $input->getOption('mysql-db-prefix');
             $this->target_db        = $db_name;
         }
         
