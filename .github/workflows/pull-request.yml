@@ -1,0 +1,53 @@
+
+name: Create a pull request
+
+on:
+  create:
+
+jobs:
+  pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+
+      - name:  Only run on branches whose names start with feature/ or hotfix/
+        if: startsWith(github.ref, 'refs/heads/feature') || startsWith(github.ref, 'refs/heads/hotfix')
+        shell: bash
+        run: echo "::set-env name=ISSUE_ID::$(echo $GITHUB_REF | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//')"
+
+
+      - name: Get issue data
+        uses: octokit/request-action@v2.x
+        if: ${{ env.ISSUE_ID }}
+        id: issue
+        with:
+          route: GET /repos/${{ github.repository }}/issues/${{ env.ISSUE_ID }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Gather PR data
+        if: ${{ steps.issue.outputs.data }}
+        id: pr_data
+        shell: bash
+        run: |
+          echo "::set-output name=title::$(echo $json_var | jq '.title' --raw-output )"
+          echo "::set-output name=body::Closes #$(echo $json_var | jq '.number' --raw-output)"
+          echo "::set-output name=assignee::$(echo $json_var | jq '[.assignees[].login] | join(",")' --raw-output --compact-output)"
+          echo "::set-output name=label::$(echo $json_var | jq '[.labels[].name] | join(",")' --raw-output --compact-output)"
+          echo "::set-output name=milestone::$(echo $json_var | jq '[.milestone.title] | join(",")' --raw-output --compact-output)"
+        env:
+          json_var: ${{ steps.issue.outputs.data }}
+
+
+      - name: Create pull request
+        if: ${{ steps.issue.outputs.data }}
+        uses: repo-sync/pull-request@v2
+        with:
+          pr_title: ${{ steps.pr_data.outputs.title }}
+          pr_body: ${{ steps.pr_data.outputs.body }}
+          pr_assignee: ${{ steps.pr_data.outputs.assignee }}
+          pr_label: ${{ steps.pr_data.outputs.label }}
+          pr_milestone: ${{ steps.pr_data.outputs.milestone }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
