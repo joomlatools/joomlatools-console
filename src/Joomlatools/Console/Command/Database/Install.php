@@ -234,6 +234,20 @@ class Install extends AbstractDatabase
     {
         $files = array();
 
+        $beta_installs = function($path) {
+
+            $beta_installs = array();
+
+            foreach (array_diff(scandir($path), array('.', '..')) AS $install_sql)
+            {
+                if (strpos($install_sql, 'sample_') === false){
+                    $beta_installs[] = $path .$install_sql;
+                }
+            }
+
+            return $beta_installs;
+        };
+
         if (Util::isPlatform($this->target_dir) || Util::isKodekitPlatform($this->target_dir))
         {
             $path = $this->target_dir .'/install/mysql/';
@@ -251,11 +265,9 @@ class Install extends AbstractDatabase
 
             $version = Util::getJoomlaVersion($this->target_dir);
 
-            if (version_compare($version->release, '4.0.0-alpha', '>'))
+            if (version_compare($version->release, '3.9', '>'))
             {
-                foreach (array_diff(scandir($path), array('.', '..')) AS $install_sql){
-                    $files[] = $path . $install_sql;
-                }
+                $files = $beta_installs($path);
             }else{
                 $files[] = $path.'joomla.sql';
             }

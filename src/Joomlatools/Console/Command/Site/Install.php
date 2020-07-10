@@ -109,7 +109,7 @@ class Install extends Database\AbstractDatabase
 
         $version = Util::getJoomlaVersion($this->target_dir);
 
-        if (version_compare($version->release, '4.0.0-alpha', '>')){
+        if (version_compare($version->release, '4.0.0-alpha5', '>=')){
             $this->configureDependencies($input, $output);
         }
 
