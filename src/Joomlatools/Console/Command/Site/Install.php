@@ -106,6 +106,13 @@ class Install extends Database\AbstractDatabase
         $this->check($input, $output);
 
         $this->importdb($input, $output);
+
+        $version = Util::getJoomlaVersion($this->target_dir);
+
+        if (version_compare($version->release, '4.0.0-alpha', '>')){
+            $this->configureDependencies($input, $output);
+        }
+
         $this->createConfig($input, $output);
 
         if ($this->symlink)
@@ -119,6 +126,23 @@ class Install extends Database\AbstractDatabase
         $name = Util::isPlatform($this->target_dir) ? 'Joomla Platform application' : 'Joomla site';
         $output->writeln("Your new $name has been configured.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
+    }
+
+    /*
+     * https://docs.joomla.org/J4.x:Setting_Up_Your_Local_Environment
+     */
+    public function configureDependencies(InputInterface $input, OutputInterface $output)
+    {
+        $path = $this->target_dir;
+
+        $output->writeLn('<info>Installing Joomla 4 project dependencies');
+
+        //first remove existing css, media, node and vendor files
+        passthru("rm -rf $path/administrator/templates/atum/css; rm -rf $path/templates/cassiopeia/css; rm -rf $path/media/; rm -rf $path/node_modules/; rm -rf $path/libraries/vendor/; rm -f $path/administrator/cache/autoload_psr4.php;rm -rf $path/installation/template/css");
+
+        passthru("composer --working-dir=$path --ignore-platform-reqs install; npm ci --prefix $path");
+
+        $output->writeln('Joomla 4 is now configured');
     }
 
     public function check(InputInterface $input, OutputInterface $output)
