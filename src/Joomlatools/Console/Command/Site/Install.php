@@ -135,14 +135,12 @@ class Install extends Database\AbstractDatabase
     {
         $path = $this->target_dir;
 
-        $output->writeLn('<info>Installing Joomla 4 project dependencies');
+        $output->writeLn('<info>Installing Joomla 4 project dependencies</info>');
 
         //first remove existing css, media, node and vendor files
-        passthru("rm -rf $path/administrator/templates/atum/css; rm -rf $path/templates/cassiopeia/css; rm -rf $path/media/; rm -rf $path/node_modules/; rm -rf $path/libraries/vendor/; rm -f $path/administrator/cache/autoload_psr4.php;rm -rf $path/installation/template/css");
+        exec("rm -rf $path/administrator/templates/atum/css; rm -rf $path/templates/cassiopeia/css; rm -rf $path/media/; rm -rf $path/node_modules/; rm -rf $path/libraries/vendor/; rm -f $path/administrator/cache/autoload_psr4.php;rm -rf $path/installation/template/css");
 
-        passthru("composer --working-dir=$path --ignore-platform-reqs install; npm ci --prefix $path");
-
-        $output->writeln('Joomla 4 is now configured');
+        exec("composer --working-dir=$path --ignore-platform-reqs install; npm ci --prefix $path");
     }
 
     public function check(InputInterface $input, OutputInterface $output)
