@@ -140,7 +140,9 @@ class Install extends Database\AbstractDatabase
         //first remove existing css, media, node and vendor files
         exec("rm -rf $path/administrator/templates/atum/css; rm -rf $path/templates/cassiopeia/css; rm -rf $path/media/; rm -rf $path/node_modules/; rm -rf $path/libraries/vendor/; rm -f $path/administrator/cache/autoload_psr4.php;rm -rf $path/installation/template/css");
 
-        exec("composer --working-dir=$path --ignore-platform-reqs install; npm ci --prefix $path");
+        exec("composer --working-dir=$path --ignore-platform-reqs install;");
+
+        exec(" npm ci --prefix $path");
     }
 
     public function check(InputInterface $input, OutputInterface $output)
