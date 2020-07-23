@@ -137,8 +137,19 @@ class Install extends Database\AbstractDatabase
 
         $output->writeLn('<info>Installing Joomla 4 project dependencies</info>');
 
-        //first remove existing css, media, node and vendor files
-        exec("rm -rf $path/administrator/templates/atum/css; rm -rf $path/templates/cassiopeia/css; rm -rf $path/media/; rm -rf $path/node_modules/; rm -rf $path/libraries/vendor/; rm -f $path/administrator/cache/autoload_psr4.php;rm -rf $path/installation/template/css");
+        $remove_folders = array(
+            "$path/administrator/templates/atum/css",
+            "$path/templates/cassiopeia/css",
+            "$path/media/",
+            "$path/node_modules/",
+            "$path/libraries/vendor/",
+            "$path/administrator/cache/autoload_psr4.php",
+            "$path/installation/template/css"
+        );
+
+        foreach ($remove_folders AS $folder){
+            exec("rm -rf $folder;");
+        }
 
         exec("composer --working-dir=$path --ignore-platform-reqs install;");
 
