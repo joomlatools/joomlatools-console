@@ -152,6 +152,12 @@ EOF
                 null,
                 InputOption::VALUE_NONE,
                 'Do not run the "CREATE IF NOT EXISTS <db>" query. Use this if the user does not have CREATE privileges on the database.'
+            )
+            ->addOption(
+                'jt_docker',
+                null,
+                InputOption::VALUE_NONE,
+                'Disable SSL for this site'
             );
     }
 
@@ -185,6 +191,10 @@ EOF
                 if (!empty($value)) {
                     $arguments['--' . $optionalArg] = $value;
                 }
+            }
+
+            if ($input->getOption('jt_docker')){
+                $arguments['--jt_docker'] = $input->getOption('jt_docker');
             }
 
             $command = new Install();
@@ -230,7 +240,7 @@ EOF
 
     public function addVirtualHost(InputInterface $input, OutputInterface $output)
     {
-        $command_input = new ArrayInput(array(
+        $defaults = array(
             'vhost:create',
             'site'          => $this->site,
             '--http-port'   => $input->getOption('http-port'),
@@ -239,8 +249,23 @@ EOF
             '--ssl-key'     => $input->getOption('ssl-key'),
             '--ssl-port'    => $input->getOption('ssl-port'),
             '--www'         => $input->getOption('www'),
-            '--use-webroot-dir' => $input->getOption('use-webroot-dir')
-        ));
+            '--use-webroot-dir' => $input->getOption('use-webroot-dir'),
+        );
+
+        if ($input->getOption('jt_docker'))
+        {
+            $defaults['--php-fpm-address'] =  'joomlatools_php_fpm:9000';
+            $defaults[ '--www'] =  '/code';
+            $defaults['--jt_docker'] = $input->getOption('jt_docker');
+        }
+
+        $command_input = new ArrayInput($defaults);
+
+        echo "<pre>";
+        print_r($command_input);
+        echo "</pre>";
+
+
 
         $command = new Vhost\Create();
         $command->run($command_input, $output);
