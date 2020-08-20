@@ -1,12 +1,12 @@
 release: "latest"
 
-#docker: "true"
-#docker_container: "joomlatools_nginx"
-#docker_nginx: true
-#docker_apache: false
-#mysql_host_alias: "db"
-#php_fpm: "joomlatools_php_fpm:9000"
-#config_www: "/code/"
+docker: "true"
+docker_container: "joomlatools_nginx"
+docker_nginx: true
+docker_apache: false
+mysql_host_alias: "db"
+php_fpm: "joomlatools_php_fpm:9000"
+config_www: "/code/"
 
 www_dir: "/var/www"
 
