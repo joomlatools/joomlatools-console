@@ -65,12 +65,7 @@ class Configure extends AbstractDatabase
 		        InputOption::VALUE_REQUIRED,
 		        "A YAML file consisting of serialized parameters to override JConfig"
 	        )
-            ->addOption(
-                'jt_docker',
-                null,
-                InputOption::VALUE_NONE,
-                'Disable SSL for this site'
-            );
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -162,7 +157,7 @@ class Configure extends AbstractDatabase
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
-            'host'      => 'db', #@todo hardcoded for now
+            'host'      => $this->mysql->host,
             'dbprefix'  => 'j_',
             'dbtype'    => $this->mysql->driver,
 
@@ -298,7 +293,7 @@ class Configure extends AbstractDatabase
 
     public function check(InputInterface $input, OutputInterface $output)
     {
-        if (!file_exists($this->target_dir) && !$input->getOption('jt_docker')) {
+        if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site %s not found', $this->site));
         }
 

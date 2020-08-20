@@ -87,12 +87,6 @@ class Install extends Database\AbstractDatabase
                 null,
                 InputOption::VALUE_REQUIRED,
                 "A YAML file consisting of serialized parameters to override JConfig."
-            )
-            ->addOption(
-                'jt_docker',
-                null,
-                InputOption::VALUE_NONE,
-                'Disable SSL for this site'
             );
     }
 
@@ -112,24 +106,17 @@ class Install extends Database\AbstractDatabase
         $this->check($input, $output);
 
         $this->importdb($input, $output);
-
-        echo "\n about to create configuration";
-
         $this->createConfig($input, $output);
 
-        echo "\n about to symlink stuff";
-
-        //@todo temp disable
         if ($this->symlink)
         {
-            //$this->symlinkProjects($input, $output);
-            //$this->installExtensions($input, $output);
+            $this->symlinkProjects($input, $output);
+            $this->installExtensions($input, $output);
         }
 
-        //$this->_enableWebInstaller($input, $output);
+        $this->_enableWebInstaller($input, $output);
 
-        //$name = Util::isPlatform($this->target_dir) ? 'Joomla Platform application' : 'Joomla site';
-        $name = 'Joomla site';
+        $name = Util::isPlatform($this->target_dir) ? 'Joomla Platform application' : 'Joomla site';
         $output->writeln("Your new $name has been configured.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
     }
@@ -181,13 +168,6 @@ class Install extends Database\AbstractDatabase
             if (!empty($value)) {
                 $arguments['--' . $optionalArg] = $value;
             }
-        }
-
-        if ($input->getOption('jt_docker'))
-        {
-            //$arguments['--www'] = '/code';
-            $arguments['--mysql-host'] = 'db';
-            $arguments['--jt_docker'] = $input->getOption('jt_docker');
         }
 
         $command = new Configure();

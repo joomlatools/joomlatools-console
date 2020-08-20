@@ -78,12 +78,6 @@ class Create extends AbstractSite
                 'Custom file to use as the Nginx vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
                 null
             )
-            ->addOption(
-                'jt_docker',
-                null,
-                InputOption::VALUE_NONE,
-                'Disable SSL for this site'
-            )
         ;
     }
 
@@ -93,9 +87,7 @@ class Create extends AbstractSite
 
         $site = $input->getArgument('site');
 
-        var_dump($input->getOption('jt_docker'));
-
-        if (!file_exists($this->target_dir) && !$input->getOption('jt_docker')) {
+        if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
@@ -148,23 +140,6 @@ class Create extends AbstractSite
 
             `box server:restart $arguments`;
         }
-
-
-        if ($input->getOption('jt_docker'))
-        {
-            $template = $this->_getTemplate($input, 'nginx');
-            $vhost = str_replace(array_keys($variables), array_values($variables), $template);
-
-            file_put_contents($tmp, $vhost);
-
-            passthru("docker cp $tmp joomlatools_nginx:/etc/nginx/sites-available/1-$site.conf");
-            passthru("docker cp $tmp joomlatools_nginx:/etc/nginx/sites-enabled/1-$site.conf");
-            passthru("docker kill -s HUP joomlatools_nginx");
-        }
-
-        echo "<pre>";
-        print_r($vhost);
-        echo "</pre>";
     }
 
     protected function _getVariables(InputInterface $input)
