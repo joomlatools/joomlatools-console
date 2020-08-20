@@ -251,7 +251,8 @@ class Install extends AbstractDatabase
 
             $version = Util::getJoomlaVersion($this->target_dir);
 
-            if (version_compare($version->release, '3.9', '>'))
+            if (version_compare($version->release, '4.0.0-alpha12', '>') &&
+                file_exists($path . "base.sql"))
             {
                 $files[] = $path . "base.sql";
                 $files[] = $path . "extensions.sql";
