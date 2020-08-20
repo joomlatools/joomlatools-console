@@ -84,9 +84,15 @@ class Configure extends AbstractDatabase
             return $string;
         };
 
+        $site_path = $this->target_dir;
+
+        if (isset($this->config['config_www'])){
+            $site_path = $this->config['config_www'] . $this->site;
+        }
+
         $this->_default_values = array(
-            'log_path' => $this->target_dir . '/logs/',
-            'tmp_path' => $this->target_dir . '/tmp/',
+            'log_path' => $site_path . '/logs/',
+            'tmp_path' => $site_path . '/tmp/',
             'sitename' => $this->site,
             'key'      => $random(16),
             'env'      => 'development'
@@ -157,7 +163,7 @@ class Configure extends AbstractDatabase
             'db'        => $this->target_db,
             'user'      => $this->mysql->user,
             'password'  => $this->mysql->password,
-            'host'      => $this->mysql->host,
+            'host'      => isset($this->config['mysql_host_alias']) ? $this->config['mysql_host_alias'] : $this->mysql->host,
             'dbprefix'  => 'j_',
             'dbtype'    => $this->mysql->driver,
 

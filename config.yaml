@@ -1,0 +1,23 @@
+release: "latest"
+
+#docker: "true"
+#docker_container: "joomlatools_nginx"
+#docker_nginx: true
+#docker_apache: false
+#mysql_host_alias: "db"
+#php_fpm: "joomlatools_php_fpm:9000"
+#config_www: "/code/"
+
+www_dir: "/var/www"
+
+mysql_host: "127.0.0.1"
+mysql_port: "3306"
+mysql_login: "root:root"
+target_db_prefix: "sites_"
+mysql_driver: "mysqli"
+
+http_port: "80"
+ssl_cert: "/etc/apache2/ssl/server.crt"
+ssl_key: "/etc/apache2/ssl/server.key"
+ssl_port: "443"
+php_fpm: "unix:/opt/php/php-fpm.sock"

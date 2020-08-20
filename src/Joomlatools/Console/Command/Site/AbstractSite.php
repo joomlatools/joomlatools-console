@@ -24,8 +24,12 @@ abstract class AbstractSite extends Command
 
     protected static $files;
 
+    protected $config;
+
     protected function configure()
     {
+        $this->config = Util::getConfig();
+
         if (empty(self::$files)) {
             self::$files = Util::getTemplatePath() . '/bin/.files';
         }
@@ -39,7 +43,7 @@ abstract class AbstractSite extends Command
             null,
             InputOption::VALUE_REQUIRED,
             "Web server root",
-            '/var/www'
+            $this->config['www_dir']
         )
         ->addOption(
             'use-webroot-dir',

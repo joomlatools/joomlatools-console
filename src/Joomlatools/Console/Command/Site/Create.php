@@ -61,7 +61,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 "Joomla version. Can be a release number (2, 3.2, ..) or branch name. Run `joomla versions` for a full list.\nUse \"none\" for an empty virtual host.",
-                'latest'
+                $this->config['release']
             )
             ->addOption(
                 'sample-data',
@@ -99,7 +99,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTP port the virtual host should listen to',
-                80
+                $this->config['http_port']
             )
             ->addOption(
                 'disable-ssl',
@@ -112,21 +112,21 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The full path to the signed cerfificate file',
-                '/etc/apache2/ssl/server.crt'
+                $this->config['ssl_cert']
             )
             ->addOption(
                 'ssl-key',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The full path to the private cerfificate file',
-                '/etc/apache2/ssl/server.key'
+                $this->config['ssl_key']
             )
             ->addOption(
                 'ssl-port',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The port on which the server will listen for SSL requests',
-                443
+                $this->config['ssl_port']
             )
             ->addOption(
                 'interactive',

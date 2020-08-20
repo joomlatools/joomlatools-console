@@ -10,13 +10,12 @@ namespace Joomlatools\Console\Command\Database;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 use Joomlatools\Console\Command\Site\AbstractSite;
 
 abstract class AbstractDatabase extends AbstractSite
 {
     protected $target_db;
-    protected $target_db_prefix = 'sites_';
+    protected $target_db_prefix;
 
     protected $mysql;
 
@@ -24,26 +23,28 @@ abstract class AbstractDatabase extends AbstractSite
     {
         parent::configure();
 
+        $this->target_db_prefix = $this->config['target_db_prefix'];
+
         $this->addOption(
             'mysql-login',
             'L',
             InputOption::VALUE_REQUIRED,
             "MySQL credentials in the form of user:password",
-            'root:root'
+            $this->config['mysql_login']
         )
         ->addOption(
             'mysql-host',
             'H',
             InputOption::VALUE_REQUIRED,
             "MySQL host",
-            'localhost'
+             $this->config['mysql_host']
         )
         ->addOption(
             'mysql-port',
             'P',
             InputOption::VALUE_REQUIRED,
             "MySQL port",
-            3306
+            $this->config['mysql_port']
         )
         ->addOption(
             'mysql-db-prefix',
@@ -63,7 +64,7 @@ abstract class AbstractDatabase extends AbstractSite
             null,
             InputOption::VALUE_REQUIRED,
             "MySQL driver",
-            'mysqli'
+            $this->config['mysql_driver']
         )
         ->addOption(
         // @TODO To be removed in 1.6

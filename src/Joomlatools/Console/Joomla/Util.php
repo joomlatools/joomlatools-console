@@ -7,6 +7,8 @@
 
 namespace Joomlatools\Console\Joomla;
 
+use Symfony\Component\Yaml\Yaml as Yaml;
+
 class Util
 {
     protected static $_versions  = array();
@@ -252,5 +254,25 @@ class Util
     	$root = dirname(dirname(dirname(dirname(__DIR__))));
 
     	return realpath($root .DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR . '.files');
+    }
+
+    public static function getConfig()
+    {
+        $path = \Phar::running();
+
+        //if run in the same directoy as bin?
+        if (!empty($path))
+        {
+            $config_file = $path . DIRECTORY_SEPARATOR . 'config.yaml';
+            return Yaml::parse(file_get_contents($config_file));
+
+        }
+
+        //otherwise being run from elsewhere on the system /var/www for example
+        $root = dirname(dirname(dirname(dirname(__DIR__))));
+
+        $config_file = realpath($root .DIRECTORY_SEPARATOR . 'config.yaml');
+
+        return Yaml::parse(file_get_contents($config_file));
     }
 }

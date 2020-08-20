@@ -28,7 +28,7 @@ class Create extends AbstractSite
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTP port the virtual host should listen to',
-                80
+                $this->config['http_port']
             )
             ->addOption(
                 'disable-ssl',
@@ -41,28 +41,28 @@ class Create extends AbstractSite
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The full path to the signed cerfificate file',
-                '/etc/apache2/ssl/server.crt'
+                $this->config['ssl_cert']
             )
             ->addOption(
                 'ssl-key',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The full path to the private cerfificate file',
-                '/etc/apache2/ssl/server.key'
+                $this->config['ssl_key']
             )
             ->addOption(
                 'ssl-port',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The port on which the server will listen for SSL requests',
-                443
+                $this->config['ssl_port']
             )
             ->addOption(
                 'php-fpm-address',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'PHP-FPM address or path to Unix socket file, set as value for fastcgi_pass in Nginx config',
-                'unix:/opt/php/php-fpm.sock'
+                $this->config['php_fpm']
             )
             ->addOption(
                 'apache-template',
@@ -139,6 +139,37 @@ class Create extends AbstractSite
             $arguments = implode(' ', $restart);
 
             `box server:restart $arguments`;
+        }
+
+        if (isset($this->config['docker']))
+        {
+            $variables["%root%"] = $this->config['config_www'] . $this->site;
+
+            $docker_container = $this->config['docker_container'];
+
+            if ($this->config['docker_nginx'])
+            {
+                $template = $this->_getTemplate($input, 'nginx');
+                $vhost = str_replace(array_keys($variables), array_values($variables), $template);
+
+                file_put_contents($tmp, $vhost);
+
+                passthru("docker cp $tmp $docker_container:/etc/nginx/sites-available/1-$site.conf");
+                passthru("docker cp $tmp $docker_container:/etc/nginx/sites-enabled/1-$site.conf");
+            }
+
+            if ($this->config['docker_apache'])
+            {
+                $template = $this->_getTemplate($input, 'apache');
+                $vhost = str_replace(array_keys($variables), array_values($variables), $template);
+
+                file_put_contents($tmp, $vhost);
+
+                passthru("docker cp $tmp $docker_container:/etc/apache2/sites-available/1-$site.conf");
+                passthru("docker cp $tmp $docker_container:/etc/apache2/sites-enabled/1-$site.conf");
+            }
+
+            passthru("docker kill -s HUP $docker_container");
         }
     }
 

@@ -170,6 +170,10 @@ class Install extends Database\AbstractDatabase
             }
         }
 
+        if (isset($this->config['mysql_host_alias'])){
+            $arguments['--mysql-host'] = $this->config['mysql_host_alias'];
+        }
+
         $command = new Configure();
         $command->setApplication($this->getApplication());
         $command->skipDatabasePrompt();
