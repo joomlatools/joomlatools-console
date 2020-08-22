@@ -166,6 +166,7 @@ class Configure extends AbstractDatabase
             'host'      => isset($this->config['mysql_host_alias']) ? $this->config['mysql_host_alias'] : $this->mysql->host,
             'dbprefix'  => 'j_',
             'dbtype'    => $this->mysql->driver,
+            'dbtype'    => $this->mysql->driver,
 
             'mailer'   => 'smtp',
             'mailfrom' => 'admin@example.com',
@@ -173,7 +174,7 @@ class Configure extends AbstractDatabase
             'smtpauth' => '0',
             'smtpuser' => '',
             'smtppass' => '',
-            'smtphost' => 'localhost',
+            'smtphost' => $this->config['smtphost'],
             'smtpsecure' => 'none',
             'smtpport' => '1025',
 
