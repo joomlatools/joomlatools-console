@@ -129,6 +129,7 @@ class Application extends \Symfony\Component\Console\Application
 
             new Command\Database\Install(),
             new Command\Database\Drop(),
+            new Command\Database\Export(),
 
             new Command\Extension\Disable(),
             new Command\Extension\Enable(),
