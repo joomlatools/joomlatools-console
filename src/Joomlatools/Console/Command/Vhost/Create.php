@@ -145,7 +145,8 @@ class Create extends AbstractSite
         {
             $variables["%root%"] = $this->config['config_www'] . $this->site;
 
-            $docker_container = $this->config['docker_container'];
+            $docker_nginx_container = $this->config['docker_nginx_container'];
+            $docker_apache_container = $this->config['docker_apache_container'];
 
             if ($this->config['docker_nginx'])
             {
@@ -154,8 +155,9 @@ class Create extends AbstractSite
 
                 file_put_contents($tmp, $vhost);
 
-                passthru("docker cp $tmp $docker_container:/etc/nginx/sites-available/1-$site.conf");
-                passthru("docker cp $tmp $docker_container:/etc/nginx/sites-enabled/1-$site.conf");
+                passthru("docker cp $tmp $docker_nginx_container:/etc/nginx/sites-enabled/1-$site.conf");
+
+                passthru("docker kill -s HUP $docker_nginx_container");
             }
 
             if ($this->config['docker_apache'])
@@ -165,11 +167,10 @@ class Create extends AbstractSite
 
                 file_put_contents($tmp, $vhost);
 
-                passthru("docker cp $tmp $docker_container:/etc/apache2/sites-available/1-$site.conf");
-                passthru("docker cp $tmp $docker_container:/etc/apache2/sites-enabled/1-$site.conf");
-            }
+                passthru("docker cp $tmp $docker_apache_container:/usr/local/apache2/sites-enabled/1-$site.conf");
 
-            passthru("docker kill -s HUP $docker_container");
+                passthru("docker kill -s HUP $docker_apache_container");
+            }
         }
     }
 
