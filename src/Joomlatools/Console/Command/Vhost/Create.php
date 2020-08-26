@@ -169,7 +169,7 @@ class Create extends AbstractSite
 
                 passthru("docker cp $tmp $docker_apache_container:/usr/local/apache2/sites-enabled/1-$site.conf");
 
-                passthru("docker kill -s HUP $docker_apache_container");
+                passthru("docker exec $docker_apache_container /usr/local/apache2/bin/apachectl restart -D FOREGROUND");
             }
         }
     }
