@@ -28,8 +28,6 @@ class Export extends AbstractDatabase
             InputOption::VALUE_REQUIRED,
             'The path to export the database to',
             $this->config['mysqld_output']
-<<<<<<< Updated upstream
-=======
         )
         ->addOption(
             'all-dbs',
@@ -37,7 +35,6 @@ class Export extends AbstractDatabase
             InputOption::VALUE_REQUIRED,
             'Whether all dbs should be exported',
             false
->>>>>>> Stashed changes
         );
     }
 
@@ -51,16 +48,7 @@ class Export extends AbstractDatabase
         $mysql_host = $input->getOption('mysql-host');
         $mysql_port = $input->getOption('mysql-port');
         $site = $input->getArgument('site');
-<<<<<<< Updated upstream
-
-        $args = "-uroot --opt --skip-dump-date -B sites_$site";
-        $sed = 'sed \'s$VALUES ($VALUES\n($g\' | sed \'s$),($),\n($g\'';
-        $file = $output_dir . $this->site . '.sql';
-
-        echo "\n" . "docker exec joomlatools_mysql sh -c 'MYSQL_PWD=root mysqldump -h $mysql_host -P $mysql_port $args > $file' \n";
-=======
         $all_dbs = $input->getOption('all-dbs');
-
 
         $file = $output_dir . $this->site . '.sql';
 
@@ -76,7 +64,6 @@ class Export extends AbstractDatabase
         $sed = 'sed \'s$VALUES ($VALUES\n($g\' | sed \'s$),($),\n($g\'';
 
         #echo "\n" . "docker exec joomlatools_mysql sh -c 'MYSQL_PWD=root mysqldump -h $mysql_host -P $mysql_port $args > $file' \n";
->>>>>>> Stashed changes
 
         shell_exec("docker exec joomlatools_mysql sh -c 'MYSQL_PWD=root mysqldump -h $mysql_host -P $mysql_port $args > $file'");
 
