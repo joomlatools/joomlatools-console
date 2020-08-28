@@ -69,6 +69,8 @@ class Kindle extends Site\AbstractSite
 
         }
 
+        sleep(5);
+
         $open_tabs = <<<EOT
         open -a "Google Chrome" http://localhost:8080 &&
         open -a "Google Chrome" http://localhost:8081 && 
