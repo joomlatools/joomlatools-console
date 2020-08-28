@@ -10,6 +10,7 @@ php_fpm: "joomlatools_php_fpm:9000"
 config_www: "/code/"
 smtphost: "mailhog"
 mysqld_output: "/docker-entrypoint-initdb.d/"
+disable-ssl: true
 
 www_dir: "/var/www"
 
@@ -22,6 +23,7 @@ mysql_driver: "mysqli"
 #mysqld_output:"/var/www/"
 
 http_port: "80"
+#disable-ssl: false
 ssl_cert: "/etc/apache2/ssl/server.crt"
 ssl_key: "/etc/apache2/ssl/server.key"
 ssl_port: "443"

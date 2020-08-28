@@ -33,8 +33,9 @@ class Create extends AbstractSite
             ->addOption(
                 'disable-ssl',
                 null,
-                InputOption::VALUE_NONE,
-                'Disable SSL for this site'
+                InputOption::VALUE_REQUIRED,
+                'Disable SSL for this site',
+                $this->config['disable-ssl']
             )
             ->addOption(
                 'ssl-crt',
