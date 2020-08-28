@@ -20,13 +20,14 @@ class Export extends AbstractDatabase
         parent::configure();
 
         $this
-        ->setName('database:exportt')
+        ->setName('database:export')
         ->setDescription('Export a database')
             ->addOption(
             'output-file',
             'o',
             InputOption::VALUE_REQUIRED,
-            'The path to export the database to'
+            'The path to export the database to',
+            $this->config['mysqld_output']
         );
     }
 
@@ -39,12 +40,15 @@ class Export extends AbstractDatabase
         $output_dir = $input->getOption('output-file');
         $mysql_host = $input->getOption('mysql-host');
         $mysql_port = $input->getOption('mysql-port');
+        $site = $input->getArgument('site');
 
-        $args = '-uroot --opt --skip-dump-date -B sites_alpha --column-statistics=0 sites_alpha ';
+        $args = "-uroot --opt --skip-dump-date -B sites_$site";
         $sed = 'sed \'s$VALUES ($VALUES\n($g\' | sed \'s$),($),\n($g\'';
         $file = $output_dir . $this->site . '.sql';
 
-        shell_exec("MYSQL_PWD=root mysqldump -h $mysql_host -P $mysql_port $args > $file");
+        echo "\n" . "docker exec joomlatools_mysql sh -c 'MYSQL_PWD=root mysqldump -h $mysql_host -P $mysql_port $args > $file' \n";
+
+        shell_exec("docker exec joomlatools_mysql sh -c 'MYSQL_PWD=root mysqldump -h $mysql_host -P $mysql_port $args > $file'");
 
         $output->writeln("<info>File updated: " . $file . "</info>");
 
