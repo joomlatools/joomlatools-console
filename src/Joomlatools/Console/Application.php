@@ -127,6 +127,9 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Cache\ListObjects(),
             new Command\Cache\Purge(),
 
+            new Command\Box\Kindle(),
+            new Command\Box\Burn(),
+
             new Command\Database\Install(),
             new Command\Database\Drop(),
             new Command\Database\Export(),
