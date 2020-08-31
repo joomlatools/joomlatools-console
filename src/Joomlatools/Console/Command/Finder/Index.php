@@ -71,6 +71,8 @@ class Index extends AbstractSite
             $this->putFilters($input, $output);
         }
         else $this->createIndexes($input, $output);
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

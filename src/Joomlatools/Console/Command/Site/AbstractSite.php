@@ -60,6 +60,8 @@ abstract class AbstractSite extends Command
         } else {
             $this->target_dir = $this->www.'/'.$this->site;
         }
+
+        return 0;
     }
 
     /**

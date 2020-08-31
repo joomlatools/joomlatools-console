@@ -82,6 +82,8 @@ abstract class AbstractExtension extends Command
         $this->www        = $input->getOption('www');
         $this->target_dir = $this->www.'/'.$this->site;
         $this->extension = $input->getArgument('extension');
+
+        return 0;
     }
 
     protected function check(InputInterface $input, OutputInterface $output)

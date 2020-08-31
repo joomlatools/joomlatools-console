@@ -32,5 +32,7 @@ class Enable extends AbstractExtension
         $this->toggle(true);
 
         $output->writeln(sprintf("<info>Extension %s has been enabled</info>", $this->extension));
+
+        return 0;
     }
 }

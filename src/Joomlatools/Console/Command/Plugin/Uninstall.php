@@ -38,15 +38,17 @@ class Uninstall extends Command
         if ($result == 'false')
         {
             $output->writeln('<error>Composer was not found. It is either not installed or globally available.</error>');
-            return;
+            return 99;
         }
 
         if (!array_key_exists($package, $plugins))
         {
             $output->writeln('<error>Error:</error>The package "' . $package . '" is not installed');
-            return;
+            return 99;
         }
 
         passthru("composer --no-interaction --working-dir=$path remove $package");
+
+        return 0;
     }
 }

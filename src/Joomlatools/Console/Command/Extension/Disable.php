@@ -32,5 +32,7 @@ class Disable extends AbstractExtension
         $this->toggle(false);
 
         $output->writeln(sprintf("<info>Extension %s has been disabled</info>", $this->extension));
+
+        return 0;
     }
 }

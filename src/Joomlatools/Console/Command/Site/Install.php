@@ -119,6 +119,8 @@ class Install extends Database\AbstractDatabase
         $name = Util::isPlatform($this->target_dir) ? 'Joomla Platform application' : 'Joomla site';
         $output->writeln("Your new $name has been configured.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

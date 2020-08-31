@@ -191,6 +191,8 @@ EOF
             $command->setApplication($this->getApplication());
             $command->run(new ArrayInput($arguments), $output);
         }
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

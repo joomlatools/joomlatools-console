@@ -57,6 +57,8 @@ class Alias extends AbstractSite
         {
             `box server:restart apache nginx`;
         }
+
+        return 0;
     }
 
     protected function _updateAliases($site, $alias, $delete = false, $application)

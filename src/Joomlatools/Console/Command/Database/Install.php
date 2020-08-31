@@ -153,6 +153,8 @@ class Install extends AbstractDatabase
                 $executeQuery("UPDATE j_extensions SET manifest_cache = '{\"version\": \"$version->release\"}' WHERE manifest_cache = '';");
             }
         }
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

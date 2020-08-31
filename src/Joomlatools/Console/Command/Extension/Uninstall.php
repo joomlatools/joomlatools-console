@@ -42,6 +42,8 @@ class Uninstall extends AbstractSite
 
         $this->check($input, $output);
         $this->uninstall($input, $output);
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

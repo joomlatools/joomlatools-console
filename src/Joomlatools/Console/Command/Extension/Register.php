@@ -132,6 +132,8 @@ EOL
 
         $this->check($input, $output);
         $this->register($input, $output);
+
+        return 0;
     }
 
     public function register(InputInterface $input, OutputInterface $output)

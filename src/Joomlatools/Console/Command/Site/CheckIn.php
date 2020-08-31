@@ -92,6 +92,8 @@ class CheckIn extends AbstractSite
             }
             else $output->writeln("[<error>FAILED</error>]");
         }
+
+        return 0;
     }
 
     /**

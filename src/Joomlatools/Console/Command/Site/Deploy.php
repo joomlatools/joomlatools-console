@@ -66,6 +66,8 @@ class Deploy extends AbstractSite
         if (!$initialised) {
             $this->deploy();
         }
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

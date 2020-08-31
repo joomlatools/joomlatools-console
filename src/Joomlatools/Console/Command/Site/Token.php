@@ -53,6 +53,8 @@ class Token extends AbstractSite
         $token  = \KObjectManager::getInstance()->getObject('http.token')->setSubject($user)->sign($secret);
 
         $output->writeln($token);
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

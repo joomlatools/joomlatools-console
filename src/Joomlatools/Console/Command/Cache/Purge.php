@@ -31,6 +31,8 @@ class Purge extends AbstractCache
         parent::execute($input, $output);
 
         $this->purgeCache($input, $output);
+
+        return 0;
     }
 
     public function purgeCache(InputInterface $input, OutputInterface $output)

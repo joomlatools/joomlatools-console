@@ -50,6 +50,8 @@ abstract class AbstractCache extends AbstractSite
         }
 
         $this->check($input, $output);
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

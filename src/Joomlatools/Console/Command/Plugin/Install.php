@@ -45,7 +45,7 @@ EOF
         if (trim($result) == 'false')
         {
             $output->writeln('<error>Composer was not found. It is either not installed or globally available</error>');
-            return;
+            return 99;
         }
 
         $plugin_path = $this->getApplication()->getPluginPath();
@@ -68,7 +68,7 @@ EOF
         if ($code === 1)
         {
             $output->writeln("<error>The $package plugin you are attempting to install cannot be found</error>");
-            return;
+            return 99;
         }
 
         $type = '';
@@ -92,9 +92,11 @@ EOF
         {
             $output->writeln("<comment>$package is not a Joomla console plugin</comment>");
             $output->writeln('<error>Plugin not installed</error>');
-            return;
+            return 99;
         }
 
         passthru("composer --no-interaction --no-progress --working-dir=$plugin_path require $package");
+
+        return 0;
     }
 }
