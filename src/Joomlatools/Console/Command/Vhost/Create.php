@@ -183,7 +183,8 @@ class Create extends AbstractSite
             '%site%'       => $input->getArgument('site'),
             '%root%'       => $documentroot,
             '%http_port%'  => $input->getOption('http-port'),
-            '%php_fpm%'    => $input->getOption('php-fpm-address')
+            '%php_fpm%'    => $input->getOption('php-fpm-address'),
+            '%nginx_http_port%' => $this->config['nginx_http_port']
         );
 
         if (!$input->getOption('disable-ssl'))
