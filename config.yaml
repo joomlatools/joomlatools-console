@@ -7,7 +7,7 @@ docker_nginx: true
 docker_apache: true
 mysql_host_alias: "db"
 php_fpm: "joomlatools_php_fpm:9000"
-config_www: "/code/"
+config_www: "/Sites/"
 smtphost: "mailhog"
 mysqld_output: "/docker-entrypoint-initdb.d/"
 disable-ssl: true
