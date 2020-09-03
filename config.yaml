@@ -23,6 +23,7 @@ mysql_driver: "mysqli"
 #mysqld_output:"/var/www/"
 
 http_port: "80"
+nginx_http_port: "8081"
 #disable-ssl: false
 ssl_cert: "/etc/apache2/ssl/server.crt"
 ssl_key: "/etc/apache2/ssl/server.key"
