@@ -188,7 +188,8 @@ class Install extends Database\AbstractDatabase
             'site'    => $input->getArgument('site'),
             'symlink' => $this->symlink,
             '--www'   => $this->www,
-            '--projects-dir' => $input->getOption('projects-dir')
+            '--projects-dir' => $input->getOption('projects-dir'),
+            '--relative'    => true
         ));
         $symlink = new Command\Extension\Symlink();
 

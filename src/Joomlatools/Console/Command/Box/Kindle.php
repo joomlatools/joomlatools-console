@@ -31,6 +31,8 @@ class Kindle extends Site\AbstractSite
     {
         $file_sync = $input->getOption('file_sync');
 
+        shell_exec("sh checkout-joomlatools.sh");
+
         if ($file_sync == 'docker-sync')
         {
             //is this first time set up
@@ -80,6 +82,32 @@ EOT;
 
         shell_exec($open_tabs);
 
-        $output->writeln('<info>cleared for take off</info>');
+        $finish_message = <<<EOT
+                  ____
+                (xXXXX|xx======---(-  Apology accepted Captain Needa
+                /     |
+               /    XX|
+              /xxx XXX|
+             /xxx X   |
+            / ________|
+    __ ____/_|_|_______\_      Red two standing by.
+###|=||________|_________|    /
+    ~~   |==| __  _  __  /|~~~~~~~~~-------------_______
+         |==| ||(( ||()|| |XXXXXXXX| powell@coventry.ac.uk
+    __   |==| ~~__~__~~__\|_________-------------~~~~~~~
+###|=||~~~~~~~~|_______  |
+    ~~ ~~~~\~|~|       /~
+            \ ~~~~~~~~~
+             \xxx X   |
+              \xxx XXX|
+               \    XX|
+                \     |
+                (xXXXX|xx======---(-  Do or do not, there is no try!
+                  ~~~~
+EOT;
+
+
+        $finish_message .= "\n\n May your code light the way \n";
+        $output->writeln("<info>$finish_message</info>");
     }
 }
