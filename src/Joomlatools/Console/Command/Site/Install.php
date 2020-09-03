@@ -111,7 +111,8 @@ class Install extends Database\AbstractDatabase
         if ($this->symlink)
         {
             $this->symlinkProjects($input, $output);
-            $this->installExtensions($input, $output);
+
+            //$this->installExtensions($input, $output);
         }
 
         $this->_enableWebInstaller($input, $output);
