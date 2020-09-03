@@ -129,6 +129,7 @@ class Application extends \Symfony\Component\Console\Application
 
             new Command\Box\Kindle(),
             new Command\Box\Burn(),
+            new Command\Box\Clear(),
 
             new Command\Database\Install(),
             new Command\Database\Drop(),
