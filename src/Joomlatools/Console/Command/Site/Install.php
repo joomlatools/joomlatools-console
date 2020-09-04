@@ -194,7 +194,7 @@ class Install extends Database\AbstractDatabase
             'symlink' => $this->symlink,
             '--www'   => $this->www,
             '--projects-dir' => $input->getOption('projects-dir'),
-            '--relative'    => true
+            '--relative'    => $this->config['symlink_relative']
         ));
         $symlink = new Command\Extension\Symlink();
 

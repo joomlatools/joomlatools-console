@@ -43,7 +43,7 @@ abstract class AbstractSite extends Command
             null,
             InputOption::VALUE_REQUIRED,
             "Web server root",
-            $this->config['www_dir']
+            sprintf($this->config['www_dir'] . '%s', $this->config['config_www'])
         )
         ->addOption(
             'use-webroot-dir',

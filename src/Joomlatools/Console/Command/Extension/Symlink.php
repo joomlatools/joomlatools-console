@@ -69,13 +69,14 @@ EOL
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Directory where your custom projects reside',
-                sprintf('%s/Projects', trim(`echo ~`))
+                sprintf($this->config['www_dir'] . '%s', $this->config['projects_dir'])
             )
             ->addOption(
                 'relative',
                 'r',
-                InputOption::VALUE_NONE,
-                'Use relative paths to the site root instead of absolute paths.'
+                InputOption::VALUE_REQUIRED,
+                'Use relative paths to the site root instead of absolute paths.',
+                $this->config['symlink_relative']
             );
     }
 

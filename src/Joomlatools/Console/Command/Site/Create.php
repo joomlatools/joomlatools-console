@@ -92,7 +92,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Directory where your custom projects reside',
-                sprintf('%s/Projects', trim(`echo ~`))
+                sprintf($this->config['www_dir'] . '%s', $this->config['projects_dir'])
             )
             ->addOption(
                 'http-port',

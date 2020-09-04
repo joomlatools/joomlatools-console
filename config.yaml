@@ -12,6 +12,8 @@ smtphost: "mailhog"
 mysqld_output: "/docker-entrypoint-initdb.d/"
 disable-ssl: true
 
+projects_dir: "/Projects"
+symlink_relative: true
 www_dir: "/var/www"
 
 mysql_host: "127.0.0.1"
@@ -28,4 +30,5 @@ nginx_http_port: "8081"
 ssl_cert: "/etc/apache2/ssl/server.crt"
 ssl_key: "/etc/apache2/ssl/server.key"
 ssl_port: "443"
+#symlink_relative: false
 #php_fpm: "unix:/opt/php/php-fpm.sock"
