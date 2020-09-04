@@ -15,6 +15,8 @@ class Clear extends Site\AbstractSite
 {
     protected function configure()
     {
+        $this->config = Util::getConfig();
+
         $this
             ->setName('box:clear')
             ->setDescription('Clear logs, vhosts, db')
@@ -22,13 +24,15 @@ class Clear extends Site\AbstractSite
                 'root',
                 null,
                 InputOption::VALUE_REQUIRED,
-                "burner box root",
                 $this->config['www_dir']
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
+        $output->writeLn('<info>about to burn to the ground</info>');
+
         $root = $input->getOption('root');
 
         shell_exec("rm -Rf $root/apache2/logs/*");
