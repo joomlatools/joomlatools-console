@@ -119,6 +119,10 @@ EOL
         static::$_relative = $input->getOption('relative') === true;
 
         $this->check($input, $output);
+
+        $this->symlinkProjects($input, $output);
+
+        //@todo currently a bug, needs to run twice for media/koowa to be present
         $this->symlinkProjects($input, $output);
     }
 

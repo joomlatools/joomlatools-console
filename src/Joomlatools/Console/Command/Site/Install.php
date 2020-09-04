@@ -112,6 +112,11 @@ class Install extends Database\AbstractDatabase
         {
             $this->symlinkProjects($input, $output);
 
+            //@todo currently a bug needs to be run twice in order for all media/koowa
+            //to be present
+            $this->symlinkProjects($input, $output);
+
+            //@todo can't install, because not inside the box and app configured to db host
             //$this->installExtensions($input, $output);
         }
 

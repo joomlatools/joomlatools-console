@@ -84,13 +84,13 @@ EOT;
 
         $finish_message = <<<EOT
                   ____
-                (xXXXX|xx======---(-  Apology accepted Captain Needa
+                (xXXXX|xx======---(-  IT'S A TRAP!!!!
                 /     |
                /    XX|
               /xxx XXX|
              /xxx X   |
             / ________|
-    __ ____/_|_|_______\_      Red two standing by.
+    __ ____/_|_|_______\_      Rogue One standing by.
 ###|=||________|_________|    /
     ~~   |==| __  _  __  /|~~~~~~~~~-------------_______
          |==| ||(( ||()|| |XXXXXXXX| powell@coventry.ac.uk
