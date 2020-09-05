@@ -7,14 +7,19 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Console\Question;
 use Joomlatools\Console\Joomla\Util;
 use Joomlatools\Console\Command\Site;
 
 class Kindle extends Site\AbstractSite
 {
+    protected $containers = ['apache','web', 'php_fpm', 'composer', 'db', 'theia', 'mailhog', 'phpmyadmin'];
+
     protected function configure()
     {
+        $this->config = Util::getConfig();
+
         $this
             ->setName('box:kindle')
             ->setDescription('Bring up your burner box')
@@ -34,6 +39,17 @@ class Kindle extends Site\AbstractSite
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
+
+        /*$testing = Yaml::parseFile($this->config['www_dir'] . '/docker-compose-xdebug.yml');
+
+
+        var_dump($testing['services']);
+        $result = var_dump(array_values($testing['services']));
+        var_dump($result[0]);
+        exit();*/
+
+
         $file_sync = $input->getOption('file_sync');
         $xdebug = $input->getOption('xdebug');
 
