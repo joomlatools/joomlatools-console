@@ -34,12 +34,25 @@ class Burn extends Site\AbstractSite
                 'scorched-earth',
                 null,
                 InputOption::VALUE_OPTIONAL
+            )
+            ->addOption(
+                'xdebug',
+                'x',
+                InputOption::VALUE_NONE
             );
     }
 
+    /*
+     *
+     * We need to stop and remove an image if xdebug was previously enabled
+     * docker rmi joomlatools-kindle_php_fpm:latest
+     *
+     *
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $burn_to_the_ground = $input->getOption('scorched-earth');
+        $kill_xdebug = $input->getOption('xdebug');
 
         if ($burn_to_the_ground)
         {
@@ -67,5 +80,9 @@ class Burn extends Site\AbstractSite
         passthru('docker-compose down');
 
         passthru('docker container prune');
+
+        if ($kill_xdebug){
+            passthru("docker rmi joomlatools-kindle_php_fpm:latest");
+        }
     }
 }

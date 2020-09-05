@@ -24,12 +24,22 @@ class Kindle extends Site\AbstractSite
                 InputOption::VALUE_REQUIRED,
                 "Select your type of file sync (nfs | docker-sync)",
                 'nfs'
+            )
+            ->addOption(
+                'xdebug',
+                'x',
+                InputOption::VALUE_NONE
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $file_sync = $input->getOption('file_sync');
+        $xdebug = $input->getOption('xdebug');
+
+        if ($xdebug){
+            $file_sync = '';
+        }
 
         shell_exec("sh checkout-joomlatools.sh");
 
@@ -54,7 +64,8 @@ class Kindle extends Site\AbstractSite
             passthru('docker-sync-stack start');
 
         }
-        elseif ($file_sync == 'nfs')
+
+        if ($file_sync == 'nfs')
         {
             if (!file_exists('.nfs_file_sharing'))
             {
@@ -69,6 +80,10 @@ class Kindle extends Site\AbstractSite
 
             passthru('docker-compose up -d');
 
+        }
+
+        if ($xdebug) {
+            passthru('docker-compose -f docker-compose-xdebug.yml up -d');
         }
 
         sleep(5);
