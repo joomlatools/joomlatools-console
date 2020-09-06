@@ -39,17 +39,6 @@ class Kindle extends Site\AbstractSite
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
-
-        /*$testing = Yaml::parseFile($this->config['www_dir'] . '/docker-compose-xdebug.yml');
-
-
-        var_dump($testing['services']);
-        $result = var_dump(array_values($testing['services']));
-        var_dump($result[0]);
-        exit();*/
-
-
         $file_sync = $input->getOption('file_sync');
         $xdebug = $input->getOption('xdebug');
 
