@@ -60,5 +60,7 @@ class Remove extends Command
 
             `box server:restart $arguments`;
         }
+
+        return 0;
     }
 }

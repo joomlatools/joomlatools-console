@@ -92,6 +92,7 @@ class Versions extends Command
                 ->setStyle('compact')
                 ->render($output);
         }
+
         return 0;
     }
 

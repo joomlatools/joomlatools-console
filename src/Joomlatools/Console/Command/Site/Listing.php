@@ -97,5 +97,7 @@ class Listing extends Database\AbstractDatabase
         }
 
         $output->writeln($string);
+
+        return 0;
     }
 }

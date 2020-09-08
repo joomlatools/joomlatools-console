@@ -33,6 +33,8 @@ class Drop extends AbstractDatabase
         if (!empty($result)) {
             throw new \RuntimeException(sprintf('Cannot drop database %s. Error: %s', $this->target_db, $result));
         }
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

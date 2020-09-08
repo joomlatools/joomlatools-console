@@ -55,6 +55,8 @@ class Clear extends AbstractCache
         if (!count($deleted)) {
             $output->writeln("<info>There are no $client_string cache items to delete</info>");
         }
+
+        return 0;
     }
 
     public function deleteCache($client, $group = array())

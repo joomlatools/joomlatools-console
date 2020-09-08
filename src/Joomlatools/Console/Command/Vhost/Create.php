@@ -140,6 +140,8 @@ class Create extends AbstractSite
 
             `box server:restart $arguments`;
         }
+
+        return 0;
     }
 
     protected function _getVariables(InputInterface $input)

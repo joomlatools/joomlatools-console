@@ -7,6 +7,10 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+1.5.9 (2020-09-01)
+    * Added - Support for Joomla 4 installs [#126](https://github.com/joomlatools/joomlatools-console/pull/126)
+    * Improved - Support for Symfony console 5x [#129](https://github.com/joomlatools/joomlatools-console/issues/129)
+
 * 1.5.8 (2020-06-03)
     * Added - Add JOOMLATOOLS_CONSOLE_HOME environment variable [#120](https://github.com/joomlatools/joomlatools-console/issues/120)
 

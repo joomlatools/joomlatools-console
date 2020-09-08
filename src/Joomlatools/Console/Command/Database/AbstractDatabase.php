@@ -104,6 +104,8 @@ abstract class AbstractDatabase extends AbstractSite
         if (!in_array($this->mysql->driver, array('mysql', 'mysqli'))) {
             throw new \RuntimeException(sprintf('Invalid MySQL driver %s', $this->mysql->driver));
         }
+
+        return 0;
     }
 
     protected function _executeSQL($query)

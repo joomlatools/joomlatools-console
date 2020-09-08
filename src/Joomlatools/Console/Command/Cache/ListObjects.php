@@ -49,6 +49,8 @@ class ListObjects extends AbstractCache
             }
         }
         else $output->writeln("<info>There appears to be no cache items for the $client_string</info>");
+
+        return 0;
     }
 
     public function listCache(InputInterface $input, OutputInterface $output)

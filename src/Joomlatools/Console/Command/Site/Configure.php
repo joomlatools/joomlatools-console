@@ -122,6 +122,8 @@ class Configure extends AbstractDatabase
         } else {
             $this->_configureJoomlaCMS();
         }
+
+        return 0;
     }
 
     protected function _configureJoomlaCMS()

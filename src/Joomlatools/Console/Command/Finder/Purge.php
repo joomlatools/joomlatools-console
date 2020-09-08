@@ -48,6 +48,8 @@ class Purge extends AbstractSite
 
         $this->check($input, $output);
         $this->purgeFinder($input, $output);
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

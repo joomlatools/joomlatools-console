@@ -73,6 +73,8 @@ EOL
         if (count($this->composer_extensions)) {
             $this->installPackages($input, $output);
         }
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

@@ -112,7 +112,7 @@ class Download extends AbstractSite
         $this->setVersion($input->getOption('release'));
 
         if (strtolower($this->version) == 'none') {
-            return;
+            return 0;
         }
 
         if ($input->hasParameterOption('--clone')) {
@@ -130,6 +130,8 @@ class Download extends AbstractSite
         if ($isPlatform || Util::isKodekitPlatform($this->target_dir)) {
             `cd $this->target_dir; composer --no-interaction install -q`;
         }
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

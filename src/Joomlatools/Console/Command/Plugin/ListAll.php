@@ -40,5 +40,7 @@ class ListAll extends Command
         $table->setHeaders($headers)
             ->setRows($rows)
             ->render($output);
+
+        return 0;
     }
 }
