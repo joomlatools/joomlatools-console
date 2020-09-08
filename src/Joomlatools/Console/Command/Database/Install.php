@@ -249,14 +249,27 @@ class Install extends AbstractDatabase
                 $path = $this->target_dir.'/installation/sql/mysql/';
             }
 
-            $files[] = $path.'joomla.sql';
+            $version = Util::getJoomlaVersion($this->target_dir);
+
+            if (version_compare($version->release, '4.0.0-alpha12', '>') &&
+                file_exists($path . "base.sql"))
+            {
+                $files[] = $path . "base.sql";
+                $files[] = $path . "extensions.sql";
+                $files[] = $path . "supports.sql";
+
+            }else{
+                $files[] = $path.'joomla.sql';
+            }
 
             if ($sample_data)
             {
                 $type      = $sample_data == 'default' ? 'data' : $sample_data;
                 $sample_db = $path . 'sample_' . $type . '.sql';
 
-                $files[] = $sample_db;
+                if (file_exists($sample_db)){
+                    $files[] = $sample_db;
+                }
             }
         }
 
