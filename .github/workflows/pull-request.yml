@@ -14,7 +14,7 @@ jobs:
       - name:  Only run on branches whose names start with feature/ or hotfix/
         if: startsWith(github.ref, 'refs/heads/feature') || startsWith(github.ref, 'refs/heads/hotfix')
         shell: bash
-        run: echo "::set-env name=ISSUE_ID::$(echo $GITHUB_REF | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//')"
+        run: echo "ISSUE_ID=$(echo $GITHUB_REF | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//')" >> $GITHUB_ENV
 
 
       - name: Get issue data
