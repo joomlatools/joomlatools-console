@@ -8,13 +8,13 @@
 namespace Joomlatools\Console\Command\Vhost;
 
 use Joomlatools\Console\Joomla\Util;
-use Symfony\Component\Console\Command\Command;
+use Joomlatools\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Remove extends Command
+class Remove extends Command\Configurable
 {
     protected function configure()
     {
@@ -56,11 +56,11 @@ class Remove extends Command
         $site    = $input->getArgument('site');
         $restart = [];
 
-        $file = sprintf('%s/available-sites/1-%s.conf', $input->getOption('apache-path'), $site);
+        $file = sprintf('%s/sites-available/1-%s.conf', $input->getOption('apache-path'), $site);
 
         if (is_file($file))
         {
-            $link = sprintf('%s/enabled-sites/1-%s.conf', $input->getOption('apache-path'), $site);
+            $link = sprintf('%s/sites-enabled/1-%s.conf', $input->getOption('apache-path'), $site);
 
             if (is_file($link)) `sudo rm -f $link`;
 
@@ -69,11 +69,11 @@ class Remove extends Command
             $restart[] = 'apache';
         }
 
-        $file = sprintf('%s/available-sites/1-%s.conf', $input->getOption('nginx-path'), $site);
+        $file = sprintf('%s/sites-available/1-%s.conf', $input->getOption('nginx-path'), $site);
 
         if (is_file($file))
         {
-            $link = sprintf('%s/enabled-sites/1-%s.conf', $input->getOption('nginx-path'), $site);
+            $link = sprintf('%s/sites-enabled/1-%s.conf', $input->getOption('nginx-path'), $site);
 
             if (is_file($link)) `sudo rm -f $link`;
 

@@ -7,16 +7,15 @@
 
 namespace Joomlatools\Console\Command\Site;
 
-use Symfony\Component\Console\Command\Command;
+use Joomlatools\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question;
 use Joomlatools\Console\Joomla\Util;
-use Symfony\Component\Yaml\Yaml;
 
-abstract class AbstractSite extends Command
+abstract class AbstractSite extends Command\Configurable
 {
     protected $site;
     protected $www;
@@ -24,6 +23,8 @@ abstract class AbstractSite extends Command
     protected $target_dir;
 
     protected static $files;
+
+    protected $_config = null;
 
     protected function configure()
     {
@@ -49,45 +50,6 @@ abstract class AbstractSite extends Command
             "Uses directory specified with --www as the site install dir"
          )
         ;
-    }
-
-    public function addArgument($name, $mode = null, $description = '', $default = null)
-    {
-        if ($mode != InputOption::VALUE_NONE) {
-            $default = $this->_getConfigOverride($name) ?? $default;
-        }
-
-        return parent::addArgument($name, $mode, $description, $default);
-    }
-
-    public function addOption($name, $shortcut = null, $mode = null, $description = '', $default = null)
-    {
-        if ($mode != InputOption::VALUE_NONE) {
-            $default = $this->_getConfigOverride($name) ?? $default;
-        }
-
-        return parent::addOption($name, $shortcut, $mode, $description, $default);
-    }
-
-    protected function _getConfigOverride($name)
-    {
-        $override = null;
-
-        if ($command = $this->getName())
-        {
-            $file = sprintf('%s/.joomlatools/console/config.yaml', trim(`echo ~`));
-
-            if (file_exists($file))
-            {
-                $overrides = Yaml::parseFile($file);
-
-                if (isset($overrides[$command][$name])) {
-                    $override = $overrides[$command][$name];
-                }
-            }
-        }
-
-        return $override;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
