@@ -70,7 +70,7 @@ class Alias extends AbstractSite
         $alias  = $input->getArgument('alias');
         $delete = $input->getOption('delete');
 
-        $restart = [];
+        $restart = array();
 
         if ($this->_updateAliases($site, $alias, $delete, $input, 'apache')) {
             $restart[] = 'apache';

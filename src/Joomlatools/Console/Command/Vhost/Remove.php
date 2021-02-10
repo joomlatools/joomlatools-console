@@ -54,7 +54,7 @@ class Remove extends Command\Configurable
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $site    = $input->getArgument('site');
-        $restart = [];
+        $restart = array();
 
         $file = sprintf('%s/sites-available/1-%s.conf', $input->getOption('apache-path'), $site);
 
