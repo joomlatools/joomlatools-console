@@ -105,7 +105,8 @@ class Create extends AbstractSite
     {
         parent::execute($input, $output);
 
-        $site = $input->getArgument('site');
+        $site    = $input->getArgument('site');
+        $restart = array();
 
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
