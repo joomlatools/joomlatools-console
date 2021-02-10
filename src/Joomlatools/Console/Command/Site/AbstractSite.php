@@ -7,7 +7,7 @@
 
 namespace Joomlatools\Console\Command\Site;
 
-use Symfony\Component\Console\Command\Command;
+use Joomlatools\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question;
 use Joomlatools\Console\Joomla\Util;
 
-abstract class AbstractSite extends Command
+abstract class AbstractSite extends Command\Configurable
 {
     protected $site;
     protected $www;
@@ -23,6 +23,8 @@ abstract class AbstractSite extends Command
     protected $target_dir;
 
     protected static $files;
+
+    protected $_config = null;
 
     protected function configure()
     {

@@ -78,6 +78,26 @@ class Create extends AbstractSite
                 'Custom file to use as the Nginx vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
                 null
             )
+            ->addOption('apache-path',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The Apache2 path',
+                '/etc/apache2'
+            )->addOption('nginx-path',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The Nginx path',
+                '/etc/nginx'
+            )->addOption('apache-restart',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The full command for restarting Apache2',
+                null
+            )->addOption('nginx-restart',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The full command for restarting Nginx',
+                null)
         ;
     }
 
@@ -91,26 +111,33 @@ class Create extends AbstractSite
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
-        $tmp  = '/tmp/vhost.tmp';
+        $tmp = '/tmp/vhost.tmp';
 
         $variables = $this->_getVariables($input);
 
-        if (is_dir('/etc/apache2/sites-available'))
+        $folder = sprintf('%s/sites-available', $input->getOption('apache-path'));
+
+        if (is_dir($folder))
         {
             $template = $this->_getTemplate($input, 'apache');
             $template = str_replace(array_keys($variables), array_values($variables), $template);
 
             file_put_contents($tmp, $template);
 
-            `sudo tee /etc/apache2/sites-available/1-$site.conf < $tmp`;
-            `sudo a2ensite 1-$site.conf`;
+            `sudo tee $folder/1-$site.conf < $tmp`;
+
+            $link = sprintf('%s/sites-enabled/1-%s.conf', $input->getOption('apache-path'), $site);
+
+            `sudo ln -fs $folder/1-$site.conf $link`;
 
             $restart[] = 'apache';
 
             @unlink($tmp);
         }
 
-        if (is_dir('/etc/nginx/sites-available'))
+        $folder = sprintf('%s/sites-available', $input->getOption('nginx-path'));
+
+        if (is_dir($folder))
         {
             if (Util::isJoomlatoolsBox() && $variables['%http_port%'] == 80) {
                 $variables['%http_port%'] = 81;
@@ -126,19 +153,36 @@ class Create extends AbstractSite
 
             file_put_contents($tmp, $vhost);
 
-            `sudo tee /etc/nginx/sites-available/1-$site.conf < $tmp`;
-            `sudo ln -fs /etc/nginx/sites-available/1-$site.conf /etc/nginx/sites-enabled/1-$site.conf`;
+            `sudo tee $folder/1-$site.conf < $tmp`;
+
+            $link = sprintf('%s/sites-enabled/1-%s.conf', $input->getOption('nginx-path'), $site);
+
+            `sudo ln -fs $folder/1-$site.conf $link`;
 
             $restart[] = 'nginx';
 
             @unlink($tmp);
         }
 
-        if (Util::isJoomlatoolsBox() && $restart)
+        if ($restart)
         {
-            $arguments = implode(' ', $restart);
+            $ignored = array();
 
-            `box server:restart $arguments`;
+            foreach ($restart as $server)
+            {
+                if ($command = $input->getOption(sprintf('%s-restart', $server))) {
+                    `sudo $command`;
+                } else {
+                    $ignored[] = $server;
+                }
+            }
+
+            if (Util::isJoomlatoolsBox() && $ignored)
+            {
+                $arguments = implode(' ', $ignored);
+
+                `box server:restart $arguments`;
+            }
         }
 
         return 0;

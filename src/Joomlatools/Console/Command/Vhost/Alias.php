@@ -35,6 +35,26 @@ class Alias extends AbstractSite
                 InputOption::VALUE_NONE,
                 'Delete the alias if it exists.'
             )
+            ->addOption('apache-path',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The Apache2 path',
+                '/etc/apache2'
+            )->addOption('nginx-path',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The Nginx path',
+                '/etc/nginx'
+            )->addOption('apache-restart',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The full command for restarting Apache2',
+                null
+            )->addOption('nginx-restart',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The full command for restarting Nginx',
+                null)
         ;
     }
 
@@ -50,29 +70,52 @@ class Alias extends AbstractSite
         $alias  = $input->getArgument('alias');
         $delete = $input->getOption('delete');
 
-        $changed = $this->_updateAliases($site, $alias, $delete, 'apache');
-        $changed = $this->_updateAliases($site, $alias, $delete, 'nginx') || $changed;
+        $restart = [];
 
-        if ($changed && Util::isJoomlatoolsBox())
+        if ($this->_updateAliases($site, $alias, $delete, $input, 'apache')) {
+            $restart[] = 'apache';
+        }
+
+        if ($this->_updateAliases($site, $alias, $delete, $input, 'nginx')) {
+            $restart[] = 'nginx';
+        }
+
+        if ($restart)
         {
-            `box server:restart apache nginx`;
+            $ignored = array();
+
+            foreach ($restart as $server)
+            {
+                if ($command = $this->getOption(sprintf('%s-restart', $server))) {
+                    `sudo $command`;
+                } else {
+                    $ignored[] = $server;
+                }
+            }
+
+            if (Util::isJoomlatoolsBox() && $ignored)
+            {
+                $arguments = implode(' ', $ignored);
+
+                `box server:restart $arguments`;
+            }
         }
 
         return 0;
     }
 
-    protected function _updateAliases($site, $alias, $delete = false, $application)
+    protected function _updateAliases($site, $alias, $delete = false, $input, $application)
     {
         switch ($application)
         {
             case 'nginx':
                 $keyword = 'server_name';
-                $file    = sprintf('/etc/nginx/sites-available/1-%s.conf', $site);
+                $file    = sprintf('%s/sites-available/1-%s.conf', $input->getOption('apache-path'), $site);
                 break;
             case 'apache':
             default:
                 $keyword = 'ServerAlias';
-                $file    = sprintf('/etc/apache2/sites-available/1-%s.conf', $site);
+                $file    = sprintf('%s/sites-available/1-%s.conf', $input->getOption('nginx-path'), $site);
                 break;
         };
 
