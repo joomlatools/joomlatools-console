@@ -217,7 +217,11 @@ class Download extends AbstractSite
             `mkdir -p $this->target_dir`;
         }
 
-        `cd $this->target_dir; tar xzf $tarball --strip 1`;
+        if (!$this->versions->isBranch($this->version) && \version_compare($this->version, '4.0.0', '>=')) {
+            `cd $this->target_dir; tar xzf $tarball`;    
+        } else {
+            `cd $this->target_dir; tar xzf $tarball --strip 1`;
+        }
 
         if ($this->versions->isBranch($this->version)) {
             unlink($tarball);
@@ -245,23 +249,29 @@ class Download extends AbstractSite
 
         if ($this->versions->isGitRepository())
         {
+
             if (file_exists($cache) && !$this->versions->isBranch($this->version)) {
                 return $cache;
             }
 
-            $scheme    = strtolower(parse_url($repository, PHP_URL_SCHEME));
-            $isGitHub  = strtolower(parse_url($repository, PHP_URL_HOST)) == 'github.com';
-            $extension = substr($repository, -4);
-
-            if (in_array($scheme, array('http', 'https')) && $isGitHub && $extension != '.git') {
-                $result = $this->_downloadFromGitHub($cache);
-            }
-            else
-            {
-                $directory = $this->versions->getCacheDirectory() . '/source';
-
-                if ($this->_clone($directory)) {
-                    $result = $this->_archive($directory, $cache);
+            if ($repository === 'https://github.com/joomla/joomla-cms' && !$this->versions->isBranch($this->version)
+                && \version_compare($this->version, '4.0.0', '>=')) {
+                $result = $this->_downloadJoomlaRelease($cache);           
+            } else {
+                $scheme    = strtolower(parse_url($repository, PHP_URL_SCHEME));
+                $isGitHub  = strtolower(parse_url($repository, PHP_URL_HOST)) == 'github.com';
+                $extension = substr($repository, -4);
+    
+                if (in_array($scheme, array('http', 'https')) && $isGitHub && $extension != '.git') {
+                    $result = $this->_downloadFromGitHub($cache);
+                }
+                else
+                {
+                    $directory = $this->versions->getCacheDirectory() . '/source';
+    
+                    if ($this->_clone($directory)) {
+                        $result = $this->_archive($directory, $cache);
+                    }
                 }
             }
         }
@@ -272,6 +282,25 @@ class Download extends AbstractSite
         }
 
         return $cache;
+    }
+
+    protected function _downloadJoomlaRelease($target)
+    {
+		$url = $this->versions->getRepository();
+
+        $url .= "/releases/download/{$this->version}/Joomla_{$this->version}-Stable-Full_Package.tar.gz";
+        
+        $this->output->writeln("<info>Downloading $url - this could take a few minutes ..</info>");
+
+        $opts = array(
+            'http' => array('method' => 'GET',
+            'max_redirects' => '20')
+        );
+     
+     $context = stream_context_create($opts);
+        $bytes = file_put_contents($target, fopen($url, 'r', false, $context));
+
+        return (bool) $bytes;
     }
 
     /**
