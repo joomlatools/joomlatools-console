@@ -11,6 +11,36 @@ class Util
 {
     protected static $_versions  = array();
 
+    public static function executeCommand(string $command): string
+    {
+        exec($command, $output, $code);
+        if (count($output) === 0) {
+            $outputError = $code;
+        } else {
+            $outputError = implode(PHP_EOL, $output);
+        }
+
+        if ($code !== 0) {
+            throw new \RuntimeException(
+                "Command failed. The exit code: ".
+                $outputError."<br>The last line of output: ".
+                $command
+            );
+        }
+
+        return implode(PHP_EOL, $output);
+    }
+
+    public static function isJoomla4($base): bool
+    {
+         return (bool) \version_compare(static::getJoomlaVersion($base)->release, '4.0.0', '>=');
+    }
+
+    public static function executeJ4CliCommand($base, $command): string
+    {
+        return static::executeCommand("php $base/cli/joomla.php $command");
+    }
+
     /**
      * Retrieve the Joomla version.
      *

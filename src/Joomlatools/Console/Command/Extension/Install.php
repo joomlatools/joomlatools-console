@@ -13,6 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Site\AbstractSite;
 use Joomlatools\Console\Joomla\Bootstrapper;
+use Joomlatools\Console\Joomla\Util;
 
 class Install extends AbstractSite
 {
@@ -113,6 +114,39 @@ EOL
 
     public function installFiles(InputInterface $input, OutputInterface $output)
     {
+        if (Util::isJoomla4($this->target_dir)) {
+            Util::executeJ4CliCommand($this->target_dir, 'extension:discover');
+            $result = Util::executeJ4CliCommand($this->target_dir, 'extension:discover:list | less');
+            $verbosity = $output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE ? '-vvv' : '';
+
+            $results = [];
+            foreach (explode("\n", $result) as $row) {
+                if (!\preg_match('#[0-9]+#', $row)) continue; # skip table headers etc
+
+                $data = preg_split('#\s+#', trim($row));
+
+                $results[$data[0]] = $data[1];
+            }
+
+            if (isset($results['plg_system_joomlatools']) && (\in_array('all', $this->extensions) || \in_array('joomlatools-framework', $this->extensions))) {
+                $result = Util::executeJ4CliCommand($this->target_dir, "extension:discover:install $verbosity --eid={$results['plg_system_joomlatools']}");
+                
+                unset($results['plg_system_joomlatools']);
+
+                $output->writeln("<info>Joomlatools Framework install: $result</info>\n");
+            }
+
+            foreach ($results as $extension => $extension_id) {
+                if (\in_array('all', $this->extensions) || \in_array(substr($extension, 4), $this->extensions) || \in_array($extension, $this->extensions)) {
+                    $result = Util::executeJ4CliCommand($this->target_dir, "extension:discover:install $verbosity --eid=$extension_id", );
+
+                    $output->writeln("<info>$result</info>\n");
+                }
+            }
+            
+            return;
+        }
+
         $app = Bootstrapper::getApplication($this->target_dir);
         $db  = \JFactory::getDbo();
 

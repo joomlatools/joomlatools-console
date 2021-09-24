@@ -13,6 +13,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Util;
+
 class Uninstall extends Command
 {
     protected function configure()
@@ -28,6 +30,12 @@ class Uninstall extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (Util::isJoomla4($this->target_dir)) {
+            $output->write("<error>This command is not implemented for Joomla 4</error>\n");
+
+            return;
+        }
+
         $plugins = $this->getApplication()->getPlugins();
         $path    = $this->getApplication()->getPluginPath();
 

@@ -33,6 +33,8 @@ class Symlink extends AbstractSite
             'joomlatools-framework-migrator',
             'joomlatools-framework-tags'
         ),
+        'joomlatools-pages'     => array('joomlatools-framework'),
+        'pages'                 => array('joomlatools-framework'),
         'docman'                => array('joomlatools-framework'),
         'fileman'               => array('joomlatools-framework'),
         'leadman'               => array('joomlatools-framework', 'joomlatools-framework-ckeditor'),

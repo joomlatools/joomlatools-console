@@ -12,6 +12,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Util;
+
 class Install extends Command
 {
     protected function configure()
@@ -40,6 +42,12 @@ EOF
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (Util::isJoomla4($this->target_dir)) {
+            $output->write("<error>This command is not implemented for Joomla 4</error>\n");
+
+            return;
+        }
+
         $result = shell_exec('command -v composer >/dev/null 2>&1 || { echo "false"; }');
 
         if (trim($result) == 'false')
