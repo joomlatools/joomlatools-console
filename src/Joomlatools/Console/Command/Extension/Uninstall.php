@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Joomlatools\Console\Command\Site\AbstractSite;
 
 use Joomlatools\Console\Joomla\Bootstrapper;
+use Joomlatools\Console\Joomla\Util;
 
 class Uninstall extends AbstractSite
 {
@@ -55,6 +56,12 @@ class Uninstall extends AbstractSite
 
     public function uninstall(InputInterface $input, OutputInterface $output)
     {
+        if (Util::isJoomla4($this->target_dir)) {
+            $output->write("<error>This command is not implemented for Joomla 4</error>\n");
+
+            return;
+        }
+
         $app = Bootstrapper::getApplication($this->target_dir);
 
         ob_start();

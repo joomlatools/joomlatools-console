@@ -46,6 +46,12 @@ class Index extends AbstractSite
     {
         parent::execute($input, $output);
 
+        if (Util::isJoomla4($this->target_dir)) {
+            $output->write("<error>This command is not implemented for Joomla 4</error>\n");
+
+            return;
+        }
+
         $this->app = Bootstrapper::getApplication($this->target_dir, Bootstrapper::SITE);
         // Load Library language
         $lang = \JFactory::getLanguage();

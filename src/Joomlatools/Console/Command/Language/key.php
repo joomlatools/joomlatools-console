@@ -14,6 +14,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Joomla\Util;
+
 class LanguageKey extends Site\AbstractSite
 {
     protected function configure()
@@ -30,6 +32,12 @@ class LanguageKey extends Site\AbstractSite
         parent::execute($input, $output);
 
         $this->check($input, $output);
+
+        if (Util::isJoomla4($this->target_dir)) {
+            $output->write("<error>This command is not implemented for Joomla 4</error>\n");
+
+            return;
+        }
 
         Bootstrapper::getApplication($this->target_dir);
 

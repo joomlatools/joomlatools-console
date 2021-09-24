@@ -39,6 +39,12 @@ class Token extends AbstractSite
 
         $this->check($input, $output);
 
+        if (Util::isJoomla4($this->target_dir)) {
+            $output->write("<error>This command is not implemented for Joomla 4</error>\n");
+
+            return;
+        }
+
         Bootstrapper::getApplication($this->target_dir);
 
         require_once Util::buildTargetPath('libraries/joomlatools/library/koowa.php', $this->target_dir);
