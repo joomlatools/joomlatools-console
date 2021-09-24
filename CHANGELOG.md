@@ -7,6 +7,8 @@ in 1.x versions.
 To get the diff for a specific change, go to https://github.com/joomlatools/joomlatools-console/commit/xxx where xxx is the change hash.
 To view the diff between two versions, go to https://github.com/joomlatools/joomlatools-console/compare/v1.0.0...v1.0.1
 
+* 2.0.0 (2021-09-24) 
+    * Added - Joomla 4 support in site:install and extension:install commands
 * 1.6.0 (2021-02-10) 
     * Added - Ability to use ~/.joomlatools/console/config.yaml for default parameter value overrides
 * 1.5.9 (2020-09-01)
