@@ -107,12 +107,6 @@ class Install extends Database\AbstractDatabase
 
         $this->importdb($input, $output);
 
-        $version = Util::getJoomlaVersion($this->target_dir);
-
-        if (version_compare($version->release, '4.0.0-alpha5', '>=')){
-            $this->configureDependencies($input, $output);
-        }
-
         $this->createConfig($input, $output);
 
         if ($this->symlink)
@@ -128,34 +122,6 @@ class Install extends Database\AbstractDatabase
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
 
         return 0;
-    }
-
-    /*
-     * https://docs.joomla.org/J4.x:Setting_Up_Your_Local_Environment
-     */
-    public function configureDependencies(InputInterface $input, OutputInterface $output)
-    {
-        $path = $this->target_dir;
-
-        $output->writeLn('<info>Installing Joomla 4 project dependencies</info>');
-
-        $remove_folders = array(
-            "$path/administrator/templates/atum/css",
-            "$path/templates/cassiopeia/css",
-            "$path/media/",
-            "$path/node_modules/",
-            "$path/libraries/vendor/",
-            "$path/administrator/cache/autoload_psr4.php",
-            "$path/installation/template/css"
-        );
-
-        foreach ($remove_folders AS $folder){
-            exec("rm -rf $folder;");
-        }
-
-        exec("composer --working-dir=$path --ignore-platform-reqs install;");
-
-        exec(" npm ci --prefix $path");
     }
 
     public function check(InputInterface $input, OutputInterface $output)
@@ -232,7 +198,7 @@ class Install extends Database\AbstractDatabase
         $extension_input = new ArrayInput(array(
             'extension:install',
             'site'      => $input->getArgument('site'),
-            'extension' => 'all',
+            'extension' => $this->symlink,
             '--www'     => $this->www
         ));
         $installer = new Command\Extension\Install();
