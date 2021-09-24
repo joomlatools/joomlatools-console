@@ -5,7 +5,7 @@
  * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command\SIte;
+namespace Joomlatools\Console\Command\Site;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
