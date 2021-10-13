@@ -92,13 +92,6 @@ class Alias extends AbstractSite
                     $ignored[] = $server;
                 }
             }
-
-            if (Util::isJoomlatoolsBox() && $ignored)
-            {
-                $arguments = implode(' ', $ignored);
-
-                `box server:restart $arguments`;
-            }
         }
 
         return 0;

@@ -140,15 +140,7 @@ class Create extends AbstractSite
 
         if (is_dir($folder))
         {
-            if (Util::isJoomlatoolsBox() && $variables['%http_port%'] == 80) {
-                $variables['%http_port%'] = 81;
-            }
-
             $template = $this->_getTemplate($input, 'nginx');
-
-            if (!$input->getOption('disable-ssl') && Util::isJoomlatoolsBox() && $variables['%ssl_port%'] == 443) {
-                $variables['%ssl_port%'] = 444;
-            }
 
             $vhost = str_replace(array_keys($variables), array_values($variables), $template);
 
@@ -176,13 +168,6 @@ class Create extends AbstractSite
                 } else {
                     $ignored[] = $server;
                 }
-            }
-
-            if (Util::isJoomlatoolsBox() && $ignored)
-            {
-                $arguments = implode(' ', $ignored);
-
-                `box server:restart $arguments`;
             }
         }
 
