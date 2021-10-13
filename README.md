@@ -3,7 +3,7 @@
 Joomlatools Console
 =====================
 
-[Joomlatools Console](https://www.joomlatools.com/developer/tools/console/) simplifies the management of Joomla sites. It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Vagrant box](https://www.joomlatools.com/developer/tools/vagrant/).
+[Joomlatools Console](https://www.joomlatools.com/developer/tools/console/) simplifies the management of Joomla sites. It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Server](https://github.com/joomlatools/joomlatools-server).
 
 Installation
 ------------

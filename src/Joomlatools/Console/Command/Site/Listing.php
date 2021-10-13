@@ -35,7 +35,7 @@ class Listing extends Database\AbstractDatabase
                 "Web server root",
                 '/var/www'
             )
-            ->setHelp('List Joomla sites running on this box');
+            ->setHelp('List Joomla sites running on this server');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
