@@ -70,7 +70,7 @@ class Download extends AbstractSite
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform.'
+                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository.'
             )
             ->addOption(
                 'clone',
@@ -120,15 +120,10 @@ class Download extends AbstractSite
         }
         else $this->_setupCopy();
 
-        $isPlatform = Util::isPlatform($this->target_dir);
 
-        $directory = $this->target_dir. ($isPlatform ? '/web' : '');
+        $directory = $this->target_dir;
         if (file_exists($directory.'/htaccess.txt')) {
             `cp $directory/htaccess.txt $directory/.htaccess`;
-        }
-
-        if ($isPlatform ) {
-            `cd $this->target_dir; composer --no-interaction install -q`;
         }
 
         return 0;

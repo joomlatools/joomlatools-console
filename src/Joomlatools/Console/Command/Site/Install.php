@@ -117,8 +117,7 @@ class Install extends Database\AbstractDatabase
 
         $this->_enableWebInstaller($input, $output);
 
-        $name = Util::isPlatform($this->target_dir) ? 'Joomla Platform application' : 'Joomla site';
-        $output->writeln("Your new $name has been configured.");
+        $output->writeln("Your new Joomla site has been configured.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
 
         return 0;
@@ -208,10 +207,6 @@ class Install extends Database\AbstractDatabase
 
     protected function _enableWebInstaller(InputInterface $input, OutputInterface $output)
     {
-        if (Util::isPlatform($this->target_dir)) {
-            return;
-        }
-
         $version = Util::getJoomlaVersion($this->target_dir);
 
         if (version_compare($version->release, '3.2.0', '<')) {

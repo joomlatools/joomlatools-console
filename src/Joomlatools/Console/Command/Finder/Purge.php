@@ -47,7 +47,7 @@ class Purge extends AbstractSite
         $lang = \JFactory::getLanguage();
 
         // Try the finder_cli file in the current language (without allowing the loading of the file in the default language)
-        $path = Util::isPlatform($this->target_dir) ? JPATH_SITE . '/components/com_finder' : JPATH_SITE;
+        $path = JPATH_SITE;
 
         $lang->load('finder_cli', $path, null, false, false)
             || $lang->load('finder_cli', $path, null, true); // Fallback to the finder_cli file in the default language

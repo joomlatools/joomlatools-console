@@ -63,7 +63,7 @@ class Listing extends Database\AbstractDatabase
                 {
                     $sites[] = (object) array(
                         'name'    => $fileinfo->getFilename(),
-                        'docroot' => $docroot . '/' . $fileinfo->getFilename() . '/' . ($version->type == 'joomlatools-platform' ? 'web' : ''),
+                        'docroot' => $docroot . '/' . $fileinfo->getFilename() . '/',
                         'type'    => $version->type == 'joomla-cms-new' ? 'joomla-cms' : $version->type,
                         'version' => $version->release
                     );

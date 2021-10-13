@@ -122,7 +122,7 @@ abstract class AbstractCache extends AbstractSite
         $contents = file_get_contents($template);
         $contents = sprintf($contents, $autoloader, $this->target_dir, $task, $client, implode(',', $group), $hash);
 
-        $target = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web' : $this->target_dir;
+        $target = $this->target_dir;
 
         file_put_contents($target.'/console-cache.php', $contents);
 
@@ -131,7 +131,7 @@ abstract class AbstractCache extends AbstractSite
 
     protected function _removeTemporaryScript()
     {
-        $target = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web' : $this->target_dir;
+        $target = $this->target_dir;
 
         return unlink($target.'/console-cache.php');
     }
