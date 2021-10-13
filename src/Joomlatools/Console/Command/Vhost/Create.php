@@ -230,7 +230,7 @@ class Create extends AbstractSite
             switch($application)
             {
                 case 'nginx':
-                    $file = Util::isKodekitPlatform($this->target_dir) ? 'nginx.kodekit.conf' : 'nginx.conf';
+                    $file = 'nginx.conf';
                     break;
                 case 'apache':
                 default:

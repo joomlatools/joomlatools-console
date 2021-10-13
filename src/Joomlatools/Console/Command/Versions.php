@@ -20,7 +20,6 @@ class Versions extends Command
 {
     const REPO_JOOMLATOOLS_PLATFORM = 'https://github.com/joomlatools/joomlatools-platform';
     const REPO_JOOMLA_CMS           = 'https://github.com/joomla/joomla-cms';
-    const REPO_KODEKIT_PLATFORM     = 'https://github.com/timble/kodekit-platform.git';
 
     /**
      * Cache file
@@ -61,7 +60,7 @@ class Versions extends Command
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform. For Kodekit Platform, use --repo=kodekit-platform.',
+                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform.',
                 $this->repository
             );
     }
@@ -102,9 +101,6 @@ class Versions extends Command
         {
             case 'platform':
                 $repository = Versions::REPO_JOOMLATOOLS_PLATFORM;
-                break;
-            case 'kodekit-platform':
-                $repository = Versions::REPO_KODEKIT_PLATFORM;
                 break;
         }
 

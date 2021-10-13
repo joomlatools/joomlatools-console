@@ -209,7 +209,7 @@ class Install extends AbstractDatabase
         $version = Util::getJoomlaVersion($this->target_dir);
         $imports = $this->_getInstallFiles($input->getOption('sample-data'));
 
-        $isJoomlaCMS = !Util::isPlatform($this->target_dir) && !Util::isKodekitPlatform($this->target_dir);
+        $isJoomlaCMS = !Util::isPlatform($this->target_dir);
 
         if ($version !== false && $isJoomlaCMS)
         {
@@ -236,7 +236,7 @@ class Install extends AbstractDatabase
     {
         $files = array();
 
-        if (Util::isPlatform($this->target_dir) || Util::isKodekitPlatform($this->target_dir))
+        if (Util::isPlatform($this->target_dir))
         {
             $path = $this->target_dir .'/install/mysql/';
 
