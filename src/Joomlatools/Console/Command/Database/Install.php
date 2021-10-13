@@ -209,9 +209,7 @@ class Install extends AbstractDatabase
         $version = Util::getJoomlaVersion($this->target_dir);
         $imports = $this->_getInstallFiles($input->getOption('sample-data'));
 
-        $isJoomlaCMS = !Util::isPlatform($this->target_dir);
-
-        if ($version !== false && $isJoomlaCMS)
+        if ($version !== false)
         {
             $users = 'joomla3.users.sql';
             if(is_numeric(substr($version->release, 0, 1)) && version_compare($version->release, '3.0.0', '<')) {
@@ -236,42 +234,32 @@ class Install extends AbstractDatabase
     {
         $files = array();
 
-        if (Util::isPlatform($this->target_dir))
-        {
-            $path = $this->target_dir .'/install/mysql/';
+        $path = $this->target_dir.'/_installation/sql/mysql/';
 
-            $files[] = $path . 'schema.sql';
-            $files[] = $path . 'data.sql';
+        if (!file_exists($path)) {
+            $path = $this->target_dir.'/installation/sql/mysql/';
         }
-        else
+
+        $version = Util::getJoomlaVersion($this->target_dir);
+
+        if (version_compare($version->release, '4.0.0-alpha12', '>') &&
+            file_exists($path . "base.sql"))
         {
-            $path = $this->target_dir.'/_installation/sql/mysql/';
+            $files[] = $path . "base.sql";
+            $files[] = $path . "extensions.sql";
+            $files[] = $path . "supports.sql";
 
-            if (!file_exists($path)) {
-                $path = $this->target_dir.'/installation/sql/mysql/';
-            }
+        }else{
+            $files[] = $path.'joomla.sql';
+        }
 
-            $version = Util::getJoomlaVersion($this->target_dir);
+        if ($sample_data)
+        {
+            $type      = $sample_data == 'default' ? 'data' : $sample_data;
+            $sample_db = $path . 'sample_' . $type . '.sql';
 
-            if (version_compare($version->release, '4.0.0-alpha12', '>') &&
-                file_exists($path . "base.sql"))
-            {
-                $files[] = $path . "base.sql";
-                $files[] = $path . "extensions.sql";
-                $files[] = $path . "supports.sql";
-
-            }else{
-                $files[] = $path.'joomla.sql';
-            }
-
-            if ($sample_data)
-            {
-                $type      = $sample_data == 'default' ? 'data' : $sample_data;
-                $sample_db = $path . 'sample_' . $type . '.sql';
-
-                if (file_exists($sample_db)){
-                    $files[] = $sample_db;
-                }
+            if (file_exists($sample_db)){
+                $files[] = $sample_db;
             }
         }
 

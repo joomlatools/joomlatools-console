@@ -74,24 +74,10 @@ class Bootstrapper
                 define('DS', DIRECTORY_SEPARATOR);
             }
 
-            if (Util::isPlatform($base))
-            {
-                define('JPATH_WEB'   , $base.'/web');
-                define('JPATH_ROOT'  , $base);
-                define('JPATH_BASE'  , JPATH_ROOT . '/app/administrator');
-                define('JPATH_CACHE' , JPATH_ROOT . '/cache/site');
-                define('JPATH_THEMES', __DIR__.'/templates');
+            define('JPATH_BASE', realpath($base));
 
-                require_once JPATH_ROOT . '/app/defines.php';
-                require_once JPATH_ROOT . '/app/bootstrap.php';
-            }
-            else
-            {
-                define('JPATH_BASE', realpath($base));
-
-                require_once JPATH_BASE . '/includes/defines.php';
-                require_once JPATH_BASE . '/includes/framework.php';
-            }
+            require_once JPATH_BASE . '/includes/defines.php';
+            require_once JPATH_BASE . '/includes/framework.php';
         }
     }
 } 

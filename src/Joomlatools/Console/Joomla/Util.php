@@ -76,10 +76,9 @@ class Util
             };
 
             $files = array(
-                'joomla-cms'           => '/libraries/cms/version/version.php',
-                'joomla-cms-new'       => '/libraries/src/Version.php', // 3.8+
-                'joomlatools-platform' => '/lib/libraries/cms/version/version.php',
-                'joomla-1.5'           => '/libraries/joomla/version.php'
+                'joomla-cms'     => '/libraries/cms/version/version.php',
+                'joomla-cms-new' => '/libraries/src/Version.php', // 3.8+
+                'joomla-1.5'     => '/libraries/joomla/version.php'
             );
 
             $code        = false;
@@ -131,34 +130,7 @@ class Util
     }
 
     /**
-     * Checks if we are dealing with joomlatools/platform or not
-     *
-     * @param string $base Base path for the Joomla installation
-     * @return boolean
-     */
-    public static function isPlatform($base)
-    {
-        $manifest = realpath($base . '/composer.json');
-
-        if (file_exists($manifest))
-        {
-            $contents = file_get_contents($manifest);
-            $package  = json_decode($contents);
-
-            if ($package->name == 'joomlatools/platform') {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Builds the full path for a given path inside a Joomla project.
-     * If base is a Joomla Platform installation, the path will be
-     * translated into the correct path in platform.
-     *
-     * Example: /administrator/components/com_xyz becomes /app/administrator/components/com_xyz in platform.
      * 
      * @param string $path The original relative path to the file/directory
      * @param string $base The root directory of the Joomla installation
@@ -174,31 +146,6 @@ class Util
 
         if (substr($path, 0, 1) != '/') {
             $path = '/'.$path;
-        }
-
-        if (self::isPlatform($base))
-        {
-            $paths = array(
-                '/administrator/manifests' => '/config/manifests/',
-                '/administrator' => '/app/administrator',
-                '/components'    => '/app/site/components',
-                '/modules'       => '/app/site/modules',
-                '/language'      => '/app/site/language',
-                '/media'         => '/web/media',
-                '/plugins'       => '/lib/plugins',
-                '/libraries'     => '/lib/libraries',
-                '/images'        => '/web/images',
-                '/configuration.php' => '/config/configuration.php'
-            );
-
-            foreach ($paths as $original => $replacement)
-            {
-                if (substr($path, 0, strlen($original)) == $original)
-                {
-                    $path = $replacement . substr($path, strlen($original));
-                    break;
-                }
-            }
         }
 
         return $base.$path;

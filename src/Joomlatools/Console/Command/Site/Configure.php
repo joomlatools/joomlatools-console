@@ -114,12 +114,7 @@ class Configure extends AbstractDatabase
         }
 
         $this->check($input, $output);
-
-        if (Util::isPlatform($this->target_dir)) {
-            $this->_configureJoomlatoolsPlatform();
-        } else {
-            $this->_configureJoomlaCMS();
-        }
+        $this->_configureJoomlaCMS();
 
         return 0;
     }
@@ -203,35 +198,6 @@ class Configure extends AbstractDatabase
         }
     }
 
-    protected function _configureJoomlatoolsPlatform()
-    {
-        $config = array(
-            'JOOMLA_DB_NAME' => $this->target_db,
-            'JOOMLA_DB_USER' => $this->mysql->user,
-            'JOOMLA_DB_PASS' => $this->mysql->password,
-            'JOOMLA_DB_HOST' => $this->mysql->host,
-            'JOOMLA_DB_TYPE' => $this->mysql->driver,
-
-            'JOOMLA_LOG_PATH' => $this->_default_values['log_path'],
-            'JOOMLA_TMP_PATH' => $this->_default_values['tmp_path'],
-
-            'JOOMLA_KEY' => $this->_default_values['key'],
-            'JOOMLA_ENV' => $this->_default_values['env']
-        );
-
-        if ($this->mysql->port != $this->getDefaultPort()) {
-        	$config['JOOMLA_DB_HOST'] .= ':' . $this->mysql->port;
-        }
-
-        $fp = fopen($this->target_dir.'/.env', 'w');
-
-        foreach (array_merge($config, $this->_extra_options) as $key => $val) {
-            fwrite($fp, $key . '=' . $val . PHP_EOL);
-        }
-
-        fclose($fp);
-    }
-
 	/**
 	 * Get default port for MySQL
 	 *
@@ -258,7 +224,7 @@ class Configure extends AbstractDatabase
 
         if (!$input->getOption('overwrite'))
         {
-            $file = Util::isPlatform($this->target_dir) ? '.env' : 'configuration.php';
+            $file = 'configuration.php';
 
             if (file_exists($this->target_dir . '/' . $file)) {
                 throw new \RuntimeException(sprintf('Site %s is already configured', $this->site));
@@ -283,12 +249,7 @@ class Configure extends AbstractDatabase
             $this->_promptDatabaseDetails($input, $output);
         }
 
-        if (Util::isPlatform($this->target_dir)) {
-            $this->_default_values['env'] = $this->_ask($input, $output, 'Environment', array('development', 'staging', 'production'), true);
-        }
-        else {
-            $this->_default_values['sitename'] = $this->_ask($input, $output, 'Site Name', $this->_default_values['sitename'], true);
-        }
+        $this->_default_values['sitename'] = $this->_ask($input, $output, 'Site Name', $this->_default_values['sitename'], true);
 
         $this->_default_values['tmp_path'] = $this->_ask($input, $output, 'Temporary path', $this->_default_values['tmp_path'], true);
         $this->_default_values['log_path'] = $this->_ask($input, $output, 'Log path', $this->_default_values['log_path'], true);

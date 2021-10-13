@@ -191,7 +191,7 @@ class Create extends AbstractSite
 
     protected function _getVariables(InputInterface $input)
     {
-        $documentroot = Util::isPlatform($this->target_dir) ? $this->target_dir . '/web/' : $this->target_dir;
+        $documentroot = $this->target_dir;
 
         $variables = array(
             '%site%'       => $input->getArgument('site'),
