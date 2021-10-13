@@ -70,7 +70,7 @@ class Download extends AbstractSite
                 'repo',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform. For Kodekit Platform, use --repo=kodekit-platform.'
+                'Alternative Git repository to clone. Also accepts a gzipped tar archive instead of a Git repository. To use joomlatools/platform, use --repo=platform.'
             )
             ->addOption(
                 'clone',
@@ -127,7 +127,7 @@ class Download extends AbstractSite
             `cp $directory/htaccess.txt $directory/.htaccess`;
         }
 
-        if ($isPlatform || Util::isKodekitPlatform($this->target_dir)) {
+        if ($isPlatform ) {
             `cd $this->target_dir; composer --no-interaction install -q`;
         }
 
