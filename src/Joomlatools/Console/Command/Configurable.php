@@ -19,7 +19,7 @@ class Configurable extends Command
     public function addArgument($name, $mode = null, $description = '', $default = null)
     {
         if ($mode != InputOption::VALUE_NONE) {
-            $default = $this->_getConfigOverride($name) ?? $default;
+            $default = $this->_getConfigOverride($name) === null ? $default : $this->_getConfigOverride($name);
         }
 
         return parent::addArgument($name, $mode, $description, $default);
@@ -28,7 +28,7 @@ class Configurable extends Command
     public function addOption($name, $shortcut = null, $mode = null, $description = '', $default = null)
     {
         if ($mode != InputOption::VALUE_NONE) {
-            $default = $this->_getConfigOverride($name) ?? $default;
+            $default = $this->_getConfigOverride($name) === null ? $default : $this->_getConfigOverride($name);
         }
 
         return parent::addOption($name, $shortcut, $mode, $description, $default);

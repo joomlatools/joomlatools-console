@@ -11,7 +11,11 @@ class Util
 {
     protected static $_versions  = array();
 
-    public static function executeCommand(string $command): string
+    /**
+     * @param string $command
+     * @return string
+     */
+    public static function executeCommand($command)
     {
         exec($command, $output, $code);
         if (count($output) === 0) {
@@ -31,12 +35,21 @@ class Util
         return implode(PHP_EOL, $output);
     }
 
-    public static function isJoomla4($base): bool
+    /**
+     * @param string $base
+     * @return bool
+     */
+    public static function isJoomla4($base)
     {
          return (bool) \version_compare(static::getJoomlaVersion($base)->release, '4.0.0', '>=');
     }
 
-    public static function executeJ4CliCommand($base, $command): string
+    /**
+     * @param string $base
+     * @param string $command
+     * @return string
+     */
+    public static function executeJ4CliCommand($base, $command)
     {
         return static::executeCommand("php $base/cli/joomla.php $command");
     }
@@ -125,13 +138,13 @@ class Util
             }
             else self::$_versions[$key] = false;
         }
-        
+
         return self::$_versions[$key];
     }
 
     /**
      * Builds the full path for a given path inside a Joomla project.
-     * 
+     *
      * @param string $path The original relative path to the file/directory
      * @param string $base The root directory of the Joomla installation
      * @return string Target path

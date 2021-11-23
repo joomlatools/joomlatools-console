@@ -130,7 +130,7 @@ EOL
 
             if (isset($results['plg_system_joomlatools']) && (\in_array('all', $this->extensions) || \in_array('joomlatools-framework', $this->extensions))) {
                 $result = Util::executeJ4CliCommand($this->target_dir, "extension:discover:install $verbosity --eid={$results['plg_system_joomlatools']}");
-                
+
                 unset($results['plg_system_joomlatools']);
 
                 $output->writeln("<info>Joomlatools Framework install: $result</info>\n");
@@ -138,12 +138,12 @@ EOL
 
             foreach ($results as $extension => $extension_id) {
                 if (\in_array('all', $this->extensions) || \in_array(substr($extension, 4), $this->extensions) || \in_array($extension, $this->extensions)) {
-                    $result = Util::executeJ4CliCommand($this->target_dir, "extension:discover:install $verbosity --eid=$extension_id", );
+                    $result = Util::executeJ4CliCommand($this->target_dir, "extension:discover:install $verbosity --eid=$extension_id");
 
                     $output->writeln("<info>$result</info>\n");
                 }
             }
-            
+
             return;
         }
 
