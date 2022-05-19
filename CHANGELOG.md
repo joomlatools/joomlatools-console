@@ -9,6 +9,8 @@ To view the diff between two versions, go to https://github.com/joomlatools/joom
 
 * 2.0.0 (2021-09-24) 
     * Added - Joomla 4 support in site:install and extension:install commands
+    * Fixed - Fix namespace typo causing autoloader error in composer v2.x [#137](https://github.com/joomlatools/joomlatools-console/pull/137)
+    * Removed - Remove special support for Vagrant and Joomlatools platform [#144](https://github.com/joomlatools/joomlatools-console/issues/144) - [#144](https://github.com/joomlatools/joomlatools-console/issues/141)
 * 1.6.0 (2021-02-10) 
     * Added - Ability to use ~/.joomlatools/console/config.yaml for default parameter value overrides
 * 1.5.9 (2020-09-01)
