@@ -72,11 +72,11 @@ class Alias extends AbstractSite
 
         $restart = array();
 
-        if ($this->_updateAliases($site, $alias, $delete, $input, 'apache')) {
+        if ($this->_updateAliases($site, $alias, $input, 'apache', $delete)) {
             $restart[] = 'apache';
         }
 
-        if ($this->_updateAliases($site, $alias, $delete, $input, 'nginx')) {
+        if ($this->_updateAliases($site, $alias, $input, 'nginx', $delete)) {
             $restart[] = 'nginx';
         }
 
@@ -97,7 +97,7 @@ class Alias extends AbstractSite
         return 0;
     }
 
-    protected function _updateAliases($site, $alias, $delete = false, $input, $application)
+    protected function _updateAliases($site, $alias, $input, $application, $delete = false)
     {
         switch ($application)
         {
