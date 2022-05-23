@@ -7,7 +7,6 @@
 
 namespace Joomlatools\Console\Command\Vhost;
 
-use Joomlatools\Console\Joomla\Util;
 use Joomlatools\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,7 +21,7 @@ class Remove extends Command\Configurable
 
         $this
             ->setName('vhost:remove')
-            ->setDescription('Removes the Apache2 and/or Nginx virtual host')
+            ->setDescription('Removes the Apache2 virtual host')
             ->addArgument(
                 'site',
                 InputArgument::REQUIRED,
@@ -33,66 +32,31 @@ class Remove extends Command\Configurable
                 InputOption::VALUE_REQUIRED,
                 'The Apache2 path',
                 '/etc/apache2'
-            )->addOption('nginx-path',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'The Nginx path',
-                '/etc/nginx'
             )->addOption('apache-restart',
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'The full command for restarting Apache2',
                 null
-            )->addOption('nginx-restart',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'The full command for restarting Nginx',
-                null)
+            )
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $site    = $input->getArgument('site');
-        $restart = array();
 
-        $file = sprintf('%s/sites-available/1-%s.conf', $input->getOption('apache-path'), $site);
+        $file = sprintf('%s/sites-available/100-%s.conf', $input->getOption('apache-path'), $site);
 
         if (is_file($file))
         {
-            $link = sprintf('%s/sites-enabled/1-%s.conf', $input->getOption('apache-path'), $site);
+            $link = sprintf('%s/sites-enabled/100-%s.conf', $input->getOption('apache-path'), $site);
 
             if (is_file($link)) `sudo rm -f $link`;
 
             `sudo rm -f $file`;
 
-            $restart[] = 'apache';
-        }
-
-        $file = sprintf('%s/sites-available/1-%s.conf', $input->getOption('nginx-path'), $site);
-
-        if (is_file($file))
-        {
-            $link = sprintf('%s/sites-enabled/1-%s.conf', $input->getOption('nginx-path'), $site);
-
-            if (is_file($link)) `sudo rm -f $link`;
-
-            `sudo rm -f $file`;
-
-            $restart[] = 'nginx';
-        }
-
-        if ($restart)
-        {
-            $ignored = array();
-
-            foreach ($restart as $server)
-            {
-                if ($command = $input->getOption(sprintf('%s-restart', $server))) {
-                    `sudo $command`;
-                } else {
-                    $ignored[] = $server;
-                }
+            if ($command = $input->getOption('apache-restart')) {
+                `sudo $command`;
             }
         }
 
