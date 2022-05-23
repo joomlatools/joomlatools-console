@@ -114,10 +114,6 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Extension\Register(),
             new Command\Extension\Symlink(),
 
-            new Command\Koowa\ConnectToken(),
-            new Command\Koowa\LanguageKey(),
-            new Command\Koowa\LoginToken(),
-
             new Command\Site\Configure(),
             new Command\Site\Create(),
             new Command\Site\Delete(),
@@ -125,7 +121,6 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Site\Install(),
             new Command\Site\Listing(),
 
-            new Command\Vhost\Alias(),
             new Command\Vhost\Create(),
             new Command\Vhost\Remove(),
 
