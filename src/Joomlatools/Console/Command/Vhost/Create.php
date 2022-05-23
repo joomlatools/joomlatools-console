@@ -64,7 +64,7 @@ class Create extends AbstractSite
         $site    = $input->getArgument('site');
 
         if (!file_exists($this->target_dir)) {
-            //throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
         $tmp = '/tmp/vhost.tmp';
