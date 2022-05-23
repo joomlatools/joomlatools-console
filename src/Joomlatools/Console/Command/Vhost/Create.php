@@ -80,20 +80,31 @@ class Create extends AbstractSite
 
             file_put_contents($tmp, $template);
 
-            `sudo tee $folder/100-$site.conf < $tmp`;
+            $this->_runWithOrWithoutSudo("tee $folder/100-$site.conf < $tmp");
 
             $link = sprintf('%s/sites-enabled/100-%s.conf', $input->getOption('apache-path'), $site);
 
-            `sudo ln -fs $folder/100-$site.conf $link`;
+            $this->_runWithOrWithoutSudo("ln -fs $folder/100-$site.conf $link");
 
             if ($command = $input->getOption('apache-restart')) {
-                `sudo $command`;
+                $this->_runWithOrWithoutSudo($command);
             }
 
             @unlink($tmp);
         }
 
         return 0;
+    }
+
+    protected function _runWithOrWithoutSudo($command) 
+    {
+        $hasSudo = `which sudo`;
+
+        if ($hasSudo) {
+            `sudo $command`;
+        } else {
+            `$command`;
+        }
     }
 
     protected function _getVariables(InputInterface $input)

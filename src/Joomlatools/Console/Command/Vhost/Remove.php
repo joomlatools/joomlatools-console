@@ -51,15 +51,26 @@ class Remove extends Command\Configurable
         {
             $link = sprintf('%s/sites-enabled/100-%s.conf', $input->getOption('apache-path'), $site);
 
-            if (is_file($link)) `sudo rm -f $link`;
+            if (is_file($link)) $this->_runWithOrWithoutSudo("rm -f $link");
 
-            `sudo rm -f $file`;
+            $this->_runWithOrWithoutSudo("rm -f $file");
 
             if ($command = $input->getOption('apache-restart')) {
-                `sudo $command`;
+                $this->_runWithOrWithoutSudo($command);
             }
         }
 
         return 0;
+    }
+
+    protected function _runWithOrWithoutSudo($command) 
+    {
+        $hasSudo = `which sudo`;
+
+        if ($hasSudo) {
+            `sudo $command`;
+        } else {
+            `$command`;
+        }
     }
 }
