@@ -5,16 +5,17 @@
  * @link		http://github.com/joomlatools/joomlatools-console for the canonical source repository
  */
 
-namespace Joomlatools\Console\Command\Site;
+namespace Joomlatools\Console\Command\Koowa;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Command\Site\AbstractSite;
 use Joomlatools\Console\Joomla\Bootstrapper;
 use Joomlatools\Console\Joomla\Util;
 
-class Token extends AbstractSite
+class LoginToken extends AbstractSite
 {
     protected $extension = array();
 
@@ -23,7 +24,7 @@ class Token extends AbstractSite
         parent::configure();
 
         $this
-            ->setName('site:token')
+            ->setName('koowa:login:token')
             ->setDescription('Generate a login token for a user name to be used for JWT authentication')
             ->setHelp('Add the token to your query string such as <comment>?auth_token=TOKEN</comment> and the given user will be automatically logged in')
             ->addArgument(
@@ -42,7 +43,7 @@ class Token extends AbstractSite
         if (Util::isJoomla4($this->target_dir)) {
             $output->write("<error>This command is not implemented for Joomla 4</error>\n");
 
-            return;
+            return 1;
         }
 
         Bootstrapper::getApplication($this->target_dir);

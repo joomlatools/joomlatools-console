@@ -5,22 +5,26 @@
  * @link		http://github.com/joomlatools/joomla-console for the canonical source repository
  */
 
-namespace JoomlatoolsExtended\Console\Command;
+namespace Joomlatools\Console\Command\Koowa;
 
 use Joomlatools\Console\Command\Site;
 use Joomlatools\Console\Joomla\Bootstrapper;
 
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ConnectToken extends Site\AbstractSite
+use Joomlatools\Console\Joomla\Util;
+
+class LanguageKey extends Site\AbstractSite
 {
     protected function configure()
     {
         parent::configure();
 
-        $this->setName('connect:token')
-             ->setDescription('Generate a JWT token');
+        $this->setName('koowa:language:key')
+             ->setDescription('Generate a language key from the given string')
+             ->addArgument('string', InputArgument::REQUIRED, 'The string');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -29,9 +33,19 @@ class ConnectToken extends Site\AbstractSite
 
         $this->check($input, $output);
 
+        if (Util::isJoomla4($this->target_dir)) {
+            $output->write("<error>This command is not implemented for Joomla 4</error>\n");
+
+            return 1;
+        }
+
         Bootstrapper::getApplication($this->target_dir);
 
-        $output->writeln(\PlgKoowaConnect::generateToken());
+        $catalogue = \KObjectManager::getInstance()->getObject('com://admin/koowa.translator')->getCatalogue();
+
+        $output->writeln($catalogue->getPrefix().$catalogue->generateKey($input->getArgument('string')));
+
+        return 0;
     }
 
     public function check(InputInterface $input, OutputInterface $output)

@@ -109,7 +109,7 @@ EOL
         if (Util::isJoomla4($this->target_dir)) {
             $output->write("<error>This command is not implemented for Joomla 4</error>\n");
 
-            return;
+            return 1;
         }
 
         $type = false;
