@@ -27,14 +27,14 @@ class Create extends AbstractSite
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTP port the virtual host should listen to',
-                getenv('APP_HTTP') ?: 80
+                80
             )
             ->addOption(
                 'ssl-port',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The HTTPS port the virtual host should listen to',
-                getenv('APP_HTTPS') ?: 443
+                443
             )
             ->addOption(
                 'apache-template',
