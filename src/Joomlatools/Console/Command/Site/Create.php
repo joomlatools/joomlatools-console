@@ -14,7 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Database;
 use Joomlatools\Console\Command\Vhost;
-use Joomlatools\Console\Joomla\Util;
 
 class Create extends Database\AbstractDatabase
 {
@@ -128,7 +127,43 @@ EOF
                 null,
                 InputOption::VALUE_NONE,
                 'Do not run the "CREATE IF NOT EXISTS <db>" query. Use this if the user does not have CREATE privileges on the database.'
-            );
+            )
+            ->addOption(
+                'vhost', 
+                null,
+                InputOption::VALUE_NEGATABLE,
+                'Create an Apache vhost for the site',
+                true
+            )
+            ->addOption(
+                'vhost-template',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Custom file to use as the Apache vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
+                null
+            )
+            ->addOption(
+                'vhost-folder',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The Apache2 vhost folder',
+                null
+            )
+            ->addOption(
+                'vhost-filename',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The Apache2 vhost file name',
+                null,
+            )
+            ->addOption(
+                'vhost-restart-command',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The full command for restarting Apache2',
+                null
+            )
+            ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -140,7 +175,10 @@ EOF
         $this->check($input, $output);
 
         $this->download($input, $output);
-        $this->addVirtualHost($input, $output);
+
+        if ($input->getOption('vhost')) {
+            $this->addVirtualHost($input, $output);
+        }
 
         if (!file_exists($this->target_dir)) {
             `mkdir -p $this->target_dir`;
@@ -208,16 +246,22 @@ EOF
 
     public function addVirtualHost(InputInterface $input, OutputInterface $output)
     {
-        $command_input = new ArrayInput(array(
+        $command_input = array(
             'vhost:create',
             'site'          => $this->site,
             '--http-port'   => $input->getOption('http-port'),
             '--ssl-port'    => $input->getOption('ssl-port'),
             '--www'         => $input->getOption('www'),
-            '--use-webroot-dir' => $input->getOption('use-webroot-dir')
-        ));
+            '--use-webroot-dir' => $input->getOption('use-webroot-dir'),
+        );
+
+        foreach (array('template', 'folder', 'filename', 'restart-command') as $vhostkey) {
+            if ($input->getOption('vhost-'.$vhostkey) !== null) {
+                $command_input['--'.$vhostkey] = $input->getOption('vhost-'.$vhostkey);
+            }
+        }
 
         $command = new Vhost\Create();
-        $command->run($command_input, $output);
+        $command->run(new ArrayInput($command_input), $output);
     }
 }

@@ -37,18 +37,25 @@ class Create extends AbstractSite
                 443
             )
             ->addOption(
-                'apache-template',
+                'template',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Custom file to use as the Apache vhost configuration. Make sure to include HTTP and SSL directives if you need both.',
                 null
             )
-            ->addOption('apache-path',
+            ->addOption('folder',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'The Apache2 path',
-                '/etc/apache2'
-            )->addOption('apache-restart',
+                'The Apache2 vhost folder',
+                '/etc/apache2/sites-enabled'
+            )
+            ->addOption('filename',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The Apache2 vhost file name',
+                null,
+            )
+            ->addOption('restart-command',
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'The full command for restarting Apache2',
@@ -61,50 +68,39 @@ class Create extends AbstractSite
     {
         parent::execute($input, $output);
 
-        $site    = $input->getArgument('site');
-
         if (!file_exists($this->target_dir)) {
             throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
         }
 
-        $tmp = '/tmp/vhost.tmp';
+        $target = $this->_getVhostPath($input);
 
         $variables = $this->_getVariables($input);
 
-        $folder = sprintf('%s/sites-available', $input->getOption('apache-path'));
+        if (!is_dir(dirname($target))) {
+            mkdir(dirname($target), 0755, true);
+        }
 
-        if (is_dir($folder))
+        if (is_dir(dirname($target)))
         {
             $template = $this->_getTemplate($input);
             $template = str_replace(array_keys($variables), array_values($variables), $template);
 
-            file_put_contents($tmp, $template);
+            file_put_contents($target, $template);
 
-            $this->_runWithOrWithoutSudo("tee $folder/100-$site.conf < $tmp");
-
-            $link = sprintf('%s/sites-enabled/100-%s.conf', $input->getOption('apache-path'), $site);
-
-            $this->_runWithOrWithoutSudo("ln -fs $folder/100-$site.conf $link");
-
-            if ($command = $input->getOption('apache-restart')) {
-                $this->_runWithOrWithoutSudo($command);
+            if ($command = $input->getOption('restart-command')) {
+                `$command`;
             }
-
-            @unlink($tmp);
         }
 
         return 0;
     }
 
-    protected function _runWithOrWithoutSudo($command) 
+    protected function _getVhostPath($input) 
     {
-        $hasSudo = `which sudo`;
+        $folder = str_replace('[site]', $this->site, $input->getOption('folder'));
+        $file = $input->getOption('filename') ?? $input->getArgument('site').'.conf';
 
-        if ($hasSudo) {
-            `sudo $command`;
-        } else {
-            `$command`;
-        }
+        return $folder.'/'.$file;
     }
 
     protected function _getVariables(InputInterface $input)
@@ -123,7 +119,7 @@ class Create extends AbstractSite
 
     protected function _getTemplate(InputInterface $input)
     {
-        if ($template = $input->getOption('apache-template'))
+        if ($template = $input->getOption('template'))
         {
             if (file_exists($template))
             {

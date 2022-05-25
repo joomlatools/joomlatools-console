@@ -13,7 +13,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Remove extends Command\Configurable
+use Joomlatools\Console\Command\Site\AbstractSite;
+
+class Remove extends AbstractSite
 {
     protected function configure()
     {
@@ -22,17 +24,19 @@ class Remove extends Command\Configurable
         $this
             ->setName('vhost:remove')
             ->setDescription('Removes the Apache2 virtual host')
-            ->addArgument(
-                'site',
-                InputArgument::REQUIRED,
-                'Alphanumeric site name, used in the site URL with .test domain'
-            )
-            ->addOption('apache-path',
+            ->addOption('folder',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'The Apache2 path',
-                '/etc/apache2'
-            )->addOption('apache-restart',
+                'The Apache2 vhost folder',
+                '/etc/apache2/sites-enabled'
+            )
+            ->addOption('filename',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The Apache2 vhost file name',
+                null,
+            )
+            ->addOption('restart-command',
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'The full command for restarting Apache2',
@@ -43,24 +47,32 @@ class Remove extends Command\Configurable
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $site    = $input->getArgument('site');
+        parent::execute($input, $output);
 
-        $file = sprintf('%s/sites-available/100-%s.conf', $input->getOption('apache-path'), $site);
+        if (!file_exists($this->target_dir)) {
+            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+        }
+
+        $file = $this->_getVhostPath($input);
 
         if (is_file($file))
         {
-            $link = sprintf('%s/sites-enabled/100-%s.conf', $input->getOption('apache-path'), $site);
-
-            if (is_file($link)) $this->_runWithOrWithoutSudo("rm -f $link");
-
             $this->_runWithOrWithoutSudo("rm -f $file");
 
-            if ($command = $input->getOption('apache-restart')) {
+            if ($command = $input->getOption('restart-command')) {
                 $this->_runWithOrWithoutSudo($command);
             }
         }
 
         return 0;
+    }
+
+    protected function _getVhostPath($input) 
+    {
+        $folder = str_replace('[site]', $this->site, $input->getOption('folder'));
+        $file = $input->getOption('filename') ?? $input->getArgument('site').'.conf';
+
+        return $folder.'/'.$file;
     }
 
     protected function _runWithOrWithoutSudo($command) 
