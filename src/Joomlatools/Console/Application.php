@@ -125,6 +125,7 @@ class Application extends \Symfony\Component\Console\Application
         $commands = array_merge($commands, array(
             new Command\Database\Install(),
             new Command\Database\Drop(),
+            new Command\Database\Dump(),
 
             new Command\Extension\Install(),
             new Command\Extension\Register(),
@@ -138,6 +139,7 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Site\Create(),
             new Command\Site\Delete(),
             new Command\Site\Download(),
+            new Command\Site\Export(),
             new Command\Site\Install(),
             new Command\Site\Listing(),
 

@@ -108,6 +108,17 @@ abstract class AbstractDatabase extends AbstractSite
         return 0;
     }
 
+    protected function _backupDatabase($target_file)
+    {
+        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
+
+        exec(sprintf("mysqldump --host=%s --port=%u -u'%s' %s %s > %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $target_file));
+
+        if (!file_exists($target_file)) {
+            throw new \RuntimeException(sprintf('Failed to backup database "%s"!', $this->target_db));
+        }
+    }
+
     protected function _executeSQL($query)
     {
         $password = empty($this->mysql->password) ? '' : sprintf("--password='%s'", $this->mysql->password);
