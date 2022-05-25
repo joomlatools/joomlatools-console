@@ -123,39 +123,24 @@ class Application extends \Symfony\Component\Console\Application
         $commands = parent::getDefaultCommands();
 
         $commands = array_merge($commands, array(
-            new Command\Cache\Clear(),
-            new Command\Cache\ListObjects(),
-            new Command\Cache\Purge(),
-
             new Command\Database\Install(),
             new Command\Database\Drop(),
 
-            new Command\Extension\Disable(),
-            new Command\Extension\Enable(),
             new Command\Extension\Install(),
-            new Command\Extension\Uninstall(),
-            new Command\Extension\InstallFile(),
             new Command\Extension\Register(),
             new Command\Extension\Symlink(),
-
-            new Command\Finder\Index(),
-            new Command\Finder\Purge(),
 
             new Command\Plugin\ListAll(),
             new Command\Plugin\Install(),
             new Command\Plugin\Uninstall(),
 
-            new Command\Site\CheckIn(),
             new Command\Site\Configure(),
             new Command\Site\Create(),
-            new Command\Site\Deploy(),
             new Command\Site\Delete(),
             new Command\Site\Download(),
             new Command\Site\Install(),
             new Command\Site\Listing(),
-            new Command\Site\Token(),
 
-            new Command\Vhost\Alias(),
             new Command\Vhost\Create(),
             new Command\Vhost\Remove(),
 
