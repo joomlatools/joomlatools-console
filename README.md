@@ -5,8 +5,14 @@ Joomlatools Console
 
 [Joomlatools Console](https://www.joomlatools.com/developer/tools/console/) simplifies the management of Joomla sites. It is designed to work on Linux and MacOS. Windows users can use it in [Joomlatools Server](https://github.com/joomlatools/joomlatools-server).
 
-Installation
-------------
+## Requirements
+
+* PHP7.3 or newer
+* Linux, MacOS, or [Joomlatools Server](https://github.com/joomlatools/joomlatools-server)
+* Composer
+* Joomla versions 3.5 and 4.x
+
+## Installation
 
 1. Install using Composer:
 
@@ -35,7 +41,7 @@ Installation
    By default, the web server root is set to _/var/www_. You can pass _--www=/my/server/path_ to commands for custom values. You can choose the Joomla version or the sample data to be installed:
 
    ```shell
-     joomla site:create testsite --joomla=2.5 --sample-data=blog
+     joomla site:create testsite --release=4.0 --sample-data=blog
    ```
 
 1. For other available options, run:
@@ -67,12 +73,6 @@ bin/joomla list
 ```
 
 1. Happy coding!
-
-## Requirements
-
-* Git
-* Composer
-* Joomla version 2.5 and up.
 
 ## Contributing
 
