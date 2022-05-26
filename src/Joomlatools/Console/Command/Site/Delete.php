@@ -78,7 +78,7 @@ class Delete extends Database\AbstractDatabase
             'site' => $this->site
         );
 
-        $optionalArgs = array('mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database');
+        $optionalArgs = array('mysql-login', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);

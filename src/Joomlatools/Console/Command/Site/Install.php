@@ -138,7 +138,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'skip-exists-check', 'skip-create-statement', 'www', 'use-webroot-dir');
+        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'skip-exists-check', 'skip-create-statement', 'www', 'use-webroot-dir');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
@@ -163,7 +163,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive', 'options', 'www', 'use-webroot-dir');
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive', 'options', 'www', 'use-webroot-dir');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
