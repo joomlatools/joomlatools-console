@@ -49,10 +49,6 @@ class Remove extends AbstractSite
     {
         parent::execute($input, $output);
 
-        if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
-        }
-
         $file = $this->_getVhostPath($input);
 
         if (is_file($file))

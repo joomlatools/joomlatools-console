@@ -56,10 +56,6 @@ class Delete extends Database\AbstractDatabase
         if (getcwd() === $this->target_dir && getcwd() !== $this->www) {
             throw new \RuntimeException('You are currently in the directory you are trying to delete. Aborting');
         }
-
-        if (!is_dir($this->target_dir)) {
-            throw new \RuntimeException(sprintf('The site %s does not exist!', $this->site));
-        }
     }
 
     public function deleteDirectory(InputInterface $input, OutputInterface $output)
