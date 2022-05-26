@@ -88,8 +88,6 @@ class Install extends AbstractDatabase
     {
         parent::execute($input, $output);
 
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-
         $this->drop                  = $input->getOption('drop');
         $this->skip_check            = $input->getOption('skip-exists-check');
         $this->skip_create_statement = $input->getOption('skip-create-statement');
@@ -119,7 +117,7 @@ class Install extends AbstractDatabase
 
             file_put_contents($tmp, $contents);
 
-            $result = exec(sprintf("mysql --host=%s --port=%u --user='%s' %s %s < %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $tmp));
+            $result = $this->_executeMysql(sprintf("%s < %s", $this->target_db, $tmp));
 
             unlink($tmp);
 
@@ -143,10 +141,8 @@ class Install extends AbstractDatabase
 
                 $version = Util::getJoomlaVersion($this->target_dir);
 
-                $executeQuery = function ($sql) use ($password) {
-                    $command = sprintf("mysql --host=%s --port=%u --user='%s' %s %s -e %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, escapeshellarg($sql));
-
-                    exec ($command);
+                $executeQuery = function($sql) {
+                    $this->_executeMysql(sprintf("%s -e %s", $this->target_db, escapeshellarg($sql)));
                 };
 
                 $executeQuery("REPLACE INTO j_schemas (extension_id, version_id) VALUES (700, '$schema');");

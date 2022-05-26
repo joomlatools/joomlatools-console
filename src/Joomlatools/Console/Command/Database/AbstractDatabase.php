@@ -65,13 +65,6 @@ abstract class AbstractDatabase extends AbstractSite
             "MySQL driver",
             'mysqli'
         )
-        ->addOption(
-        // @TODO To be removed in 1.6
-            'mysql_db_prefix',
-            null,
-            InputOption::VALUE_REQUIRED,
-            "[DEPRECATED] MySQL database prefix"
-        )
         ;
     }
 
@@ -82,7 +75,7 @@ abstract class AbstractDatabase extends AbstractSite
         $db_name = $input->getOption('mysql-database');
         if (empty($db_name))
         {
-            $this->target_db_prefix = $input->getOption('mysql_db_prefix') ?: $input->getOption('mysql-db-prefix');
+            $this->target_db_prefix = $input->getOption('mysql-db-prefix');
             $this->target_db        = $this->target_db_prefix.$this->site;
         }
         else
@@ -110,21 +103,69 @@ abstract class AbstractDatabase extends AbstractSite
 
     protected function _backupDatabase($target_file)
     {
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-
-        exec(sprintf("mysqldump --host=%s --port=%u -u'%s' %s %s > %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $target_file));
-
-        if (!file_exists($target_file)) {
-            throw new \RuntimeException(sprintf('Failed to backup database "%s"!', $this->target_db));
-        }
+        $this->_executeMysqldump(sprintf("--skip-dump-date --skip-extended-insert --no-tablespaces %s > %s", $this->target_db, $target_file));
     }
 
-    protected function _executeSQL($query)
-    {
-        $password = empty($this->mysql->password) ? '' : sprintf("--password='%s'", $this->mysql->password);
-        $cmd      = sprintf("echo '$query' | mysql --host=%s --port=%u --user='%s' %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password);
+    protected function _executePDO($query, $database = null) {
+        $database = $database ?: $this->target_db;
+        $connectionString = "mysql:host={$this->mysql->host}:{$this->mysql->port};dbname={$database};charset=utf8mb4";
+        $pdoDB = new \PDO($connectionString, $this->mysql->user, $this->mysql->password);
+        $pdoDB->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        return exec($cmd);
+        return $pdoDB->query($query);
+    }
+
+    protected function _executeSQL($query, $database = '')
+    {
+        return $this->_executeMysqlWithCredentials(function($path) use($query, $database) {
+            return "echo '$query' | mysql --defaults-extra-file=$path $database";
+        });
+    }
+
+    protected function _executeMysql($command)
+    {
+        return $this->_executeMysqlWithCredentials(function($path) use($command) {
+            return "mysql --defaults-extra-file=$path $command";
+        });
+    }
+    
+    protected function _executeMysqldump($command)
+    {
+        return $this->_executeMysqlWithCredentials(function($path) use($command) {
+            return "mysqldump --defaults-extra-file=$path $command";
+        });
+    }
+
+    /**
+     * Write a temporary --defaults-extra-file file and execute a Mysql command given from the callback
+     *
+     * @param callable $callback Receives a single string with the path to the --defaults-extra-file path
+     * @return void
+     */
+    private function _executeMysqlWithCredentials(callable $callback)
+    {
+        try {
+            $file = tmpfile();
+            $path = stream_get_meta_data($file)['uri'];
+
+            $contents = <<<STR
+[client]
+user={$this->mysql->user}
+password={$this->mysql->password}
+host={$this->mysql->host}
+port={$this->mysql->port}
+STR;
+
+            fwrite($file, $contents);
+
+
+            return exec($callback($path));
+        }
+        finally {
+            if (\is_resource($file)) {
+                \fclose($file);
+            }
+        }
     }
 
     protected function _promptDatabaseDetails(InputInterface $input, OutputInterface $output)
