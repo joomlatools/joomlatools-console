@@ -26,8 +26,6 @@ class Drop extends AbstractDatabase
     {
         parent::execute($input, $output);
 
-        $this->check($input, $output);
-        
         $result = $this->_executeSQL(sprintf("DROP DATABASE IF EXISTS `%s`", $this->target_db));
 
         if (!empty($result)) {
@@ -35,14 +33,5 @@ class Drop extends AbstractDatabase
         }
 
         return 0;
-    }
-
-    public function check(InputInterface $input, OutputInterface $output)
-    {
-        $result = $this->_executeSQL(sprintf("SHOW DATABASES LIKE \"%s\"", $this->target_db));
-
-        if (empty($result)) {
-            throw new \RuntimeException(sprintf('Database %s does not exist', $this->target_db));
-        }
     }
 }

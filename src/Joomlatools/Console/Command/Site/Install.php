@@ -14,8 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command;
 use Joomlatools\Console\Command\Database;
-use Joomlatools\Console\Command\Vhost;
-use Joomlatools\Console\Joomla\Util;
 
 class Install extends Database\AbstractDatabase
 {
@@ -115,10 +113,10 @@ class Install extends Database\AbstractDatabase
             $this->installExtensions($input, $output);
         }
 
-        $this->_enableWebInstaller($input, $output);
-
-        $output->writeln("Your new Joomla site has been configured.");
+        $output->writeln("Your new Joomla site has been created.");
+        $output->writeln("It was installed using the domain name <info>$this->site.test</info>.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
+
 
         return 0;
     }
@@ -138,7 +136,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'skip-exists-check', 'skip-create-statement', 'www', 'use-webroot-dir');
+        $optionalArgs = array('sample-data', 'drop', 'mysql-login', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'skip-exists-check', 'skip-create-statement', 'www', 'use-webroot-dir');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
@@ -163,7 +161,7 @@ class Install extends Database\AbstractDatabase
             '--www'  => $this->www
         );
 
-        $optionalArgs = array('overwrite', 'mysql-login', 'mysql_db_prefix', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive', 'options', 'www', 'use-webroot-dir');
+        $optionalArgs = array('overwrite', 'mysql-login', 'mysql-db-prefix', 'mysql-host', 'mysql-port', 'mysql-database', 'mysql-driver', 'interactive', 'options', 'www', 'use-webroot-dir');
         foreach ($optionalArgs as $optionalArg)
         {
             $value = $input->getOption($optionalArg);
@@ -203,56 +201,5 @@ class Install extends Database\AbstractDatabase
         $installer = new Command\Extension\Install();
 
         $installer->run($extension_input, $output);
-    }
-
-    protected function _enableWebInstaller(InputInterface $input, OutputInterface $output)
-    {
-        $version = Util::getJoomlaVersion($this->target_dir);
-
-        if (version_compare($version->release, '3.2.0', '<')) {
-            return;
-        }
-
-        $xml = simplexml_load_file('http://appscdn.joomla.org/webapps/jedapps/webinstaller.xml');
-
-        if(!$xml)
-        {
-            $output->writeln('<warning>Failed to install web installer</warning>');
-
-            return;
-        }
-
-        $url = '';
-        foreach($xml->update->downloads->children() as $download)
-        {
-            $attributes = $download->attributes();
-            if($attributes->type == 'full' && $attributes->format == 'zip')
-            {
-                $url = (string) $download;
-                break;
-            }
-        }
-
-        if(empty($url)) {
-            return;
-        }
-
-        $filename = Util::getWritablePath().'/cache/'.basename($url);
-        if(!file_exists($filename))
-        {
-            $bytes = file_put_contents($filename, fopen($url, 'r'));
-            if($bytes === false || $bytes == 0) {
-                return;
-            }
-        }
-
-        `mkdir -p $this->target_dir/plugins/installer`;
-        `cd $this->target_dir/plugins/installer/ && unzip -o $filename`;
-
-        $sql = "INSERT INTO `j_extensions` (`name`, `type`, `element`, `folder`, `enabled`, `access`, `manifest_cache`) VALUES ('plg_installer_webinstaller', 'plugin', 'webinstaller', 'installer', 1, 1, '{\"name\":\"plg_installer_webinstaller\",\"type\":\"plugin\",\"version\":\"".$xml->update->version."\",\"description\":\"Web Installer\"}');";
-        $sql = escapeshellarg($sql);
-
-        $password = empty($this->mysql->password) ? '' : sprintf("-p'%s'", $this->mysql->password);
-        exec(sprintf("mysql --host=%s --port=%u -u'%s' %s %s -e %s", $this->mysql->host, $this->mysql->port, $this->mysql->user, $password, $this->target_db, $sql));
     }
 }
