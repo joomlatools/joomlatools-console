@@ -58,16 +58,16 @@ class Export extends AbstractDatabase
 
         $folder = $input->getOption('folder') ?? $this->target_dir;
 
+        if (!\is_dir($folder)) {
+            @mkdir($folder, 0755, true);
+
+            if (!\is_dir($folder)) {
+                throw new \RuntimeException("Folder $folder doesn't exist.");
+            }
+        }
+
         if ($input->getOption('per-table')) 
         {
-            if (!\is_dir($folder)) {
-                @mkdir($folder, 0755, true);
-
-                if (!\is_dir($folder)) {
-                    throw new \RuntimeException("Folder $folder doesn't exist.");
-                }
-            }
-
             $statement = $this->_executePDO('show tables');
 
             while (($table = $statement->fetchColumn()) !== false) {
