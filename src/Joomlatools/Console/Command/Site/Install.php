@@ -14,8 +14,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command;
 use Joomlatools\Console\Command\Database;
-use Joomlatools\Console\Command\Vhost;
-use Joomlatools\Console\Joomla\Util;
 
 class Install extends Database\AbstractDatabase
 {
@@ -115,8 +113,10 @@ class Install extends Database\AbstractDatabase
             $this->installExtensions($input, $output);
         }
 
-        $output->writeln("Your new Joomla site has been configured.");
+        $output->writeln("Your new Joomla site has been created.");
+        $output->writeln("It was installed using the domain name <info>$this->site.test</info>.");
         $output->writeln("You can login using the following username and password combination: <info>admin</info>/<info>admin</info>.");
+
 
         return 0;
     }
