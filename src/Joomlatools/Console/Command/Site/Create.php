@@ -206,6 +206,26 @@ EOF
             $command->run(new ArrayInput($arguments), $output);
         }
 
+        /*
+         * Run all site:create:* commands after site creation
+         */
+        try {
+            $commands = $this->getApplication()->all('site:create');
+            
+            foreach ($commands as $command) {
+                $arguments = array(
+                    $command->getName(),
+                    'site'   => $this->site,
+                    '--www'  => $this->www
+                );
+                $command->setApplication($this->getApplication());
+                $command->run(new ArrayInput($arguments), $output);
+            }
+        }
+        catch (\Symfony\Component\Console\Exception\NamespaceNotFoundException $e) {}
+        catch (\Symfony\Component\Console\Exception\CommandNotFoundException $e) {}
+        
+
         return 0;
     }
 
