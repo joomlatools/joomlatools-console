@@ -7,15 +7,14 @@
 
 namespace Joomlatools\Console\Command\Plugin;
 
-use Symfony\Component\Console\Command\Command;
+use Joomlatools\Console\Command\Configurable;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Util;
 
-class Uninstall extends Command
+class Uninstall extends Configurable
 {
     protected function configure()
     {

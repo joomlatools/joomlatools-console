@@ -7,14 +7,14 @@
 
 namespace Joomlatools\Console\Command\Plugin;
 
-use Symfony\Component\Console\Command\Command;
+use Joomlatools\Console\Command\Configurable;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Joomla\Util;
 
-class Install extends Command
+class Install extends Configurable
 {
     protected function configure()
     {
