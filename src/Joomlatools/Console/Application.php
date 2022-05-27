@@ -79,6 +79,8 @@ class Application extends \Symfony\Component\Console\Application
 
         $this->_loadPlugins();
 
+        $this->_loadExtraCommands();
+
         parent::run($this->_input, $this->_output);
     }
 
@@ -205,6 +207,51 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
+     * Loads extra commands from the ~/.joomlatools/console/commands/ folder 
+     * 
+     * Each PHP file in the folder is included and if the class in the file extends the base Symfony command
+     * it's instantiated and added to the app. 
+     *
+     * @return void
+     */
+    protected function _loadExtraCommands()
+    {
+        $path = $this->getConsoleHome().'/commands';
+
+        if (\is_dir($path)) 
+        {
+            $iterator = new \DirectoryIterator($path);
+
+            foreach ($iterator as $file)
+            {
+                if ($file->getExtension() == 'php') 
+                {
+                    require $file->getPathname();
+
+                    $className  = $file->getBasename('.php');
+
+                    if (\class_exists($className)) 
+                    {
+                        $reflection = new \ReflectionClass($className);
+    
+                        if (!$reflection->isSubclassOf('\Symfony\Component\Console\Command\Command')) {
+                            continue;
+                        }
+                        
+                        $command = new $className();
+    
+                        if (!$command instanceof \Symfony\Component\Console\Command\Command) {
+                            continue;
+                        }
+    
+                        $this->add($command);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Set up environment
      */
     protected function _setup()
@@ -227,7 +274,7 @@ class Application extends \Symfony\Component\Console\Application
 
             if (file_exists($old))
             {
-                $this->_output->writeln('<comment>Moving legacy plugin directory to ~/.joomlatools-console/plugins.</comment>');
+                $this->_output->writeln('<comment>Moving legacy plugin directory to ~/.joomlatools/console/plugins.</comment>');
 
                 $cmd = sprintf('mv %s %s', escapeshellarg($old), escapeshellarg($this->getPluginPath()));
                 exec($cmd);
