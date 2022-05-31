@@ -12,8 +12,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
-use Joomlatools\Console\Joomla\Deserializer;
-use Joomlatools\Console\Joomla\Util;
 use Joomlatools\Console\Command\Database\AbstractDatabase;
 
 class Configure extends AbstractDatabase
@@ -100,7 +98,7 @@ class Configure extends AbstractDatabase
         if ($options !== null)
         {
             if (!file_exists($options)) {
-                throw new Exception(sprintf('Additional option file \'%s\' does not exist', $options));
+                throw new \Exception(sprintf('Additional option file \'%s\' does not exist', $options));
             }
 
             $contents = file_get_contents($options);
@@ -108,8 +106,8 @@ class Configure extends AbstractDatabase
             try {
                 $this->_extra_options = Yaml::parse($contents);
             }
-            catch (Exception $ex) {
-                throw new Exception(sprintf('Unable to parse YAML file %s', $options));
+            catch (\Exception $ex) {
+                throw new \Exception(sprintf('Unable to parse YAML file %s', $options));
             }
         }
 
