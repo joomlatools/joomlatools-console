@@ -42,8 +42,22 @@ class Configurable extends Command
         {
             $file = sprintf('%s/.joomlatools/console/config.yaml', trim(`echo ~`));
 
-            if (file_exists($file)) {
-                $this->_config = Yaml::parseFile($file);
+            if (file_exists($file)) 
+            {
+                $file_contents = \file_get_contents($file);
+                $env = $_ENV;
+                
+                // Replace longest keys first
+                uksort($env, function($a, $b){
+                    return strlen($b) - strlen($a);
+                });
+                
+                // Replace environment variables in the file
+                foreach ($env as $key => $value) {
+                    $file_contents = \str_replace('$'.$key, $value, $file_contents);
+                }
+
+                $this->_config = Yaml::parse($file_contents);
             } else {
                 $this->_config = false;
             }
