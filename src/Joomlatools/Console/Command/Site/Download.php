@@ -78,7 +78,13 @@ class Download extends AbstractSite
                 InputOption::VALUE_OPTIONAL,
                 'Clone the Git repository instead of creating a copy in the target directory. Use --clone=shallow for a shallow clone or leave empty.',
                 true
-            );
+            )
+            ->addOption(
+                'chown',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Change file owner as the passed user'
+            )
         ;
     }
 
@@ -124,6 +130,11 @@ class Download extends AbstractSite
         $directory = $this->target_dir;
         if (file_exists($directory.'/htaccess.txt')) {
             `cp $directory/htaccess.txt $directory/.htaccess`;
+        }
+
+        if ($input->hasOption('chown')) {
+            $user = $input->getOption('chown');
+            `chown -R $user:$user $this->target_dir`;
         }
 
         return 0;
