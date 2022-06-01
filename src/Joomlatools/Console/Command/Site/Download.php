@@ -132,11 +132,6 @@ class Download extends AbstractSite
             `cp $directory/htaccess.txt $directory/.htaccess`;
         }
 
-        if ($input->hasOption('chown')) {
-            $user = $input->getOption('chown');
-            `chown -R $user:$user $this->target_dir`;
-        }
-
         return 0;
     }
 
