@@ -163,6 +163,12 @@ EOF
                 'The full command for restarting Apache2',
                 null
             )
+            ->addOption(
+                'chown',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Change file owner as the passed user'
+            )
             ;
     }
 
@@ -204,6 +210,11 @@ EOF
             $command = new Install();
             $command->setApplication($this->getApplication());
             $command->run(new ArrayInput($arguments), $output);
+        }
+
+        if ($input->hasOption('chown')) {
+            $user = $input->getOption('chown');
+            `chown -R $user:$user $this->target_dir`;
         }
 
         /*
