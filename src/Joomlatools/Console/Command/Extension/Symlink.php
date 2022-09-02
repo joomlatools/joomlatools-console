@@ -24,15 +24,6 @@ class Symlink extends AbstractSite
     protected static $_symlinkers   = array();
 
     protected static $_dependencies = array(
-        'extman' => array('nooku-framework', 'com_files', 'com_activities'), // deprecated
-
-        'joomlatools-framework' => array(
-            'joomlatools-framework-files',
-            'joomlatools-framework-activities',
-            'joomlatools-framework-scheduler',
-            'joomlatools-framework-migrator',
-            'joomlatools-framework-tags'
-        ),
         'joomlatools-pages'     => array('joomlatools-framework'),
         'pages'                 => array('joomlatools-framework'),
         'docman'                => array('joomlatools-framework'),
