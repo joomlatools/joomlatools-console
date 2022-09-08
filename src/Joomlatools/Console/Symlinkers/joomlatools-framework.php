@@ -63,6 +63,25 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
         }
     }
 
+    // Component assets
+    $results = glob($project.'/code/libraries/joomlatools-components/*/resources/assets', GLOB_ONLYDIR);
+
+    foreach ($results as $from)
+    {
+        $component = preg_replace('#^.*?joomlatools-components/([^/]+)/resources/assets#', '$1', $from);
+        $to    = Util::buildTargetPath('/media/koowa/com_'.$component, $destination);
+
+        if (!$component || is_link($to)) {
+            continue;
+        }
+
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln(" * creating link `$to` -> $from");
+        }
+
+        `ln -sf $from $to`;
+    }
+
     // Let the default symlinker handle the rest
     return false;
 });
