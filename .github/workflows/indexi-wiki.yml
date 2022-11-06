@@ -1,0 +1,35 @@
+
+name: Index Wiki
+
+on:
+  gollum:
+  workflow_dispatch:
+
+jobs:
+  index:
+
+    name: Create Wiki Filesystem Index
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout wiki code from Github
+        uses: actions/checkout@v3
+        with:
+          repository: ${{github.repository}}.wiki
+          fetch-depth: 0
+
+      - name: Create index
+        run: |
+          git ls-files -z | xargs -0 -n1 -I{} -- git log -1 --format="{},%h,%aI,%aN,%aE" {} | \
+          jq -Rs 'split("\n")[:-1] | map({ 
+            file: (. | split(",")[0]),
+            hash: (. | split(",")[1]),
+            author_date: (. | split(",")[2]),
+            author_name: (. | split(",")[3]),
+            author_email: (. | split(",")[4]),
+          })' > _Index.json
+
+      - name: Commit index
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update Wiki Index
