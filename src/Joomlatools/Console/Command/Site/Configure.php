@@ -192,7 +192,7 @@ class Configure extends AbstractDatabase
         chmod($target, 0664);
 
         if (file_exists($this->target_dir.'/installation')) {
-            `mv $this->target_dir/installation $this->target_dir/_installation`;
+            `mv "$this->target_dir/installation" "$this->target_dir/_installation"`;
         }
     }
 
