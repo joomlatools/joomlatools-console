@@ -68,7 +68,7 @@ class Util
                 }
 
                 //start to provide support for Joomla 4 onwards
-                if (defined( "$className::MAJOR_VERSION") && $version::MAJOR_VERSION == '4'){
+                if (defined( "$className::MAJOR_VERSION") && in_array($version::MAJOR_VERSION, ['4', '5'])){
                     return  $version::MAJOR_VERSION . "." . $version::MINOR_VERSION . "." . $version::PATCH_VERSION . ($version::EXTRA_VERSION ? "." . $version::EXTRA_VERSION : '');
                 }
 
