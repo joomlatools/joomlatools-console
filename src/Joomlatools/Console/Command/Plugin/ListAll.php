@@ -24,10 +24,10 @@ class ListAll extends Configurable
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (Util::isJoomla4($this->target_dir)) {
+        if (Util::isJoomla4(getcwd() ?: dirname(__FILE__))) {
             $output->write("<error>This command is not implemented for Joomla 4</error>\n");
 
-            return;
+            return 1;
         }
 
         $plugins = $this->getApplication()->getPlugins();

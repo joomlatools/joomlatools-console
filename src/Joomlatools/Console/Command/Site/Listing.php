@@ -64,7 +64,6 @@ class Listing extends Database\AbstractDatabase
                     $sites[] = (object) array(
                         'name'    => $fileinfo->getFilename(),
                         'docroot' => $docroot . '/' . $fileinfo->getFilename() . '/',
-                        'type'    => $version->type == 'joomla-cms-new' ? 'joomla-cms' : $version->type,
                         'version' => $version->release
                     );
                 }
@@ -82,14 +81,14 @@ class Listing extends Database\AbstractDatabase
                 $result->command = $input->getArgument('command');
                 $result->data    = $sites;
 
-                $options = (version_compare(phpversion(),'5.4.0') >= 0 ? JSON_PRETTY_PRINT : 0);
+                $options = (version_compare(PHP_VERSION,'5.4.0') >= 0 ? JSON_PRETTY_PRINT : 0);
                 $string  = json_encode($result, $options);
                 break;
             case 'txt':
             default:
                 $lines = array();
                 foreach ($sites as $i => $site) {
-                    $lines[] = sprintf("<info>%s. %s</info> (%s %s)", ($i+1), $site->name, $site->type, $site->version);
+                    $lines[] = sprintf("<info>%s. %s</info> (%s)", ($i+1), $site->name, $site->version);
                 }
 
                 $string = implode("\n", $lines);

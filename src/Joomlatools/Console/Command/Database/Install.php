@@ -146,7 +146,7 @@ class Install extends AbstractDatabase
                 };
 
                 $executeQuery("REPLACE INTO j_schemas (extension_id, version_id) VALUES (700, '$schema');");
-                $executeQuery("UPDATE j_extensions SET manifest_cache = '{\"version\": \"$version->release\"}' WHERE manifest_cache = '';");
+                $executeQuery("UPDATE j_extensions SET manifest_cache = '{\"version\": \"{$version->release}\"}' WHERE manifest_cache = '';");
             }
         }
 
@@ -179,7 +179,7 @@ class Install extends AbstractDatabase
 
             if($version !== false && $version->release)
             {
-                if (in_array($sample_data, array('testing', 'learn')) && version_compare($version->release, '3.0.0', '<')) {
+                if (in_array($sample_data, array('testing', 'learn')) && $version->major < 3) {
                     throw new \RuntimeException(sprintf('%s does not support sample data %s', $version->release, $sample_data));
                 }
             }
@@ -208,7 +208,7 @@ class Install extends AbstractDatabase
         if ($version !== false)
         {
             $users = 'joomla3.users.sql';
-            if(is_numeric(substr($version->release, 0, 1)) && version_compare($version->release, '3.0.0', '<')) {
+            if($version->major < 3) {
                 $users = 'joomla2.users.sql';
             }
             $path = Util::getTemplatePath();
