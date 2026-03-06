@@ -10,7 +10,7 @@ Joomlatools Console
 * PHP7.3 or newer
 * Linux, MacOS, or [Joomlatools Server](https://github.com/joomlatools/joomlatools-server)
 * Composer
-* Joomla versions 3.5 and 4.x
+* Joomla 3.1 or newer
 
 ## Installation
 
