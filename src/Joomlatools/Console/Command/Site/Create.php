@@ -93,15 +93,13 @@ EOF
                 'http-port',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'The HTTP port the virtual host should listen to',
-                80
+                'The HTTP port the virtual host should listen to'
             )
             ->addOption(
                 'ssl-port',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'The port on which the server will listen for SSL requests',
-                443
+                'The port on which the server will listen for SSL requests'
             )
             ->addOption(
                 'interactive',
@@ -279,12 +277,18 @@ EOF
     {
         $command_input = array(
             'vhost:create',
-            'site'          => $this->site,
-            '--http-port'   => $input->getOption('http-port'),
-            '--ssl-port'    => $input->getOption('ssl-port'),
-            '--www'         => $input->getOption('www'),
+            'site'              => $this->site,
+            '--www'             => $input->getOption('www'),
             '--use-webroot-dir' => $input->getOption('use-webroot-dir'),
         );
+
+        if ($input->getOption('http-port') !== null) {
+            $command_input['--http-port'] = $input->getOption('http-port');
+        }
+
+        if ($input->getOption('ssl-port') !== null) {
+            $command_input['--ssl-port'] = $input->getOption('ssl-port');
+        }
 
         foreach (array('template', 'folder', 'filename', 'restart-command') as $vhostkey) {
             if ($input->getOption('vhost-'.$vhostkey) !== null) {
