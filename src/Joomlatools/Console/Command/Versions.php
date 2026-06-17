@@ -221,6 +221,9 @@ class Versions extends Command
             $major = substr($major, 1);
         }
 
+        // Collect every tag that looks like a stable release, keyed by tag name
+        // with its comparable (v-stripped, lower-cased) version as the value.
+        $candidates = array();
         foreach($versions['tags'] as $version)
         {
             if(!preg_match('/v?\d\.\d+\.\d+.*/im', $version) || preg_match('#(?:alpha|beta|rc)#i', $version)) {
@@ -236,16 +239,77 @@ class Versions extends Command
                 continue;
             }
 
-            if(version_compare($latest, strtolower($compare), '<')) {
-                $latest = $version;
+            $candidates[$version] = strtolower($compare);
+        }
+
+        // Highest version first, so the newest downloadable release wins.
+        uasort($candidates, function($a, $b) {
+            return version_compare($b, $a);
+        });
+
+        foreach($candidates as $version => $compare)
+        {
+            // Not every Git tag is a published release: Joomla's CI pushes tags
+            // (e.g. 5.4.112) that have no downloadable package, which would later
+            // fail with an "interrupted download" error. Skip any tag we can
+            // positively confirm has no release asset.
+            if($this->_requiresReleaseAsset($compare) && $this->_releaseExists($version) === false) {
+                continue;
+            }
+
+            return $version;
+        }
+
+        return 'master';
+    }
+
+    /**
+     * Whether the latest release for the given version is served from the
+     * GitHub releases endpoint, and therefore must have a published asset.
+     *
+     * @param string $version
+     * @return bool
+     */
+    protected function _requiresReleaseAsset($version)
+    {
+        return $this->repository === self::REPO_JOOMLA_CMS && version_compare($version, '4.0.0', '>=');
+    }
+
+    /**
+     * Check whether a published release package exists for the given tag.
+     *
+     * @param string $version
+     * @return bool|null  True if the asset exists, false if it is missing,
+     *                    null if it could not be determined (e.g. no network).
+     */
+    protected function _releaseExists($version)
+    {
+        $url = $this->repository . "/releases/download/{$version}/Joomla_{$version}-Stable-Full_Package.tar.gz";
+
+        $context = stream_context_create(array(
+            'http' => array(
+                'method'          => 'HEAD',
+                'follow_location' => 1,
+                'max_redirects'   => 20,
+                'ignore_errors'   => true,
+                'timeout'         => 10
+            )
+        ));
+
+        $headers = @get_headers($url, false, $context);
+
+        if (!$headers) {
+            return null;
+        }
+
+        $status = 0;
+        foreach ($headers as $header) {
+            if (preg_match('#^HTTP/\S+\s+(\d{3})#', $header, $matches)) {
+                $status = (int) $matches[1];
             }
         }
 
-        if ($latest == '0.0.0') {
-            $latest = 'master';
-        }
-
-        return $latest;
+        return $status >= 200 && $status < 300;
     }
 
     public function isBranch($version)
