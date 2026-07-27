@@ -50,6 +50,44 @@ Joomlatools Console
 
 1. Read our [documentation pages](https://www.joomlatools.com/developer/tools/console/) to learn more about using the tool.
 
+## Command hooks (`--preflight`, `--postflight`)
+
+Every command accepts two hooks: `--preflight`, run before the command, and
+`--postflight`, run after it succeeds. Placeholders written as `%name%` are
+replaced with the arguments and options the command was called with, and the
+substituted values are shell escaped.
+
+```shell
+  joomla site:create legacysite --release=3.10.12 --postflight="my-script %site%"
+```
+
+Like any other option they can be set per command in `config.yaml`, so they do
+not have to be typed every time:
+
+```yaml
+site:create:
+  postflight: my-script %site% %www%
+```
+
+Useful placeholders: `%site%` (the site name), `%www%` (the web server root) and
+`%root%` (the site's document root). Chaining with `&&` works, since only the
+substituted values are escaped, not the surrounding string.
+
+The two hooks treat failure differently, on purpose:
+
+* **preflight is a gate.** A non-zero exit aborts the command before it runs and
+  becomes the command's exit status — the same way a `preflight()` in a Joomla
+  installer script aborts an install. Being able to say no is the point.
+* **postflight is a follow-up.** A non-zero exit is reported but does not change
+  the command's exit status, because the command itself succeeded.
+
+`postflight` runs once the command has completely finished, not partway through.
+For `site:create` that matters: the virtual host is written well before the CMS
+is installed, so a hook attached any earlier would see a half-populated site.
+
+Note that `%root%` is only available to `postflight`. The site directory is
+resolved while the command runs, so it is not yet known at preflight time.
+
 ## Development
 
 To setup the tool for development:
