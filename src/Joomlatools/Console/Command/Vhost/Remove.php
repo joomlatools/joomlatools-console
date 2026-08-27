@@ -26,7 +26,7 @@ class Remove extends AbstractSite
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The Apache2 vhost folder',
-                '/etc/apache2/sites-enabled'
+                null
             )
             ->addOption('filename',
                 null,
@@ -61,9 +61,10 @@ class Remove extends AbstractSite
         return 0;
     }
 
-    protected function _getVhostPath($input) 
+    protected function _getVhostPath($input)
     {
-        $folder = str_replace('[site]', $this->site, $input->getOption('folder'));
+        $folder = $input->getOption('folder') ?? $this->_getDefaultVhostFolder();
+        $folder = str_replace('[site]', $this->site, $folder);
         $file = $input->getOption('filename') ?? $input->getArgument('site').'.conf';
 
         return $folder.'/'.$file;
