@@ -69,7 +69,8 @@ class Create extends AbstractSite
         parent::execute($input, $output);
 
         if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+            $output->writeln(sprintf('<error>Site not found: %s</error>', $this->site));
+            return 99;
         }
 
         if ($input->getOption('folder') === null) {
@@ -82,22 +83,21 @@ class Create extends AbstractSite
 
         if (!is_dir(dirname($target))) {
             if (!@mkdir(dirname($target), 0755, true)) {
-                 throw new \RuntimeException(sprintf('Could not create directory: %s. Please check your permissions or run the command with sudo.', dirname($target)));
+                $output->writeln(sprintf('<error>Could not create directory: %s. Please check your permissions or run the command with sudo.</error>', dirname($target)));
+                return 99;
             }
         }
 
-        if (is_dir(dirname($target)))
-        {
-            $template = $this->_getTemplate($input);
-            $template = str_replace(array_keys($variables), array_values($variables), $template);
+        $template = $this->_getTemplate($input);
+        $template = str_replace(array_keys($variables), array_values($variables), $template);
 
-            if (!@file_put_contents($target, $template)) {
-                 throw new \RuntimeException(sprintf('Could not write to file: %s. Please check your permissions or run the command with sudo.', $target));
-            }
+        if (!@file_put_contents($target, $template)) {
+            $output->writeln(sprintf('<error>Could not write to file: %s. Please check your permissions or run the command with sudo.</error>', $target));
+            return 99;
+        }
 
-            if ($command = $input->getOption('restart-command')) {
-                `$command`;
-            }
+        if ($command = $input->getOption('restart-command')) {
+            `$command`;
         }
 
         return 0;
@@ -123,24 +123,10 @@ class Create extends AbstractSite
             return;
         }
 
-        exec('apachectl -V 2>/dev/null', $lines);
-
-        $root = $config = null;
-        foreach ($lines as $line) {
-            if (preg_match('/HTTPD_ROOT="(.+)"/', $line, $matches)) {
-                $root = $matches[1];
-            }
-            if (preg_match('/SERVER_CONFIG_FILE="(.+)"/', $line, $matches)) {
-                $config = $matches[1];
-            }
-        }
+        $config = $this->_getApacheConfigFile();
 
         if (!$config) {
             return;
-        }
-
-        if ($config[0] !== '/' && $root) {
-            $config = $root.'/'.$config;
         }
 
         $include = sprintf('Include %s/*.conf', $folder);
