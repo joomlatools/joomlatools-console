@@ -209,12 +209,24 @@ EOL
     }
 
     /**
+     * Public accessor for the registered dependencies of a project, so other commands
+     * (e.g. Extension\Install) can install/activate the same dependencies that get symlinked here.
+     *
+     * @param  string $project      The directory name of Project
+     * @return array                An array of dependencies
+     */
+    public static function getDependencies($project)
+    {
+        return static::_getDependencies($project);
+    }
+
+    /**
      * Look for the dependencies of the dependency
      *
      * @param  string $project      The directory name of Project
      * @return array                An array of dependencies
      */
-    protected function _getDependencies($project)
+    protected static function _getDependencies($project)
     {
         $projects     = array();
         $dependencies = static::$_dependencies;
@@ -224,7 +236,7 @@ EOL
             $projects = $dependencies[$project];
 
             foreach ($projects as $dependency) {
-                $projects = array_merge($projects, $this->_getDependencies($dependency));
+                $projects = array_merge($projects, static::_getDependencies($dependency));
             }
         }
 

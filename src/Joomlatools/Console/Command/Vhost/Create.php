@@ -47,7 +47,7 @@ class Create extends AbstractSite
                 null,
                 InputOption::VALUE_REQUIRED,
                 'The Apache2 vhost folder',
-                '/etc/apache2/sites-enabled'
+                null
             )
             ->addOption('filename',
                 null,
@@ -69,7 +69,12 @@ class Create extends AbstractSite
         parent::execute($input, $output);
 
         if (!file_exists($this->target_dir)) {
-            throw new \RuntimeException(sprintf('Site not found: %s', $this->site));
+            $output->writeln(sprintf('<error>Site not found: %s</error>', $this->site));
+            return 99;
+        }
+
+        if ($input->getOption('folder') === null) {
+            $this->_warnIfVhostFolderNotIncluded($output, $this->_getDefaultVhostFolder());
         }
 
         $target = $this->_getVhostPath($input);
@@ -77,30 +82,61 @@ class Create extends AbstractSite
         $variables = $this->_getVariables($input);
 
         if (!is_dir(dirname($target))) {
-            mkdir(dirname($target), 0755, true);
+            if (!@mkdir(dirname($target), 0755, true)) {
+                $output->writeln(sprintf('<error>Could not create directory: %s. Please check your permissions or run the command with sudo.</error>', dirname($target)));
+                return 99;
+            }
         }
 
-        if (is_dir(dirname($target)))
-        {
-            $template = $this->_getTemplate($input);
-            $template = str_replace(array_keys($variables), array_values($variables), $template);
+        $template = $this->_getTemplate($input);
+        $template = str_replace(array_keys($variables), array_values($variables), $template);
 
-            file_put_contents($target, $template);
+        if (!@file_put_contents($target, $template)) {
+            $output->writeln(sprintf('<error>Could not write to file: %s. Please check your permissions or run the command with sudo.</error>', $target));
+            return 99;
+        }
 
-            if ($command = $input->getOption('restart-command')) {
-                `$command`;
-            }
+        if ($command = $input->getOption('restart-command')) {
+            `$command`;
         }
 
         return 0;
     }
 
-    protected function _getVhostPath($input) 
+    protected function _getVhostPath($input)
     {
-        $folder = str_replace('[site]', $this->site, $input->getOption('folder'));
+        $folder = $input->getOption('folder') ?? $this->_getDefaultVhostFolder();
+        $folder = str_replace('[site]', $this->site, $folder);
         $file = $input->getOption('filename') ?? $input->getArgument('site').'.conf';
 
         return $folder.'/'.$file;
+    }
+
+    /**
+     * When we auto-detected a non-standard vhost folder (eg. a Homebrew Apache install),
+     * warn the user if their Apache config doesn't already Include it, since writing the
+     * vhost file there alone won't make Apache pick it up.
+     */
+    protected function _warnIfVhostFolderNotIncluded(OutputInterface $output, $folder)
+    {
+        if ($folder === '/etc/apache2/sites-enabled') {
+            return;
+        }
+
+        $config = $this->_getApacheConfigFile();
+
+        if (!$config) {
+            return;
+        }
+
+        $include = sprintf('Include %s/*.conf', $folder);
+
+        if (!file_exists($config) || strpos(file_get_contents($config), $include) === false) {
+            $output->writeln(sprintf(
+                '<comment>Using %s for vhost files. If Apache does not already include this folder, add "%s" to %s.</comment>',
+                $folder, $include, $config
+            ));
+        }
     }
 
     protected function _getVariables(InputInterface $input)

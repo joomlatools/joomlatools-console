@@ -111,4 +111,64 @@ abstract class AbstractSite extends Command\Configurable
 
         return $answer;
     }
+
+    /**
+     * Resolve the path to Apache's main config file via apachectl -V.
+     *
+     * Shared by _getDefaultVhostFolder() and Vhost\Create::_warnIfVhostFolderNotIncluded()
+     * so the HTTPD_ROOT/SERVER_CONFIG_FILE parsing lives in one place.
+     *
+     * @return string|null
+     */
+    protected function _getApacheConfigFile()
+    {
+        exec('apachectl -V 2>/dev/null', $lines);
+
+        $root = $config = null;
+        foreach ($lines as $line) {
+            if (preg_match('/HTTPD_ROOT="(.+)"/', $line, $matches)) {
+                $root = $matches[1];
+            }
+            if (preg_match('/SERVER_CONFIG_FILE="(.+)"/', $line, $matches)) {
+                $config = $matches[1];
+            }
+        }
+
+        if (!$config) {
+            return null;
+        }
+
+        if ($config[0] !== '/' && $root) {
+            $config = $root.'/'.$config;
+        }
+
+        return $config;
+    }
+
+    /**
+     * Determine a writable Apache vhost folder without requiring sudo.
+     *
+     * The traditional /etc/apache2/sites-enabled path is only writable without sudo on
+     * Linux systems where Apache runs/is owned by the current user (eg. Docker, Vagrant).
+     * On macOS with a Homebrew-installed Apache, config lives under the Homebrew prefix
+     * and is owned by the current user instead, so fall back to detecting it via apachectl.
+     *
+     * @return string
+     */
+    protected function _getDefaultVhostFolder()
+    {
+        $default = '/etc/apache2/sites-enabled';
+
+        if (is_dir($default) && is_writable($default)) {
+            return $default;
+        }
+
+        $config = $this->_getApacheConfigFile();
+
+        if ($config && is_writable(dirname($config))) {
+            return dirname($config).'/sites-enabled';
+        }
+
+        return $default;
+    }
 }

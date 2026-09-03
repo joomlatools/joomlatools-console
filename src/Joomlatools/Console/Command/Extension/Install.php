@@ -63,6 +63,10 @@ EOL
             $extensions = array_diff($extensions, $this->composer_extensions);
         }
 
+        foreach ($extensions as $extension) {
+            $extensions = array_unique(array_merge($extensions, Symlink::getDependencies($extension)));
+        }
+
         $this->extensions = $extensions;
 
         $this->check($input, $output);
@@ -128,10 +132,18 @@ EOL
                 $results[$data[0]] = $data[1];
             }
 
-            if (isset($results['plg_system_joomlatools']) && (\in_array('all', $this->extensions) || \in_array('joomlatools-framework', $this->extensions))) {
-                $result = Util::executeJ4CliCommand($this->target_dir, "extension:discover:install $verbosity --eid={$results['plg_system_joomlatools']}");
-                
-                unset($results['plg_system_joomlatools']);
+            // Extensions that depend on the Joomlatools Framework (e.g. docman) require the "System -
+            // Joomlatools Framework" plugin's Koowa classes to already be loaded when their own install
+            // script runs. Each extension is installed in its own CLI subprocess, and Joomla's console
+            // application imports enabled system plugins on every boot (see PluginHelper::importPlugin('system')
+            // in ConsoleApplication::doExecute()), which constructs the framework plugin and bootstraps Koowa.
+            // So the framework plugin must be installed (and thus enabled) *before* any dependent extension's
+            // subprocess starts, or Koowa/KObjectManager will not exist yet when the dependent's script runs.
+            $joomlatools_framework_eid = $results['plg_system_joomlatools'] ?? null;
+            unset($results['plg_system_joomlatools']);
+
+            if ($joomlatools_framework_eid && (\in_array('all', $this->extensions) || \in_array('joomlatools-framework', $this->extensions))) {
+                $result = Util::executeJ4CliCommand($this->target_dir, "extension:discover:install $verbosity --eid=$joomlatools_framework_eid");
 
                 $output->writeln("<info>Joomlatools Framework install: $result</info>\n");
             }
@@ -143,7 +155,7 @@ EOL
                     $output->writeln("<info>$result</info>\n");
                 }
             }
-            
+
             return;
         }
 
