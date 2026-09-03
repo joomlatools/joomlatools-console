@@ -115,8 +115,9 @@ abstract class AbstractSite extends Command\Configurable
     /**
      * Resolve the path to Apache's main config file via apachectl -V.
      *
-     * Shared by _getDefaultVhostFolder() and Vhost\Create::_warnIfVhostFolderNotIncluded()
-     * so the HTTPD_ROOT/SERVER_CONFIG_FILE parsing lives in one place.
+     * Shared by _getDefaultVhostFolder(), _getDefaultLogFolder() and
+     * Vhost\Create::_warnIfVhostFolderNotIncluded() so the HTTPD_ROOT/SERVER_CONFIG_FILE
+     * parsing lives in one place.
      *
      * @return string|null
      */
@@ -167,6 +168,32 @@ abstract class AbstractSite extends Command\Configurable
 
         if ($config && is_writable(dirname($config))) {
             return dirname($config).'/sites-enabled';
+        }
+
+        return $default;
+    }
+
+    /**
+     * Determine a writable Apache log folder without requiring sudo.
+     *
+     * Mirrors _getDefaultVhostFolder(): the traditional /var/log/apache2 path only exists
+     * on Linux. On macOS with a Homebrew-installed Apache, logs live under the Homebrew
+     * prefix instead, so fall back to reading the main ErrorLog directive from httpd.conf.
+     *
+     * @return string
+     */
+    protected function _getDefaultLogFolder()
+    {
+        $default = '/var/log/apache2';
+
+        if (is_dir($default) && is_writable($default)) {
+            return $default;
+        }
+
+        $config = $this->_getApacheConfigFile();
+
+        if ($config && file_exists($config) && preg_match('/^\s*ErrorLog\s+"?([^"\s]+)"?/mi', file_get_contents($config), $matches)) {
+            return dirname($matches[1]);
         }
 
         return $default;

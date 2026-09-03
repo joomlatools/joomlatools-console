@@ -102,6 +102,26 @@ EOF
                 'The port on which the server will listen for SSL requests'
             )
             ->addOption(
+                'no-ssl',
+                null,
+                InputOption::VALUE_NONE,
+                'Only create the HTTP virtual host, skipping SSL setup'
+            )
+            ->addOption(
+                'ssl-cert',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to the SSL certificate to use. Defaults to a locally-trusted *.test wildcard certificate generated via mkcert.',
+                null
+            )
+            ->addOption(
+                'ssl-key',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to the SSL certificate key to use. Defaults to a locally-trusted *.test wildcard certificate generated via mkcert.',
+                null
+            )
+            ->addOption(
                 'interactive',
                 null,
                 InputOption::VALUE_NONE,
@@ -288,6 +308,16 @@ EOF
 
         if ($input->getOption('ssl-port') !== null) {
             $command_input['--ssl-port'] = $input->getOption('ssl-port');
+        }
+
+        if ($input->getOption('no-ssl')) {
+            $command_input['--no-ssl'] = true;
+        }
+
+        foreach (array('ssl-cert', 'ssl-key') as $sslkey) {
+            if ($input->getOption($sslkey) !== null) {
+                $command_input['--'.$sslkey] = $input->getOption($sslkey);
+            }
         }
 
         foreach (array('template', 'folder', 'filename', 'restart-command') as $vhostkey) {
