@@ -26,6 +26,9 @@ abstract class AbstractSite extends Command\Configurable
 
     protected $_config = null;
 
+    private $_apache_config_file_resolved = false;
+    private $_apache_config_file;
+
     protected function configure()
     {
         if (empty(self::$files)) {
@@ -117,12 +120,19 @@ abstract class AbstractSite extends Command\Configurable
      *
      * Shared by _getDefaultVhostFolder(), _getDefaultLogFolder() and
      * Vhost\Create::_warnIfVhostFolderNotIncluded() so the HTTPD_ROOT/SERVER_CONFIG_FILE
-     * parsing lives in one place.
+     * parsing lives in one place. The result is memoized per-request since several of
+     * those callers run within a single command and this shells out to apachectl.
      *
      * @return string|null
      */
     protected function _getApacheConfigFile()
     {
+        if ($this->_apache_config_file_resolved) {
+            return $this->_apache_config_file;
+        }
+
+        $this->_apache_config_file_resolved = true;
+
         exec('apachectl -V 2>/dev/null', $lines);
 
         $root = $config = null;
@@ -136,14 +146,14 @@ abstract class AbstractSite extends Command\Configurable
         }
 
         if (!$config) {
-            return null;
+            return $this->_apache_config_file = null;
         }
 
         if ($config[0] !== '/' && $root) {
             $config = $root.'/'.$config;
         }
 
-        return $config;
+        return $this->_apache_config_file = $config;
     }
 
     /**

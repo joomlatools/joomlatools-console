@@ -284,10 +284,19 @@ class Create extends AbstractSite
     /**
      * Warn the user if Apache doesn't appear to have mod_ssl enabled, since writing an SSL
      * vhost block alone won't make HTTPS work without it (and "Listen 443") being active.
+     *
+     * If apachectl itself fails to run (eg. a transient exec/fork hiccup), we can't tell
+     * that apart from "mod_ssl isn't loaded" just by getting an empty module list, so the
+     * exit code is checked explicitly and the warning is skipped rather than risking a
+     * false positive.
      */
     protected function _warnIfSslNotEnabled(OutputInterface $output)
     {
-        exec('apachectl -M 2>/dev/null', $modules);
+        exec('apachectl -M 2>/dev/null', $modules, $status);
+
+        if ($status !== 0) {
+            return;
+        }
 
         foreach ($modules as $line) {
             if (stripos($line, 'ssl_module') !== false) {
