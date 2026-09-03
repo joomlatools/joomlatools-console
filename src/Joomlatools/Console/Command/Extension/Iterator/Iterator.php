@@ -30,7 +30,7 @@ class Iterator extends \RecursiveIteratorIterator
         parent::__construct(new \RecursiveDirectoryIterator($source));
     }
 
-    public function callHasChildren()
+    public function callHasChildren(): bool
     {
         $filename = $this->getFilename();
         if ($filename[0] == '.') {
