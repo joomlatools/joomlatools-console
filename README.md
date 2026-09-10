@@ -48,6 +48,29 @@ Joomlatools Console
 
   `$ joomla --list`
 
+1. To install a package you have already built, run `package:install`. Zips are
+   looked up in `--projects-dir/<name>/` (default `~/Projects`); when more than
+   one zip is present the newest is used unless you pass a version:
+
+  ```shell
+     joomla package:install testsite textman
+     joomla package:install testsite textman:6.1.2
+     joomla site:create testsite --install=textman
+  ```
+
+   A filesystem path to a zip is also accepted. This is not `extension:install`,
+   which is the discover-install path for symlinked extensions.
+
+   Joomlatools packages need Joomla's Backward Compatibility plugin (`compat` on
+   5, `compat6` on 6). `site:create`, `site:install`, `package:install` and
+   `extension:install` enable it by default. Set it in `config.yaml` or pass
+   `--no-enable-compat`:
+
+  ```yaml
+     globals:
+       enable-compat: true
+  ```
+
 1. Read our [documentation pages](https://www.joomlatools.com/developer/tools/console/) to learn more about using the tool.
 
 ## Command hooks (`--preflight`, `--postflight`)

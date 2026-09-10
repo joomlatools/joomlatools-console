@@ -14,9 +14,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command;
 use Joomlatools\Console\Command\Database;
+use Joomlatools\Console\Command\EnableCompatTrait;
 
 class Install extends Database\AbstractDatabase
 {
+    use EnableCompatTrait;
+
     /**
      * Projects to symlink
      *
@@ -86,6 +89,8 @@ class Install extends Database\AbstractDatabase
                 InputOption::VALUE_REQUIRED,
                 "A YAML file consisting of serialized parameters to override JConfig."
             );
+
+        $this->addEnableCompatOption();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -106,6 +111,8 @@ class Install extends Database\AbstractDatabase
         $this->importdb($input, $output);
 
         $this->createConfig($input, $output);
+
+        $this->maybeEnableCompat($input, $output);
 
         if ($this->symlink)
         {
@@ -194,9 +201,10 @@ class Install extends Database\AbstractDatabase
     {
         $extension_input = new ArrayInput(array(
             'extension:install',
-            'site'      => $input->getArgument('site'),
-            'extension' => $this->symlink,
-            '--www'     => $this->www
+            'site'             => $input->getArgument('site'),
+            'extension'        => $this->symlink,
+            '--www'            => $this->www,
+            '--enable-compat'  => $input->getOption('enable-compat'),
         ));
         $installer = new Command\Extension\Install();
 

@@ -11,12 +11,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Joomlatools\Console\Command\EnableCompatTrait;
 use Joomlatools\Console\Command\Site\AbstractSite;
 use Joomlatools\Console\Joomla\Bootstrapper;
 use Joomlatools\Console\Joomla\Util;
 
 class Install extends AbstractSite
 {
+    use EnableCompatTrait;
     protected $extensions          = array();
     protected $composer_extensions = array();
 
@@ -45,6 +47,8 @@ EOL
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
                 'A list of extensions to install to the site using discover install. Use \'all\' to install all discovered extensions.'
             );
+
+        $this->addEnableCompatOption();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -70,6 +74,8 @@ EOL
         $this->extensions = $extensions;
 
         $this->check($input, $output);
+
+        $this->maybeEnableCompat($input, $output);
 
         if (count($this->extensions)) {
             $this->installFiles($input, $output);
