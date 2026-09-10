@@ -133,6 +133,8 @@ class Application extends \Symfony\Component\Console\Application
             new Command\Extension\Register(),
             new Command\Extension\Symlink(),
 
+            new Command\Package\Install(),
+
             new Command\Plugin\ListAll(),
             new Command\Plugin\Install(),
             new Command\Plugin\Uninstall(),

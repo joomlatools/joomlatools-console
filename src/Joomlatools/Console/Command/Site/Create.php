@@ -13,10 +13,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Joomlatools\Console\Command\Database;
+use Joomlatools\Console\Command\EnableCompatTrait;
+use Joomlatools\Console\Command\Package;
 use Joomlatools\Console\Command\Vhost;
 
 class Create extends Database\AbstractDatabase
 {
+    use EnableCompatTrait;
+
     /**
      * Clear cache before fetching versions
      *
@@ -69,6 +73,12 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'A comma separated list of directories to symlink from the projects directory. Use \'all\' to symlink every folder.'
+            )
+            ->addOption(
+                'install',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'A comma separated list of packages to install after the site is created. Each entry is an extension name (latest zip in --projects-dir/<name>/), name:version, or a path to a zip. See package:install.'
             )
             ->addOption(
                 'repo',
@@ -168,6 +178,8 @@ EOF
                 'Change file owner as the passed user'
             )
             ;
+
+        $this->addEnableCompatOption();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -205,9 +217,15 @@ EOF
                 }
             }
 
+            $arguments['--enable-compat'] = $input->getOption('enable-compat');
+
             $command = new Install();
             $command->setApplication($this->getApplication());
             $command->run(new ArrayInput($arguments), $output);
+
+            if ($input->getOption('install')) {
+                $this->installPackages($input, $output);
+            }
         }
 
         if ($input->hasOption('chown')) {
@@ -270,6 +288,36 @@ EOF
         }
 
         $command = new Download();
+        $command->run(new ArrayInput($arguments), $output);
+    }
+
+    public function installPackages(InputInterface $input, OutputInterface $output)
+    {
+        $packages = $input->getOption('install');
+
+        if (is_string($packages)) {
+            $packages = array_filter(array_map('trim', explode(',', $packages)));
+        }
+
+        if (empty($packages)) {
+            return;
+        }
+
+        $arguments = array(
+            'package:install',
+            'site'             => $this->site,
+            'package'          => $packages,
+            '--www'            => $this->www,
+            '--projects-dir'   => $input->getOption('projects-dir'),
+            '--enable-compat'  => $input->getOption('enable-compat'),
+        );
+
+        if ($input->getOption('use-webroot-dir')) {
+            $arguments['--use-webroot-dir'] = true;
+        }
+
+        $command = new Package\Install();
+        $command->setApplication($this->getApplication());
         $command->run(new ArrayInput($arguments), $output);
     }
 
