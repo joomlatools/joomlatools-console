@@ -70,7 +70,7 @@ EOL
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Directory where your custom projects reside',
-                sprintf('%s/Projects', trim(`echo ~`))
+                sprintf('%s/Projects', trim(shell_exec('echo ~')))
             );
 
         $this->addEnableCompatOption();

@@ -60,7 +60,7 @@ class Delete extends Database\AbstractDatabase
 
     public function deleteDirectory(InputInterface $input, OutputInterface $output)
     {
-        `rm -rf $this->target_dir`;
+        shell_exec("rm -rf $this->target_dir");
     }
 
     public function deleteDatabase(InputInterface $input, OutputInterface $output)

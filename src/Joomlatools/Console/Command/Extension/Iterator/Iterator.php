@@ -66,7 +66,7 @@ class Iterator extends \RecursiveIteratorIterator
                 $this->_output->writeln(" * creating link: `$target` -> `$source`");
             }
 
-            `ln -sf $source $target`;
+            shell_exec("ln -sf $source $target");
         }
     }
 

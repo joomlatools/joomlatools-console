@@ -97,7 +97,7 @@ class Create extends AbstractSite
         }
 
         if ($command = $input->getOption('restart-command')) {
-            `$command`;
+            shell_exec($command);
         }
 
         return 0;

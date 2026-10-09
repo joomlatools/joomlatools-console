@@ -200,7 +200,7 @@ class Configurable extends Command
 
         if (is_null($this->_config))
         {
-            $file = sprintf('%s/.joomlatools/console/config.yaml', trim(`echo ~`));
+            $file = sprintf('%s/.joomlatools/console/config.yaml', trim(shell_exec('echo ~')));
 
             if (file_exists($file)) 
             {

@@ -136,7 +136,7 @@ class Versions extends Command
 
         if(!empty($cachedir) && file_exists($cachedir))
         {
-            `rm -rf $cachedir/*.tar.gz`;
+            shell_exec("rm -rf $cachedir/*.tar.gz");
 
             $output->writeln("<info>Downloaded version cache has been cleared.</info>");
         }

@@ -129,7 +129,7 @@ class Download extends AbstractSite
 
         $directory = $this->target_dir;
         if (file_exists($directory.'/htaccess.txt')) {
-            `cp $directory/htaccess.txt $directory/.htaccess`;
+            shell_exec("cp $directory/htaccess.txt $directory/.htaccess");
         }
 
         return 0;
@@ -215,13 +215,13 @@ class Download extends AbstractSite
         }
 
         if (!file_exists($this->target_dir)) {
-            `mkdir -p $this->target_dir`;
+            shell_exec("mkdir -p $this->target_dir");
         }
 
         if (!$this->versions->isBranch($this->version) && \version_compare($this->version, '4.0.0', '>=')) {
-            `cd $this->target_dir; tar xzf $tarball`;    
+            shell_exec("cd $this->target_dir; tar xzf $tarball");    
         } else {
-            `cd $this->target_dir; tar xzf $tarball --strip 1`;
+            shell_exec("cd $this->target_dir; tar xzf $tarball --strip 1");
         }
 
         if ($this->versions->isBranch($this->version)) {
@@ -405,7 +405,7 @@ class Download extends AbstractSite
             $filename = substr($filename, 0, -3);
         }
 
-        `git --git-dir "$source/.git" archive --prefix=base/ $this->version >"$filename"`;
+        shell_exec("git --git-dir \"$source/.git\" archive --prefix=base/ $this->version >\"$filename\"");
 
         // Make sure to include submodules
         if (file_exists("$source/.gitmodules"))
@@ -427,7 +427,7 @@ class Download extends AbstractSite
             }
         }
 
-        `gzip $filename`;
+        shell_exec("gzip $filename");
 
         return (bool) @filesize("$filename.gz");
     }

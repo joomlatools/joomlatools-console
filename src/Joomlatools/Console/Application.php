@@ -60,7 +60,7 @@ class Application extends \Symfony\Component\Console\Application
      *
      * @throws \Exception When doRun returns Exception
      */
-    public function run(Input\InputInterface $input = null, Output\OutputInterface $output = null)
+    public function run(?Input\InputInterface $input = null, ?Output\OutputInterface $output = null)
     {
         if (null === $input) {
             $input = new Input\ArgvInput();

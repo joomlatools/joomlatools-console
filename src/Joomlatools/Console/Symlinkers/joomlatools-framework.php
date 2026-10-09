@@ -59,7 +59,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
                 $output->writeln(" * creating link `$to` -> $from");
             }
 
-            `ln -sf $from $to`;
+            shell_exec("ln -sf $from $to");
         }
     }
 
@@ -79,7 +79,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
             $output->writeln(" * creating link `$to` -> $from");
         }
 
-        `ln -sf $from $to`;
+        shell_exec("ln -sf $from $to");
     }
 
     // Let the default symlinker handle the rest

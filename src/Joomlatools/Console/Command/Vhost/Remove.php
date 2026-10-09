@@ -72,12 +72,12 @@ class Remove extends AbstractSite
 
     protected function _runWithOrWithoutSudo($command) 
     {
-        $hasSudo = `which sudo`;
+        $hasSudo = shell_exec('which sudo');
 
         if ($hasSudo) {
-            `sudo $command`;
+            shell_exec("sudo $command");
         } else {
-            `$command`;
+            shell_exec($command);
         }
     }
 }

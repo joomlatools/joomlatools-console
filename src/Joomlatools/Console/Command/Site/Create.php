@@ -97,7 +97,7 @@ EOF
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Directory where your custom projects reside',
-                sprintf('%s/Projects', trim(`echo ~`))
+                sprintf('%s/Projects', trim(shell_exec('echo ~')))
             )
             ->addOption(
                 'http-port',
@@ -197,7 +197,7 @@ EOF
         }
 
         if (!file_exists($this->target_dir)) {
-            `mkdir -p $this->target_dir`;
+            shell_exec("mkdir -p $this->target_dir");
         }
 
         if ($this->version != 'none')
@@ -230,7 +230,7 @@ EOF
 
         if ($input->hasOption('chown')) {
             $user = $input->getOption('chown');
-            `chown -R $user:$user $this->target_dir`;
+            shell_exec("chown -R $user:$user $this->target_dir");
         }
 
         /*

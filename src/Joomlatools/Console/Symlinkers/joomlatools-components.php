@@ -63,7 +63,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
             $output->writeln(" * creating link `$code_destination` -> $project");
         }
 
-        `ln -sf $from $code_destination`;
+        shell_exec("ln -sf $from $code_destination");
     }
 
     // Media folder always has com_ prefix
@@ -83,7 +83,7 @@ Extension\Symlink::registerSymlinker(function($project, $destination, $name, $pr
             $output->writeln(" * creating link `$target` -> $media");
         }
 
-        `ln -sf $media $target`;
+        shell_exec("ln -sf $media $target");
     }
 
     return true;

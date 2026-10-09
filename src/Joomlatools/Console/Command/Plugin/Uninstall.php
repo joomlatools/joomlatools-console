@@ -40,7 +40,7 @@ class Uninstall extends Configurable
 
         $package = $input->getArgument('package');
 
-        $result = `command -v composer >/dev/null 2>&1 || { echo >&2 "false"; }`;
+        $result = shell_exec('command -v composer >/dev/null 2>&1 || { echo >&2 "false"; }');
 
         if ($result == 'false')
         {
